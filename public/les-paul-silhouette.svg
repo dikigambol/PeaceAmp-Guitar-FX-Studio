@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <!-- Background glow & disc for maximum contrast across dark & light browser tabs -->
+    <radialGradient id="discBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2a2e3a" />
+      <stop offset="75%" stop-color="#161820" />
+      <stop offset="100%" stop-color="#0a0c10" />
+    </radialGradient>
+    <linearGradient id="goldRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f5dfaa" />
+      <stop offset="50%" stop-color="#c8a665" />
+      <stop offset="100%" stop-color="#8c6d2e" />
+    </linearGradient>
+  </defs>
+
+  <!-- Plectrum / Circular Coin Container -->
+  <circle cx="50" cy="50" r="48" fill="url(#discBg)" stroke="url(#goldRing)" stroke-width="2.5" />
+  <circle cx="50" cy="50" r="44.5" fill="none" stroke="#373e4f" stroke-width="1" stroke-dasharray="2, 2" />
+
+  <!-- Black Les Paul Guitar Silhouette (Centered Diagonal -35 deg for iconic rock pose) -->
+  <g transform="translate(50, 50) rotate(-35) translate(-50, -50)">
+    <!-- Main Solid Black Les Paul Body & Neck Silhouette -->
+    <!-- Headstock with 3+3 Tuners, Neck, and Iconic Single-Cutaway Archtop Body -->
+    <path
+      d="
+        M47.8,7.5
+        C46.8,7.5 46.2,8.2 46.2,9.6
+        L45.5,16.2
+        C44.6,17.2 43.8,17.6 42.5,18.0
+        C41.8,18.2 41.5,19.2 42.3,19.6
+        C43.1,20.0 43.5,21.2 42.8,22.4
+        C42.0,23.2 42.4,24.4 43.2,24.4
+        L46.2,25.6
+        L46.2,42.5
+        C43.2,44.0 38.0,47.0 35.8,51.0
+        C32.8,56.5 33.5,63.0 35.8,67.8
+        C33.5,71.0 30.5,75.8 30.5,83.0
+        C30.5,93.5 38.5,99.5 50.0,99.5
+        C61.5,99.5 69.5,93.5 69.5,83.0
+        C69.5,75.8 66.5,71.0 64.2,67.8
+        C66.5,63.0 67.2,56.5 64.2,51.0
+        C62.0,47.0 56.8,44.0 53.8,42.5
+        L53.8,25.6
+        L56.8,24.4
+        C57.6,24.4 58.0,23.2 57.2,22.4
+        C56.5,21.2 56.9,20.0 57.7,19.6
+        C58.5,19.2 58.2,18.2 57.5,18.0
+        C56.2,17.6 55.4,17.2 54.5,16.2
+        L53.8,9.6
+        C53.8,8.2 53.2,7.5 52.2,7.5
+        C51.0,7.5 50.4,8.6 50.0,8.6
+        C49.6,8.6 49.0,7.5 47.8,7.5 Z
+      "
+      fill="#0c0e12"
+      stroke="#c8a665"
+      stroke-width="1.6"
+      stroke-linejoin="round"
+    />
+
+    <!-- Deep Single Cutaway Horn Detail (Upper Right Bout) -->
+    <path
+      d="
+        M53.8,42.5
+        C55.5,43.3 58.0,45.0 59.5,46.5
+        C60.8,47.8 61.2,49.8 60.0,51.0
+        C58.8,52.2 57.2,51.4 55.5,51.0
+        L53.8,50.6 Z
+      "
+      fill="#161820"
+      stroke="#c8a665"
+      stroke-width="0.8"
+    />
+
+    <!-- Subtle Ivory/Gold Accent Elements: Dual Pickups & Hardware Silhouette -->
+    <!-- Neck Pickup (Humbucker) -->
+    <rect x="45.5" y="54" width="9" height="4.2" rx="0.8" fill="#181c24" stroke="#c8a665" stroke-width="0.8" />
+    <!-- Bridge Pickup (Humbucker) -->
+    <rect x="45.5" y="61.5" width="9" height="4.2" rx="0.8" fill="#181c24" stroke="#c8a665" stroke-width="0.8" />
+    <!-- Tune-o-matic Bridge & Stopbar -->
+    <rect x="46.3" y="69.5" width="7.4" height="1.6" rx="0.4" fill="#c8a665" />
+    <rect x="45.5" y="74.5" width="9" height="2" rx="0.6" fill="#c8a665" />
+
+    <!-- 4 Classic Speed Knobs -->
+    <circle cx="57.5" cy="74.5" r="1.3" fill="#c8a665" />
+    <circle cx="61.0" cy="77.5" r="1.3" fill="#c8a665" />
+    <circle cx="58.5" cy="81.5" r="1.3" fill="#c8a665" />
+    <circle cx="62.5" cy="84.5" r="1.3" fill="#c8a665" />
+
+    <!-- 3-way Pickup Selector Switch -->
+    <circle cx="41.5" cy="50.0" r="1.2" fill="#c8a665" />
+
+    <!-- Fret Markers along neck -->
+    <line x1="50" y1="26" x2="50" y2="42" stroke="#c8a665" stroke-width="0.8" stroke-dasharray="1.2, 2.8" />
+  </g>
+</svg>

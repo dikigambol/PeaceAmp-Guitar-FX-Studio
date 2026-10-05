@@ -1,0 +1,24 @@
+{
+  "name": "PeaceAmp - Analog Modeling Guitar Processor",
+  "short_name": "PeaceAmp",
+  "description": "Free, browser-based real-time guitar effects processor & modular virtual pedalboard",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "background_color": "#0c0e12",
+  "theme_color": "#0c0e12",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/les-paul-silhouette.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
