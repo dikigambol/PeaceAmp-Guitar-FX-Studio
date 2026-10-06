@@ -1,8 +1,10 @@
 import type { AudioPedalNode } from '../../../types/pedal';
-import { createDcBlocker, levelToGain, applyBypassCrossfade } from '../dspUtils';
+import { createDcBlocker, levelToGain, applyBypassCrossfade, driveDependentTrimDb } from '../dspUtils';
 
 /** Output trim (dB) calibrated so Volume=5 is ~unity loudness. */
-const OUTPUT_TRIM_DB = -16.0;
+/** Output trim (dB): ~unity at low drive, fully saturated trim at high drive. */
+const TRIM_UNITY_DB = -1.6;
+const TRIM_SAT_DB = -16.0;
 
 /**
  * Fulltone OCD (Obsessive Compulsive Drive)
@@ -16,6 +18,7 @@ export class FulltoneOcdNode implements AudioPedalNode {
 
   private ctx: AudioContext;
   private preHpBoost: BiquadFilterNode;
+  private preHighpass: BiquadFilterNode;
   private driveGain: GainNode;
   private mosfetShaper: WaveShaperNode;
   private dcBlocker: BiquadFilterNode;
@@ -43,6 +46,11 @@ export class FulltoneOcdNode implements AudioPedalNode {
 
     this.inputNode = ctx.createGain();
     this.outputNode = ctx.createGain();
+
+    // Voicing high-pass ahead of the clipper (LP = full bass, HP = tighter low end)
+    this.preHighpass = ctx.createBiquadFilter();
+    this.preHighpass.type = 'highpass';
+    this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // HP Mode Peaking Boost Filter
     this.preHpBoost = ctx.createBiquadFilter();
@@ -80,7 +88,8 @@ export class FulltoneOcdNode implements AudioPedalNode {
     this.dryGain.connect(this.outputNode);
 
     // OCD Circuit:
-    this.inputNode.connect(this.preHpBoost);
+    this.inputNode.connect(this.preHighpass);
+    this.preHighpass.connect(this.preHpBoost);
     this.preHpBoost.connect(this.driveGain);
     this.driveGain.connect(this.mosfetShaper);
     this.mosfetShaper.connect(this.dcBlocker);
@@ -117,15 +126,17 @@ export class FulltoneOcdNode implements AudioPedalNode {
     const baseGain = isHp ? 1.6 : 1.2;
     const totalDrive = baseGain + Math.pow(driveNorm, 1.6) * (isHp ? 26.0 : 20.0);
     this.driveGain.gain.setTargetAtTime(totalDrive, now, 0.02);
+    this.preHighpass.frequency.setTargetAtTime(isHp ? 170 : 55, now, 0.02);
 
     // Tone: 1200Hz to 6500Hz
     const cutoff = 1200 + Math.pow(toneNorm, 1.3) * 5300;
     this.toneFilter.frequency.setTargetAtTime(cutoff, now, 0.02);
 
-    // Volume: unified taper (unity at noon). HP voicing is louder by nature.
+    // Volume: unified taper, trim follows drive so loudness stays consistent. HP voicing is louder.
     const voicingTrimDb = isHp ? 0 : 1.5;
+    const trimDb = driveDependentTrimDb(totalDrive, TRIM_UNITY_DB, TRIM_SAT_DB, 3.5);
     this.postGain.gain.setTargetAtTime(
-      levelToGain(this.volumeVal, OUTPUT_TRIM_DB + voicingTrimDb),
+      levelToGain(this.volumeVal, trimDb + voicingTrimDb),
       now,
       0.02
     );
@@ -148,6 +159,7 @@ export class FulltoneOcdNode implements AudioPedalNode {
     this.inputNode.disconnect();
     this.outputNode.disconnect();
     this.preHpBoost.disconnect();
+    this.preHighpass.disconnect();
     this.driveGain.disconnect();
     this.mosfetShaper.disconnect();
     this.dcBlocker.disconnect();

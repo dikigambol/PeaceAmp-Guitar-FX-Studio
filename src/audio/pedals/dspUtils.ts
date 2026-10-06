@@ -24,6 +24,15 @@ export function levelToGain(level: number, trimDb = 0): number {
 }
 
 /**
+ * Output trim (dB) that follows the drive amount: ~unityDb when the stage is nearly linear
+ * (low gain) and satDb when it is fully saturated. Keeps loudness consistent across the Drive knob.
+ */
+export function driveDependentTrimDb(totalGain: number, unityDb: number, satDb: number, knee = 3.5): number {
+  const f = 1 - Math.exp(-(Math.max(1, totalGain) - 1) / knee);
+  return unityDb + (satDb - unityDb) * f;
+}
+
+/**
  * Creates a DC blocker (2nd-order Butterworth high-pass far below the guitar range).
  * Asymmetric clipping creates DC offset that otherwise eats headroom,
  * thumps on bypass and biases the next pedal in the chain.

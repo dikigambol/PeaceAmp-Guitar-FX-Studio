@@ -23,6 +23,8 @@ export interface TubeScreamerConfig {
   humpHz: number;
   /** Diode knee in shaper domain (full scale = +-1) */
   clipKnee: number;
+  /** Optional knee for the negative half (asymmetric clipping, e.g. SD-1). Defaults to clipKnee. */
+  clipKneeNeg?: number;
   /** Knee sharpness (2 = tanh-like, higher = harder) */
   clipSharpness: number;
   /** Drive pot taper exponent (audio taper ~3) */
@@ -172,11 +174,12 @@ export class TubeScreamerNode implements AudioPedalNode {
 
   /** Soft diode-pair clipper: y = x / (1 + (|x|/knee)^p)^(1/p) */
   private createDiodeCurve(samples: number): Float32Array {
-    const { clipKnee, clipSharpness } = this.cfg;
+    const { clipKnee, clipSharpness, clipKneeNeg } = this.cfg;
     const curve = new Float32Array(samples);
     for (let i = 0; i < samples; i++) {
       const x = (i * 2) / (samples - 1) - 1;
-      curve[i] = x / Math.pow(1 + Math.pow(Math.abs(x) / clipKnee, clipSharpness), 1 / clipSharpness);
+      const knee = x < 0 && clipKneeNeg !== undefined ? clipKneeNeg : clipKnee;
+      curve[i] = x / Math.pow(1 + Math.pow(Math.abs(x) / knee, clipSharpness), 1 / clipSharpness);
     }
     return curve;
   }

@@ -56,7 +56,7 @@ export class AudioEngine {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.8,
-    mix: 0.8,
+    mix: 1.0,
     level: 0,
   };
 
@@ -599,10 +599,9 @@ export class AudioEngine {
    * Update a specific parameter on an active pedal
    */
   public updatePedalParameter(pedalId: string, paramId: string, value: number): void {
-    const inst = this.pedalInstances.find((p) => p.id === pedalId);
-    if (inst) {
-      inst.parameters[paramId] = value;
-    }
+    this.pedalInstances = this.pedalInstances.map((p) =>
+      p.id === pedalId ? { ...p, parameters: { ...p.parameters, [paramId]: value } } : p
+    );
     if (this.signalChain) {
       this.signalChain.updateParameter(pedalId, paramId, value);
     }
@@ -612,10 +611,9 @@ export class AudioEngine {
    * Toggle bypass / enabled state for a pedal
    */
   public setPedalEnabled(pedalId: string, enabled: boolean): void {
-    const inst = this.pedalInstances.find((p) => p.id === pedalId);
-    if (inst) {
-      inst.enabled = enabled;
-    }
+    this.pedalInstances = this.pedalInstances.map((p) =>
+      p.id === pedalId ? { ...p, enabled } : p
+    );
     if (this.signalChain) {
       this.signalChain.setEnabled(pedalId, enabled);
     }

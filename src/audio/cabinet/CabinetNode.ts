@@ -22,7 +22,7 @@ export class CabinetNode {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.8,
-    mix: 0.8, // 80% wet convolution as specified in cabinet-instalation.md
+    mix: 1.0, // 100% wet: a cab sim should not blend in the un-filtered dry signal
     level: 0,
   };
 
@@ -76,6 +76,7 @@ export class CabinetNode {
 
   private updateImpulseResponse(): void {
     if (this.settings.model === 'custom' && this.customBuffer) {
+      this.convolver.normalize = true;
       this.convolver.buffer = this.customBuffer;
     } else {
       const buffer = generateCabinetImpulseResponse(
@@ -84,6 +85,8 @@ export class CabinetNode {
         this.settings.mic,
         this.settings.position
       );
+      // IR is already unity-energy normalized; avoid the convolver's extra attenuation
+      this.convolver.normalize = false;
       this.convolver.buffer = buffer;
     }
   }
@@ -146,6 +149,7 @@ export class CabinetNode {
     this.customIrName = name;
     this.settings.model = 'custom';
     this.settings.customIrName = name;
+    this.convolver.normalize = true;
     this.convolver.buffer = buffer;
   }
 

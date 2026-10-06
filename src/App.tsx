@@ -73,6 +73,8 @@ export function App() {
 
   // Active pedals list (initialized as empty board by default)
   const [pedals, setPedals] = useState<PedalInstance[]>([]);
+  const pedalsRef = useRef<PedalInstance[]>(pedals);
+  pedalsRef.current = pedals;
 
   // Dedicated Cabinet IR Simulator State
   const [cabinetSettings, setCabinetSettings] = useState<CabinetSettings>({
@@ -80,7 +82,7 @@ export function App() {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.8,
-    mix: 0.8,
+    mix: 1.0,
     level: 0,
   });
 
@@ -266,19 +268,17 @@ export function App() {
 
   // Pedalboard Actions
   const handleTogglePedalEnabled = useCallback((pedalId: string) => {
-    setPedals((prev) => {
-      const target = prev.find((p) => p.id === pedalId);
-      if (!target) return prev;
-      const nextEnabled = !target.enabled;
+    const target = pedalsRef.current.find((p) => p.id === pedalId);
+    if (!target) return;
+    const nextEnabled = !target.enabled;
 
-      try {
-        engineRef.current?.setPedalEnabled(pedalId, nextEnabled);
-      } catch (err) {
-        console.warn('Failed to update audio engine bypass state:', err);
-      }
+    try {
+      engineRef.current?.setPedalEnabled(pedalId, nextEnabled);
+    } catch (err) {
+      console.warn('Failed to update audio engine bypass state:', err);
+    }
 
-      return prev.map((p) => (p.id === pedalId ? { ...p, enabled: nextEnabled } : p));
-    });
+    setPedals((prev) => prev.map((p) => (p.id === pedalId ? { ...p, enabled: nextEnabled } : p)));
   }, []);
 
   const handleChangePedalParam = (pedalId: string, paramId: string, val: number) => {

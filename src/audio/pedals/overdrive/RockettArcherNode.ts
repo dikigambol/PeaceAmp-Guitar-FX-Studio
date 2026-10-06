@@ -17,6 +17,7 @@ export class RockettArcherNode implements AudioPedalNode {
   private ctx: AudioContext;
   private cleanPathGain: GainNode;
   private drivePreFilter: BiquadFilterNode;
+  private midHump!: BiquadFilterNode;
   private drivePreGain: GainNode;
   private geShaper: WaveShaperNode;
   private dcBlocker: BiquadFilterNode;
@@ -50,6 +51,12 @@ export class RockettArcherNode implements AudioPedalNode {
     this.drivePreFilter = ctx.createBiquadFilter();
     this.drivePreFilter.type = 'highpass';
     this.drivePreFilter.frequency.setValueAtTime(450, ctx.currentTime);
+
+    this.midHump = ctx.createBiquadFilter();
+    this.midHump.type = 'peaking';
+    this.midHump.frequency.setValueAtTime(1200, ctx.currentTime);
+    this.midHump.Q.setValueAtTime(0.8, ctx.currentTime);
+    this.midHump.gain.setValueAtTime(4.5, ctx.currentTime);
 
     this.drivePreGain = ctx.createGain();
 
@@ -90,7 +97,8 @@ export class RockettArcherNode implements AudioPedalNode {
 
     // Drive branch
     this.inputNode.connect(this.drivePreFilter);
-    this.drivePreFilter.connect(this.drivePreGain);
+    this.drivePreFilter.connect(this.midHump);
+    this.midHump.connect(this.drivePreGain);
     this.drivePreGain.connect(this.geShaper);
     this.geShaper.connect(this.dcBlocker);
     this.dcBlocker.connect(this.drivePostGain);
@@ -106,8 +114,8 @@ export class RockettArcherNode implements AudioPedalNode {
   private createArcherCurve(samples: number): Float32Array {
     const curve = new Float32Array(samples);
     // NOS germanium pair: tighter knee than the Klon-style curve, slightly more open top end
-    const k = 0.33;
-    const p = 1.8;
+    const k = 0.45;
+    const p = 1.6;
     for (let i = 0; i < samples; ++i) {
       const x = (i * 2) / (samples - 1) - 1;
       curve[i] = x / Math.pow(1 + Math.pow(Math.abs(x) / k, p), 1 / p);
@@ -125,7 +133,7 @@ export class RockettArcherNode implements AudioPedalNode {
     this.cleanPathGain.gain.setTargetAtTime(cleanLevel, now, 0.02);
     this.drivePostGain.gain.setTargetAtTime(driveLevel, now, 0.02);
 
-    const drivePre = 1.0 + Math.pow(gainNorm, 1.5) * 16.0;
+    const drivePre = 1.0 + Math.pow(gainNorm, 1.5) * 7.0;
     this.drivePreGain.gain.setTargetAtTime(drivePre, now, 0.02);
 
     const trebleDb = -12 + trebleNorm * 24;
@@ -151,6 +159,7 @@ export class RockettArcherNode implements AudioPedalNode {
     this.outputNode.disconnect();
     this.cleanPathGain.disconnect();
     this.drivePreFilter.disconnect();
+    this.midHump.disconnect();
     this.drivePreGain.disconnect();
     this.geShaper.disconnect();
     this.dcBlocker.disconnect();

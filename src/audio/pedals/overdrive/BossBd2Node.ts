@@ -1,8 +1,9 @@
 import type { AudioPedalNode } from '../../../types/pedal';
-import { levelToGain, applyBypassCrossfade } from '../dspUtils';
+import { levelToGain, applyBypassCrossfade, driveDependentTrimDb, createDcBlocker } from '../dspUtils';
 
 /** Output trim (dB) calibrated so Level=5 is ~unity loudness. */
-const OUTPUT_TRIM_DB = -16.8;
+const TRIM_UNITY_DB = -1.0;
+const TRIM_SAT_DB = -12.0;
 
 /**
  * Boss BD-2 Blues Driver (1995)
@@ -28,6 +29,8 @@ export class BossBd2Node implements AudioPedalNode {
   private dryGain: GainNode;
   private isEnabled = true;
 
+  private preHighpass!: BiquadFilterNode;
+  private dcBlocker!: BiquadFilterNode;
   private levelVal = 5;
   private toneVal = 5;
   private gainVal = 5;
@@ -44,17 +47,26 @@ export class BossBd2Node implements AudioPedalNode {
     this.inputNode = ctx.createGain();
     this.outputNode = ctx.createGain();
 
+    // Input coupling high-pass: keeps the transistor stages from turning boomy
+    this.preHighpass = ctx.createBiquadFilter();
+    this.preHighpass.type = 'highpass';
+    this.preHighpass.frequency.setValueAtTime(110, ctx.currentTime);
+    this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
+
     // FET Stage 1
     this.fetStage1 = ctx.createGain();
     this.fetShaper1 = ctx.createWaveShaper();
-    this.fetShaper1.curve = this.createFetCurve(4096, 1.3) as Float32Array<ArrayBuffer>;
+    this.fetShaper1.curve = this.createFetCurve(4096, 0.85, 0.6) as Float32Array<ArrayBuffer>;
     this.fetShaper1.oversample = '4x';
 
     // FET Stage 2 (second cascading FET transistor stage)
     this.fetStage2 = ctx.createGain();
     this.fetShaper2 = ctx.createWaveShaper();
-    this.fetShaper2.curve = this.createFetCurve(4096, 2.4) as Float32Array<ArrayBuffer>;
+    this.fetShaper2.curve = this.createFetCurve(4096, 0.8, 0.55) as Float32Array<ArrayBuffer>;
     this.fetShaper2.oversample = '4x';
+
+    // Asymmetric clipping leaves DC offset
+    this.dcBlocker = createDcBlocker(ctx);
 
     // Active Tilt Tone Network (Highs peaking + Lows shelf)
     this.toneHigh = ctx.createBiquadFilter();
@@ -81,25 +93,28 @@ export class BossBd2Node implements AudioPedalNode {
     this.dryGain.connect(this.outputNode);
 
     // Multi-stage FET chain:
-    this.inputNode.connect(this.fetStage1);
+    this.inputNode.connect(this.preHighpass);
+    this.preHighpass.connect(this.fetStage1);
     this.fetStage1.connect(this.fetShaper1);
     this.fetShaper1.connect(this.fetStage2);
     this.fetStage2.connect(this.fetShaper2);
-    this.fetShaper2.connect(this.toneHigh);
+    this.fetShaper2.connect(this.dcBlocker);
+    this.dcBlocker.connect(this.toneHigh);
     this.toneHigh.connect(this.toneLow);
     this.toneLow.connect(this.postGain);
     this.postGain.connect(this.wetGain);
     this.wetGain.connect(this.outputNode);
   }
 
-  private createFetCurve(samples: number, driveMult: number): Float32Array {
+  /**
+   * Asymmetric transistor-style soft clip. Slope is exactly 1 at zero (no hidden gain);
+   * positive / negative rails differ so even-order harmonics appear.
+   */
+  private createFetCurve(samples: number, posRail: number, negRail: number): Float32Array {
     const curve = new Float32Array(samples);
     for (let i = 0; i < samples; ++i) {
-      const x = (i * 2) / samples - 1;
-      // FET saturation curve: quadratic soft-compression with touch-responsive headroom
-      const sign = x < 0 ? -1 : 1;
-      const absX = Math.abs(x);
-      curve[i] = sign * (1 - Math.exp(-driveMult * absX));
+      const x = (i * 2) / (samples - 1) - 1;
+      curve[i] = x >= 0 ? posRail * Math.tanh(x / posRail) : negRail * Math.tanh(x / negRail);
     }
     return curve;
   }
@@ -109,9 +124,9 @@ export class BossBd2Node implements AudioPedalNode {
     const gainNorm = Math.max(0, Math.min(10, this.gainVal)) / 10;
     const toneNorm = Math.max(0, Math.min(10, this.toneVal)) / 10;
 
-    // Gain: from crystalline sparkle (1.0x) to crunchy raspy tweed fuzz (28x)
-    const stage1 = 1.0 + Math.pow(gainNorm, 1.4) * 5.2;
-    const stage2 = 1.2 + Math.pow(gainNorm, 1.6) * 18.0;
+    // Gain: clean boost (1x) up to ~25 dB of crunch (about 3x * 6x)
+    const stage1 = 1.0 + Math.pow(gainNorm, 1.4) * 2.0;
+    const stage2 = 1.0 + Math.pow(gainNorm, 1.6) * 5.0;
     this.fetStage1.gain.setTargetAtTime(stage1, now, 0.02);
     this.fetStage2.gain.setTargetAtTime(stage2, now, 0.02);
 
@@ -121,8 +136,9 @@ export class BossBd2Node implements AudioPedalNode {
     this.toneHigh.gain.setTargetAtTime(highGain, now, 0.02);
     this.toneLow.gain.setTargetAtTime(lowGain, now, 0.02);
 
-    // Level: unified taper (unity at noon)
-    this.postGain.gain.setTargetAtTime(levelToGain(this.levelVal, OUTPUT_TRIM_DB), now, 0.02);
+    // Level: unified taper, trim follows total gain for consistent loudness
+    const trimDb = driveDependentTrimDb(stage1 * stage2, TRIM_UNITY_DB, TRIM_SAT_DB, 6);
+    this.postGain.gain.setTargetAtTime(levelToGain(this.levelVal, trimDb), now, 0.02);
   }
 
   public updateParameter(paramId: string, value: number): void {
@@ -140,6 +156,8 @@ export class BossBd2Node implements AudioPedalNode {
   public dispose(): void {
     this.inputNode.disconnect();
     this.outputNode.disconnect();
+    this.preHighpass.disconnect();
+    this.dcBlocker.disconnect();
     this.fetStage1.disconnect();
     this.fetShaper1.disconnect();
     this.fetStage2.disconnect();

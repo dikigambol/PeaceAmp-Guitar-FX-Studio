@@ -18,6 +18,7 @@ export class KlonCentaurNode implements AudioPedalNode {
   private ctx: AudioContext;
   private cleanPathGain: GainNode;
   private drivePreFilter: BiquadFilterNode;
+  private midHump!: BiquadFilterNode;
   private drivePreGain: GainNode;
   private geShaper: WaveShaperNode;
   private dcBlocker: BiquadFilterNode;
@@ -53,6 +54,13 @@ export class KlonCentaurNode implements AudioPedalNode {
     this.drivePreFilter = ctx.createBiquadFilter();
     this.drivePreFilter.type = 'highpass';
     this.drivePreFilter.frequency.setValueAtTime(420, ctx.currentTime);
+
+    // Signature mid-hump of the gain stage
+    this.midHump = ctx.createBiquadFilter();
+    this.midHump.type = 'peaking';
+    this.midHump.frequency.setValueAtTime(1000, ctx.currentTime);
+    this.midHump.Q.setValueAtTime(0.8, ctx.currentTime);
+    this.midHump.gain.setValueAtTime(5, ctx.currentTime);
 
     this.drivePreGain = ctx.createGain();
 
@@ -95,7 +103,8 @@ export class KlonCentaurNode implements AudioPedalNode {
 
     // Drive branch:
     this.inputNode.connect(this.drivePreFilter);
-    this.drivePreFilter.connect(this.drivePreGain);
+    this.drivePreFilter.connect(this.midHump);
+    this.midHump.connect(this.drivePreGain);
     this.drivePreGain.connect(this.geShaper);
     this.geShaper.connect(this.dcBlocker);
     this.dcBlocker.connect(this.drivePostGain);
@@ -112,8 +121,8 @@ export class KlonCentaurNode implements AudioPedalNode {
     const curve = new Float32Array(samples);
     // Antiparallel 1N34A germanium pair to ground: low forward voltage, very soft knee.
     // y = x / (1 + (|x|/k)^p)^(1/p)  (smooth all the way, no hard edge at full scale)
-    const k = 0.35;
-    const p = 1.5;
+    const k = 0.5;
+    const p = 1.3;
     for (let i = 0; i < samples; ++i) {
       const x = (i * 2) / (samples - 1) - 1;
       curve[i] = x / Math.pow(1 + Math.pow(Math.abs(x) / k, p), 1 / p);
@@ -134,8 +143,8 @@ export class KlonCentaurNode implements AudioPedalNode {
     this.cleanPathGain.gain.setTargetAtTime(cleanLevel, now, 0.02);
     this.drivePostGain.gain.setTargetAtTime(driveLevel, now, 0.02);
 
-    // Drive Pre Gain: 1.0x to 16x
-    const drivePre = 1.0 + Math.pow(gainNorm, 1.5) * 15.0;
+    // Drive Pre Gain: 1.0x to ~7x (Klon is mostly a boost with light clipping)
+    const drivePre = 1.0 + Math.pow(gainNorm, 1.5) * 6.0;
     this.drivePreGain.gain.setTargetAtTime(drivePre, now, 0.02);
 
     // Active Treble: -10dB to +10dB
@@ -163,6 +172,7 @@ export class KlonCentaurNode implements AudioPedalNode {
     this.outputNode.disconnect();
     this.cleanPathGain.disconnect();
     this.drivePreFilter.disconnect();
+    this.midHump.disconnect();
     this.drivePreGain.disconnect();
     this.geShaper.disconnect();
     this.dcBlocker.disconnect();
