@@ -15,9 +15,10 @@ import { FulltoneOcdNode } from './overdrive/FulltoneOcdNode';
 import { TsMiniNode } from './overdrive/TsMiniNode';
 import { NobelsOdr1Node } from './overdrive/NobelsOdr1Node';
 import { RockettArcherNode } from './overdrive/RockettArcherNode';
+import { BigMuffNode } from './fuzz/BigMuffNode';
 
 /**
- * Curated pedal definitions for Category 1 (Compressor) and Category 2 (Overdrive)
+ * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
  */
 export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
@@ -209,6 +210,21 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       { id: 'gain', name: 'GAIN', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
     ],
   },
+
+  // Category 4: Fuzz
+  'fuzz-bigmuff': {
+    type: 'fuzz-bigmuff',
+    name: 'Electro-Harmonix Big Muff',
+    subtitle: 'Classic Pi Sustainer & Fuzz',
+    category: 'fuzz',
+    chassisColor: '#cbd1d6',
+    accentColor: '#d81d24',
+    parameters: [
+      { id: 'volume', name: 'VOLUME', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'tone', name: 'TONE', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'sustain', name: 'SUSTAIN', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -250,6 +266,10 @@ export function createPedalAudioNode(
       return new NobelsOdr1Node(ctx, id, initialParams, enabled);
     case 'od-archer':
       return new RockettArcherNode(ctx, id, initialParams, enabled);
+
+    // Fuzz
+    case 'fuzz-bigmuff':
+      return new BigMuffNode(ctx, id, initialParams, enabled);
 
     default:
       throw new Error(`Unknown pedal type: ${type}`);

@@ -43,7 +43,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 }) => {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
-  const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'dynamics' | 'drive'>('all');
+  const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'dynamics' | 'drive' | 'fuzz'>('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
   const [snapToGrid, setSnapToGrid] = useState<boolean>(() => {
@@ -407,6 +407,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       target.closest('.nobels-led-mount') ||
       target.closest('.nobels-mini-push') ||
       target.closest('.archer-led-mount') ||
+      target.closest('.bigmuff-led-mount') ||
+      target.closest('.bigmuff-stomp-wrap') ||
+      target.closest('.bigmuff-switch-nut') ||
       target.closest('.pedal-footswitch-section') ||
       target.closest('.pedal-footswitch') ||
       target.closest('.pedal-led-section') ||
@@ -660,7 +663,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
         activeCategoryTab === 'all' || def.category === activeCategoryTab;
       if (!matchCat) return false;
       if (!q) return true;
-      const catLabel = def.category === 'dynamics' ? 'compressor dynamics' : 'overdrive drive boost';
+      const catLabel =
+        def.category === 'dynamics'
+          ? 'compressor dynamics'
+          : def.category === 'drive'
+          ? 'overdrive drive boost'
+          : 'fuzz sustainer big muff distortion';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -675,6 +683,10 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const overdrives = useMemo(
     () => filteredPedals.filter((p) => p.category === 'drive'),
+    [filteredPedals]
+  );
+  const fuzzes = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'fuzz'),
     [filteredPedals]
   );
 
@@ -814,6 +826,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                   >
                     Overdrive ({availablePedals.filter((p) => p.category === 'drive').length})
                   </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'fuzz' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('fuzz')}
+                  >
+                    Fuzz ({availablePedals.filter((p) => p.category === 'fuzz').length})
+                  </button>
                 </div>
 
                 {/* Filtered Pedals List */}
@@ -875,6 +893,35 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                                 <div className="item-title-row">
                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge od">OVERDRIVE</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Fuzz */}
+                      {fuzzes.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag fuzz-tag">FUZZ</span>
+                            <span className="group-count">{fuzzes.length} pedals</span>
+                          </div>
+                          {fuzzes.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge fuzz">FUZZ</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>

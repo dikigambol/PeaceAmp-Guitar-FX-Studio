@@ -18,6 +18,7 @@ import { FulltoneOcdPedal } from './overdrives/FulltoneOcdPedal';
 import { TsMiniPedal } from './overdrives/TsMiniPedal';
 import { NobelsOdr1Pedal } from './overdrives/NobelsOdr1Pedal';
 import { RockettArcherPedal } from './overdrives/RockettArcherPedal';
+import { BigMuffPedal } from './fuzz/BigMuffPedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -82,6 +83,10 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <NobelsOdr1Pedal {...props} />;
     case 'od-archer':
       return <RockettArcherPedal {...props} />;
+
+    // Category 4: Fuzz
+    case 'fuzz-bigmuff':
+      return <BigMuffPedal {...props} />;
   }
 
   // Fallback for standard analog enclosure

@@ -92,7 +92,7 @@ export function App() {
   // Dedicated Guitar Amp Head State (Preamp Tube Drive, FMV Tone Stack, Power Sag)
   const [ampHeadSettings, setAmpHeadSettings] = useState<AmpHeadSettings>({
     enabled: true,
-    model: 'crunch-plexi',
+    model: 'clean-tweed',
     gain: 5.0,
     bass: 5.0,
     mid: 5.0,

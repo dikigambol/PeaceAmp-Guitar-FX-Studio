@@ -32,7 +32,7 @@ export class AmpHeadNode {
 
   private settings: AmpHeadSettings = {
     enabled: true,
-    model: 'crunch-plexi',
+    model: 'clean-tweed',
     gain: 5.0,
     bass: 5.0,
     mid: 5.0,

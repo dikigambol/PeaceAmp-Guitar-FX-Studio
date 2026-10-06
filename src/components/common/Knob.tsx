@@ -27,6 +27,7 @@ export interface KnobProps {
     | 'ocd'
     | 'nobels'
     | 'archer'
+    | 'bigmuff'
     | 'tsmini-small'
     | 'tsmini-large';
   showLabel?: boolean;
@@ -650,6 +651,43 @@ const DefaultKnobDial: React.FC<{ color: string }> = ({ color }) => (
   </svg>
 );
 
+const BigMuffKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="bm-body-grad" cx="42%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#32363e" />
+        <stop offset="50%" stopColor="#181a20" />
+        <stop offset="100%" stopColor="#08090c" />
+      </radialGradient>
+      <radialGradient id="bm-cap-grad" cx="45%" cy="40%" r="55%">
+        <stop offset="0%" stopColor="#252930" />
+        <stop offset="65%" stopColor="#14161b" />
+        <stop offset="100%" stopColor="#0b0d11" />
+      </radialGradient>
+      <filter id="bm-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.85" />
+      </filter>
+    </defs>
+    {/* Outer Cylindrical Puck Body */}
+    <circle cx="50" cy="50" r="48" fill="url(#bm-body-grad)" filter="url(#bm-shadow)" stroke="#050608" strokeWidth="1" />
+    {/* Beveled Rim Ring */}
+    <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1.2" />
+    {/* Recessed Top Face */}
+    <circle cx="50" cy="50" r="39" fill="url(#bm-cap-grad)" stroke="#08090d" strokeWidth="1.2" />
+    {/* Crisp White Indicator Line (perpendicular, radial from center to rim) */}
+    <line
+      x1="50"
+      y1="13"
+      x2="50"
+      y2="38"
+      stroke="#ffffff"
+      strokeWidth="3.6"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.9))"
+    />
+  </svg>
+);
+
 export const Knob: React.FC<KnobProps> = ({
   label,
   value,
@@ -757,6 +795,7 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'ocd' && <OcdKnobDial />}
           {variant === 'nobels' && <NobelsKnobDial />}
           {variant === 'archer' && <ArcherKnobDial />}
+          {variant === 'bigmuff' && <BigMuffKnobDial />}
           {variant === 'tsmini-small' && <TsMiniSmallDial />}
           {variant === 'tsmini-large' && <TsMiniLargeDial />}
           {variant === 'default' && <DefaultKnobDial color={color} />}

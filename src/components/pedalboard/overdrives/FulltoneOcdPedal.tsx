@@ -210,30 +210,10 @@ export const FulltoneOcdPedal: React.FC<PedalProps> = ({
         </div>
       </div>
 
-      {/* Iconic Bold Hand-Drawn OCD® Graphic Mark */}
+      {/* Iconic OCD® Graphic Mark with Comic Sans font */}
       <div className="ocd-logo-badge">
-        <svg viewBox="0 0 160 68" className="ocd-logo-svg" aria-label="Fulltone OCD">
-          {/* Letter O */}
-          <path
-            d="M 31 7 C 17 7, 5 18, 5 35 C 5 52, 17 63, 31 63 C 45 63, 56 52, 56 35 C 56 18, 45 7, 31 7 Z M 31 20 C 38 20, 43 26, 43 35 C 43 44, 38 50, 31 50 C 24 50, 19 44, 19 35 C 19 26, 24 20, 31 20 Z"
-            fill="#12161a"
-            fillRule="evenodd"
-          />
-          {/* Letter C */}
-          <path
-            d="M 97 17 C 95 12, 87 6, 75 6 C 58 6, 47 19, 47 35 C 47 51, 58 64, 75 64 C 88 64, 96 57, 98 51 C 99 47, 95 43, 90 43 C 86 43, 83 46, 79 48 C 76 50, 73 51, 71 51 C 62 51, 59 44, 59 35 C 59 26, 63 19, 72 19 C 76 19, 80 20, 83 23 C 86 25, 89 26, 92 26 C 96 26, 99 22, 97 17 Z"
-            fill="#12161a"
-          />
-          {/* Letter D */}
-          <path
-            d="M 103 8 C 103 6.5, 104.5 5.5, 106 5.5 L 126 5.5 C 142 5.5, 155 18, 155 35 C 155 49, 144 61, 131 63.5 C 127 64.5, 114 64.5, 106 64.5 C 104.5 64.5, 103 63.5, 103 62 Z M 116 18 L 116 52 C 120 52, 126 52, 129 50 C 137 47, 142 42, 142 35 C 142 27, 137 20, 127 18 C 124 18, 119 18, 116 18 Z"
-            fill="#12161a"
-            fillRule="evenodd"
-          />
-          {/* Registered Trademark ® */}
-          <circle cx="151.5" cy="60.5" r="3.6" fill="none" stroke="#12161a" strokeWidth="1" />
-          <text x="151.5" y="62.7" textAnchor="middle" fontSize="4.6" fontWeight="900" fill="#12161a" fontFamily="sans-serif">R</text>
-        </svg>
+        <span className="ocd-title-comic">OCD</span>
+        <span className="ocd-reg-mark">®</span>
       </div>
 
       {/* 3PDT Chrome Footswitch with Machined Hex Base */}

@@ -2566,6 +2566,12 @@ body {
   border: 1px solid rgba(200, 166, 101, 0.4);
 }
 
+.fuzz-tag {
+  background: rgba(225, 29, 72, 0.18);
+  color: #fb7185;
+  border: 1px solid rgba(225, 29, 72, 0.4);
+}
+
 .group-count {
   font-size: 9.5px;
   color: rgba(200, 166, 101, 0.65);
@@ -2666,6 +2672,12 @@ body {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
+}
+
+.item-pill-badge.fuzz {
+  background: rgba(225, 29, 72, 0.18);
+  color: #fb7185;
+  border: 1px solid rgba(225, 29, 72, 0.4);
 }
 
 .dropdown-item-info .item-desc {
@@ -5144,6 +5156,30 @@ body {
   width: 100%;
 }
 
+.ocd-title-comic {
+  font-family: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', cursive, sans-serif !important;
+  font-size: 48px;
+  font-weight: 900 !important;
+  color: #12161a;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  -webkit-text-stroke: 1.5px #12161a;
+  text-stroke: 1.5px #12161a;
+  paint-order: stroke fill;
+  filter: drop-shadow(0 0.5px 0.5px rgba(255, 255, 255, 0.5));
+  user-select: none;
+}
+
+.ocd-reg-mark {
+  font-family: system-ui, -apple-system, sans-serif !important;
+  font-size: 8.5px;
+  font-weight: 900;
+  color: #12161a;
+  align-self: flex-end;
+  margin-bottom: 7px;
+  margin-left: 2px;
+}
+
 .ocd-logo-svg {
   width: 138px;
   height: 58px;
@@ -6064,6 +6100,286 @@ body {
 .ocd-stomp-switch:hover,
 .archer-stomp-switch:hover {
   filter: brightness(1.08);
+}
+
+/* ==========================================================================
+   CATEGORY 4: FUZZ PEDAL HARDWARE ENCLOSURES
+   ========================================================================== */
+
+/* 1. ELECTRO-HARMONIX BIG MUFF PI (USA CLASSIC BRUSHED STEEL) */
+.pedal-bigmuff {
+  background: linear-gradient(180deg, #e4e7ea 0%, #cbd1d6 30%, #d8dde2 70%, #bcc2c8 100%) !important;
+  border: 2px solid #7c8490 !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.8),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.45) !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 8px 10px !important;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Authentic Dome Screws on Side Edges */
+.bm-screw {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 50%, #475569 100%);
+  border: 0.8px solid #334155;
+  box-shadow: inset 0 0.5px 1px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
+  z-index: 6;
+}
+.bm-screw::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 15%;
+  right: 15%;
+  height: 1px;
+  background: #1e293b;
+  transform: translateY(-50%) rotate(42deg);
+}
+.bm-screw.top-left { top: 8px; left: 6px; }
+.bm-screw.top-right { top: 8px; right: 6px; }
+.bm-screw.bottom-left { bottom: 8px; left: 6px; }
+.bm-screw.bottom-right { bottom: 8px; right: 6px; }
+
+/* Main Faceplate Silkscreen Border */
+.bigmuff-faceplate {
+  width: 100%;
+  height: 100%;
+  border: 1.8px solid #0f172a;
+  border-radius: 8px;
+  padding: 4px 4px 6px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Top IO Labels: AMPLIFIER / INPUT */
+.bigmuff-io-header {
+  width: 94%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1px;
+  margin-bottom: 2px;
+}
+.bm-io-label {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 0.8px;
+}
+
+/* Knobs Area with Relative Positioning for LED */
+.bigmuff-knobs-area {
+  position: relative;
+  width: 100%;
+  margin-top: 1px;
+}
+
+.bigmuff-knobs-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  padding: 0 2px;
+}
+
+.bigmuff-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Knob variant for Big Muff: Dial on top, Label underneath, NO numbers */
+.knob-variant-bigmuff {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.knob-variant-bigmuff .knob-dial-wrapper {
+  order: 1;
+}
+.knob-variant-bigmuff .knob-label {
+  order: 2;
+  margin-top: 3px;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 8.5px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* Double Red Stripes + Bold Vintage BIG MUFF Title + Beside LED */
+.bigmuff-graphics-strip {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 5px 0 4px;
+}
+
+.bigmuff-red-band-top,
+.bigmuff-red-band-bottom {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+}
+
+.bigmuff-red-line.thin {
+  width: 100%;
+  height: 1.5px;
+  background: #d81d24;
+}
+
+.bigmuff-red-line.thick {
+  width: 100%;
+  height: 3px;
+  background: #d81d24;
+}
+
+.bigmuff-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0 4px;
+  gap: 8px;
+}
+
+.bigmuff-title-text {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: #d81d24;
+  letter-spacing: 2.8px;
+  line-height: 1;
+  text-shadow:
+    1.5px 1.5px 0 #9e1419,
+    2.5px 2.5px 0 #9e1419,
+    0 0 1px rgba(0, 0, 0, 0.4);
+  margin: 2px 0 1px;
+}
+
+/* Vintage Pilot LED Bezel positioned right beside BIG MUFF title */
+.bigmuff-title-led-mount {
+  cursor: pointer;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bigmuff-led-bezel {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 50%, #334155 100%);
+  border: 1.2px solid #0f172a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bigmuff-red-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #7f1d1d 0%, #450a0a 60%, #1a0303 100%);
+  border: 0.5px solid #000000;
+  transition: all 0.2s ease;
+}
+
+.bigmuff-red-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ff1e38 40%, #dc2626 70%, #991b1b 100%);
+  border-color: #ff1e38;
+  box-shadow: 0 0 8px #ff1133, 0 0 18px rgba(255, 17, 51, 0.95);
+}
+
+/* Lower Solid Gloss Black Enamel Section with Chrome Footswitch */
+.bigmuff-lower-face {
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(180deg, #12151b 0%, #08090c 100%);
+  border: 1px solid #000000;
+  border-radius: 0 0 6px 6px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 1px;
+  margin-bottom: 4px;
+}
+.bigmuff-stomp-wrap {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bigmuff-switch-nut {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 50%, #475569 100%);
+  border: 1.5px solid #1e293b;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.75), inset 0 1px 2px rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease;
+}
+.bigmuff-stomp-wrap:active .bigmuff-switch-nut {
+  transform: scale(0.92);
+}
+.bigmuff-switch-plunger {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #94a3b8 50%, #334155 100%);
+  border: 1px solid #0f172a;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.95), 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Bottom Brushed Footer Branding */
+.bigmuff-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0;
+}
+.bigmuff-brand {
+  font-family: 'Bookman Old Style', 'Georgia', 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+.bigmuff-origin {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 7.5px;
+  font-weight: 900;
+  color: #334155;
+  letter-spacing: 2px;
+  margin-top: 1px;
 }
 
 .archer-brand-bottom {
