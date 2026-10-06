@@ -9,6 +9,7 @@ interface InputPreampPanelProps {
   selectedDeviceId: string;
   onSelectDevice: (deviceId: string) => void;
   onRefreshDevices: () => void;
+  isRefreshingDevices?: boolean;
   inputGain: number;
   onInputGainChange: (gain: number) => void;
   inputChannelMode: InputChannelMode;
@@ -31,6 +32,7 @@ export const InputPreampPanel: React.FC<InputPreampPanelProps> = ({
   selectedDeviceId,
   onSelectDevice,
   onRefreshDevices,
+  isRefreshingDevices = false,
   inputGain,
   onInputGainChange,
   inputChannelMode,
@@ -58,7 +60,7 @@ export const InputPreampPanel: React.FC<InputPreampPanelProps> = ({
       <div className="mini-module-body">
         {/* Device Select Bar */}
         <div className="mini-device-bar">
-          <Mic size={12} className="text-slate-400 shrink-0" />
+          <Mic size={12} className="text-brass shrink-0" />
           <select
             className="mini-device-select"
             value={selectedDeviceId}
@@ -79,10 +81,11 @@ export const InputPreampPanel: React.FC<InputPreampPanelProps> = ({
           </select>
           <button
             onClick={onRefreshDevices}
-            className="mini-icon-btn"
-            title="Refresh audio devices"
+            className={`mini-icon-btn ${isRefreshingDevices ? 'is-refreshing' : ''}`}
+            disabled={isRefreshingDevices}
+            title={isRefreshingDevices ? 'Memindai perangkat audio...' : 'Scan & refresh perangkat audio'}
           >
-            <RefreshCw size={11} />
+            <RefreshCw size={11} className={isRefreshingDevices ? 'is-spinning' : ''} />
           </button>
         </div>
 

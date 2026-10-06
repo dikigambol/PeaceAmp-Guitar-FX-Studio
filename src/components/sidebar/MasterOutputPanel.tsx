@@ -29,11 +29,11 @@ export const MasterOutputPanel: React.FC<MasterOutputPanelProps> = ({
     <div className="mini-card-module">
       <div className="mini-module-header">
         <div className="mini-header-title">
-          <Volume2 size={13} className="text-amber-500" />
+          <Volume2 size={13} className="text-brass" />
           <span>MASTER OUTPUT & MONITOR</span>
         </div>
         <div className="mini-limiter-badge" title="Auto Brickwall Limiter (-0.5 dB) active">
-          <ShieldCheck size={11} />
+          <ShieldCheck size={11} className="text-brass" />
           <span>LIMITER -0.5dB</span>
         </div>
       </div>
@@ -43,7 +43,7 @@ export const MasterOutputPanel: React.FC<MasterOutputPanelProps> = ({
         <div className="mini-stage-block">
           <div className="mini-stage-header">
             <div className="mini-stage-title-left">
-              <Volume2 size={11} className="text-amber-500" />
+              <Volume2 size={11} className="text-brass" />
               <span>MAIN VOLUME</span>
             </div>
             <span className="mini-stage-val">{formatVolume(masterVolume)}</span>

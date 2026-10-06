@@ -22,12 +22,14 @@ import { AudioHeader } from './components/AudioHeader';
 import { InputPreampPanel } from './components/sidebar/InputPreampPanel';
 import { ChromaticTuner } from './components/tuner/ChromaticTuner';
 import { CabinetSimulatorPanel } from './components/sidebar/CabinetSimulatorPanel';
+import { AmpHeadPanel } from './components/sidebar/AmpHeadPanel';
 import { MasterOutputPanel } from './components/sidebar/MasterOutputPanel';
 import { Pedalboard } from './components/pedalboard/Pedalboard';
 import { HeadphoneWarning } from './components/HeadphoneWarning';
 import { ManualModal } from './components/manual/ManualModal';
 import { DesktopOnlyBlocker } from './components/common/DesktopOnlyBlocker';
 import type { CabinetSettings } from './types/cabinet';
+import type { AmpHeadSettings } from './types/amp';
 import { AlertOctagon, X, BookOpen } from 'lucide-react';
 import './index.css';
 
@@ -59,6 +61,7 @@ export function App() {
 
   const [devices, setDevices] = useState<AudioDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const [isRefreshingDevices, setIsRefreshingDevices] = useState(false);
 
   const [inputGain, setInputGain] = useState(1.0);
   const [inputChannelMode, setInputChannelMode] = useState<InputChannelMode>('sum');
@@ -81,9 +84,21 @@ export function App() {
     enabled: true,
     model: '4x12-closed',
     mic: 'sm57',
-    position: 0.8,
-    mix: 1.0,
+    position: 0.5,
+    mix: 0.5,
     level: 0,
+  });
+
+  // Dedicated Guitar Amp Head State (Preamp Tube Drive, FMV Tone Stack, Power Sag)
+  const [ampHeadSettings, setAmpHeadSettings] = useState<AmpHeadSettings>({
+    enabled: true,
+    model: 'crunch-plexi',
+    gain: 5.0,
+    bass: 5.0,
+    mid: 5.0,
+    treble: 5.0,
+    presence: 5.0,
+    master: 6.0,
   });
 
   // Tuner & Telemetry
@@ -176,6 +191,7 @@ export function App() {
 
   const handleRefreshDevices = useCallback(async () => {
     if (!engineRef.current) return;
+    setIsRefreshingDevices(true);
     try {
       const devList = await engineRef.current.requestDeviceAccess();
       setDevices(devList);
@@ -189,6 +205,10 @@ export function App() {
       }
     } catch (err) {
       console.warn('Failed to request device access:', err);
+    } finally {
+      setTimeout(() => {
+        setIsRefreshingDevices(false);
+      }, 500);
     }
   }, [selectedDeviceId]);
 
@@ -358,6 +378,15 @@ export function App() {
     });
   }, []);
 
+  // Amp Head Actions
+  const handleUpdateAmpHeadSettings = useCallback((newSettings: Partial<AmpHeadSettings>) => {
+    setAmpHeadSettings((prev) => {
+      const updated = { ...prev, ...newSettings };
+      engineRef.current?.updateAmpHeadSettings(newSettings);
+      return updated;
+    });
+  }, []);
+
   // Preset Actions
   const handleSelectPreset = useCallback((preset: PresetSchema) => {
     setCurrentPresetId(preset.id);
@@ -373,7 +402,10 @@ export function App() {
     if (preset.cabinet) {
       handleUpdateCabinetSettings(preset.cabinet);
     }
-  }, [handleInputGainChange, handleMasterVolumeChange, handleUpdateCabinetSettings]);
+    if (preset.ampHead) {
+      handleUpdateAmpHeadSettings(preset.ampHead);
+    }
+  }, [handleInputGainChange, handleMasterVolumeChange, handleUpdateCabinetSettings, handleUpdateAmpHeadSettings]);
 
   const handleSaveCurrentAsPreset = (name: string) => {
     const newPreset = saveUserPreset({
@@ -383,6 +415,7 @@ export function App() {
       inputGain,
       masterVolume,
       cabinet: cabinetSettings,
+      ampHead: ampHeadSettings,
     });
     const updated = loadAllPresets();
     setPresets(updated);
@@ -451,6 +484,7 @@ export function App() {
             selectedDeviceId={selectedDeviceId}
             onSelectDevice={handleDeviceChange}
             onRefreshDevices={handleRefreshDevices}
+            isRefreshingDevices={isRefreshingDevices}
             inputGain={inputGain}
             onInputGainChange={handleInputGainChange}
             inputChannelMode={inputChannelMode}
@@ -470,13 +504,19 @@ export function App() {
             onToggleMute={handleToggleMute}
           />
 
-          {/* 3. Dedicated Cabinet IR Simulator (Positioned at the end of the signal chain) */}
+          {/* 3. Guitar Amp Head (Positioned after pedalboard & before cabinet IR) */}
+          <AmpHeadPanel
+            settings={ampHeadSettings}
+            onUpdateSettings={handleUpdateAmpHeadSettings}
+          />
+
+          {/* 4. Dedicated Cabinet IR Simulator (Positioned after amp head) */}
           <CabinetSimulatorPanel
             settings={cabinetSettings}
             onUpdateSettings={handleUpdateCabinetSettings}
           />
 
-          {/* 4. Master Output Stage & Safety Limiter */}
+          {/* 5. Master Output Stage & Safety Limiter */}
           <MasterOutputPanel
             masterVolume={masterVolume}
             onMasterVolumeChange={handleMasterVolumeChange}

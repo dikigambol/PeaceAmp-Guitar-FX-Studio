@@ -21,7 +21,7 @@ export const CabinetSimulatorPanel: React.FC<CabinetSimulatorPanelProps> = ({
       {/* Module Title Header */}
       <div className="mini-module-header">
         <div className="mini-header-title">
-          <Box size={13} className="text-amber-500" />
+          <Box size={13} className="text-brass" />
           <span>CABINET IR SIMULATOR</span>
         </div>
 

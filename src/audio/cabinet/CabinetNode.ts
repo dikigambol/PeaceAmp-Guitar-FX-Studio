@@ -21,8 +21,8 @@ export class CabinetNode {
     enabled: true,
     model: '4x12-closed',
     mic: 'sm57',
-    position: 0.8,
-    mix: 1.0, // 100% wet: a cab sim should not blend in the un-filtered dry signal
+    position: 0.5,
+    mix: 0.5, // 50% wet/dry mix by default
     level: 0,
   };
 

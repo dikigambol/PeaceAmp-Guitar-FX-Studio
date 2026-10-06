@@ -3,6 +3,8 @@ import { DEFAULT_NOISE_GATE_ENABLED, DEFAULT_NOISE_GATE_THRESHOLD_DB } from '../
 import { createDcBlocker } from './pedals/dspUtils';
 import type { PedalInstance } from '../types/pedal';
 import { SignalChain } from './SignalChain';
+import { AmpHeadNode } from './amp/AmpHeadNode';
+import type { AmpHeadSettings } from '../types/amp';
 import { CabinetNode } from './cabinet/CabinetNode';
 import type { CabinetSettings } from '../types/cabinet';
 import { detectPitch, type TunerResult } from '../dsp/tuner/pitchDetector';
@@ -49,14 +51,27 @@ export class AudioEngine {
   private signalChain: SignalChain | null = null;
   private pedalInstances: PedalInstance[] = [];
 
+  // Dedicated Guitar Amp Head Simulator (positioned between pedals and cabinet)
+  private ampHeadNode: AmpHeadNode | null = null;
+  private ampHeadSettings: AmpHeadSettings = {
+    enabled: true,
+    model: 'crunch-plexi',
+    gain: 5.0,
+    bass: 5.0,
+    mid: 5.0,
+    treble: 5.0,
+    presence: 5.0,
+    master: 6.0,
+  };
+
   // Dedicated Cabinet IR Convolver at the end of the chain
   private cabinetNode: CabinetNode | null = null;
   private cabinetSettings: CabinetSettings = {
     enabled: true,
     model: '4x12-closed',
     mic: 'sm57',
-    position: 0.8,
-    mix: 1.0,
+    position: 0.5,
+    mix: 0.5,
     level: 0,
   };
 
@@ -212,6 +227,11 @@ export class AudioEngine {
         this.signalChain.dispose();
       }
 
+      if (this.ampHeadNode) {
+        this.ampHeadNode.dispose();
+        this.ampHeadNode = null;
+      }
+
       if (this.cabinetNode) {
         this.cabinetNode.dispose();
         this.cabinetNode = null;
@@ -342,12 +362,15 @@ export class AudioEngine {
     this.applyNoiseGateState(true);
     this.gateOutGain.connect(this.chainInputNode);
 
-    // Cabinet Simulator positioned at the end of the pedal effects chain
-    // (safety DC blocker first so asymmetric clipping offsets never reach the speaker model)
+    // Guitar Amp Head & Cabinet Simulator positioned at the end of the pedal chain
+    // (safety DC blocker first so asymmetric clipping offsets never reach the amp/cabinet models)
     this.chainDcBlocker = createDcBlocker(this.ctx, 15);
+    this.ampHeadNode = new AmpHeadNode(this.ctx, this.ampHeadSettings);
     this.cabinetNode = new CabinetNode(this.ctx, this.cabinetSettings);
+
     this.chainOutputNode.connect(this.chainDcBlocker);
-    this.chainDcBlocker.connect(this.cabinetNode.inputNode);
+    this.chainDcBlocker.connect(this.ampHeadNode.inputNode);
+    this.ampHeadNode.outputNode.connect(this.cabinetNode.inputNode);
     this.cabinetNode.outputNode.connect(this.masterGainNode);
 
     this.masterGainNode.connect(this.safetyLimiter);
@@ -617,6 +640,18 @@ export class AudioEngine {
     if (this.signalChain) {
       this.signalChain.setEnabled(pedalId, enabled);
     }
+  }
+
+  /**
+   * Guitar Amp Head Simulator Configuration & Real-Time Parameter Updates
+   */
+  public updateAmpHeadSettings(settings: Partial<AmpHeadSettings>): void {
+    this.ampHeadSettings = { ...this.ampHeadSettings, ...settings };
+    this.ampHeadNode?.updateSettings(settings);
+  }
+
+  public getAmpHeadSettings(): AmpHeadSettings {
+    return this.ampHeadNode ? this.ampHeadNode.getSettings() : this.ampHeadSettings;
   }
 
   /**

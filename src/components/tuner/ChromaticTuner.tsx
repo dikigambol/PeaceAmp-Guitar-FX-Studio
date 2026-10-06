@@ -38,7 +38,7 @@ export const ChromaticTuner: React.FC<ChromaticTunerProps> = ({
     <div className="mini-card-module">
       <div className="mini-module-header">
         <div className="mini-header-title">
-          <Radio size={13} className="text-amber-500" />
+          <Radio size={13} className="text-brass" />
           <span>CHROMATIC TUNER</span>
         </div>
         <button
@@ -46,7 +46,7 @@ export const ChromaticTuner: React.FC<ChromaticTunerProps> = ({
           onClick={onToggleMute}
           title={isMuted ? 'Unmute guitar' : 'Mute guitar while tuning'}
         >
-          <VolumeX size={11} />
+          <VolumeX size={11} className="text-brass" />
           <span>{isMuted ? 'MUTED' : 'MUTE'}</span>
         </button>
       </div>

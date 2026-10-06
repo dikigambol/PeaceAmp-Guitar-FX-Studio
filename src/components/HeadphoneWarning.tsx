@@ -9,7 +9,7 @@ export const HeadphoneWarning: React.FC = () => {
   return (
     <div className="warning-banner">
       <div className="warning-content">
-        <Headphones className="warning-icon" size={20} />
+        <Headphones className="warning-icon text-brass" size={20} />
         <div>
           <strong>Use Headphones or Audio Interface:</strong>
           <span>
@@ -18,7 +18,7 @@ export const HeadphoneWarning: React.FC = () => {
         </div>
       </div>
       <button 
-        className="warning-close-btn"
+        className="warning-close-btn text-brass"
         onClick={() => setDismissed(true)}
         title="Dismiss warning"
       >
