@@ -1,5 +1,5 @@
 import type { AudioPedalNode } from '../../../types/pedal';
-import { levelToGain } from '../dspUtils';
+import { levelToGain, applyBypassCrossfade } from '../dspUtils';
 
 /**
  * Shared compressor engine for all compressor pedals.
@@ -188,9 +188,7 @@ export class CompressorPedalNode implements AudioPedalNode {
   }
 
   public setEnabled(enabled: boolean): void {
-    const now = this.ctx.currentTime;
-    this.wetGain.gain.setTargetAtTime(enabled ? 1 : 0, now, 0.015);
-    this.dryGain.gain.setTargetAtTime(enabled ? 0 : 1, now, 0.015);
+    applyBypassCrossfade(this.wetGain, this.dryGain, enabled, this.ctx);
   }
 
   public dispose(): void {

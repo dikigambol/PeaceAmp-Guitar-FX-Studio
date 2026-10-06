@@ -18,7 +18,10 @@ export const ClassicStompSwitch: React.FC<ClassicStompSwitchProps> = ({
   size = 48,
 }) => {
   return (
-    <div className={`classic-stomp-wrap ${className}`}>
+    <div
+      className={`classic-stomp-wrap ${className}`}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       <button
         type="button"
         className={`classic-stomp-switch ${isEnabled ? 'active' : ''}`}

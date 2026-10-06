@@ -237,7 +237,7 @@ export const FulltoneOcdPedal: React.FC<PedalProps> = ({
       </div>
 
       {/* 3PDT Chrome Footswitch with Machined Hex Base */}
-      <div className="ocd-stomp-wrap">
+      <div className="ocd-stomp-wrap" onPointerDown={(e) => e.stopPropagation()}>
         <button
           className={`ocd-stomp-switch ${isEnabled ? 'active' : ''}`}
           onPointerDown={(e) => e.stopPropagation()}

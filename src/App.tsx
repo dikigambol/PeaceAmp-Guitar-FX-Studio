@@ -267,12 +267,17 @@ export function App() {
   // Pedalboard Actions
   const handleTogglePedalEnabled = useCallback((pedalId: string) => {
     setPedals((prev) => {
-      const next = prev.map((p) => (p.id === pedalId ? { ...p, enabled: !p.enabled } : p));
-      const target = next.find((p) => p.id === pedalId);
-      if (target && engineRef.current) {
-        engineRef.current.setPedalEnabled(pedalId, target.enabled);
+      const target = prev.find((p) => p.id === pedalId);
+      if (!target) return prev;
+      const nextEnabled = !target.enabled;
+
+      try {
+        engineRef.current?.setPedalEnabled(pedalId, nextEnabled);
+      } catch (err) {
+        console.warn('Failed to update audio engine bypass state:', err);
       }
-      return next;
+
+      return prev.map((p) => (p.id === pedalId ? { ...p, enabled: nextEnabled } : p));
     });
   }, []);
 

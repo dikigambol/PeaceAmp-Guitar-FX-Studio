@@ -13,6 +13,7 @@ export class SignalChain {
 
   private activeNodes: AudioPedalNode[] = [];
   private activeEntries: Map<string, ActiveNodeEntry> = new Map();
+  private currentTopologyKey = '__UNINITIALIZED__';
 
   constructor(ctx: AudioContext, inputHook: GainNode, outputHook: GainNode) {
     this.ctx = ctx;
@@ -26,6 +27,26 @@ export class SignalChain {
    * and applies a smooth micro-fade to eliminate clicks and pops during rewiring.
    */
   public rebuild(instances: PedalInstance[]): void {
+    const nextKey = instances.map((i) => `${i.id}:${i.type}`).join('->');
+
+    // Fast-path: If the sequence of pedal nodes has not changed (e.g. user toggled bypass on/off
+    // or adjusted knob parameters), update node bypass/params directly without rewiring or muting!
+    if (nextKey === this.currentTopologyKey) {
+      for (const inst of instances) {
+        const entry = this.activeEntries.get(inst.id);
+        if (entry) {
+          entry.node.setEnabled(inst.enabled);
+          if (inst.parameters) {
+            for (const [paramId, val] of Object.entries(inst.parameters)) {
+              entry.node.updateParameter(paramId, val);
+            }
+          }
+        }
+      }
+      return;
+    }
+
+    this.currentTopologyKey = nextKey;
     const now = this.ctx.currentTime;
 
     // 1. Smooth micro-mute ramp to eliminate pops during rewiring
@@ -129,6 +150,7 @@ export class SignalChain {
   }
 
   public dispose(): void {
+    this.currentTopologyKey = '__UNINITIALIZED__';
     this.inputHook.disconnect();
     for (const entry of this.activeEntries.values()) {
       entry.node.dispose();

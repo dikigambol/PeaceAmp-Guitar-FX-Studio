@@ -1,5 +1,5 @@
 import type { AudioPedalNode } from '../../../types/pedal';
-import { levelToGain } from '../dspUtils';
+import { levelToGain, applyBypassCrossfade } from '../dspUtils';
 
 /** Output trim (dB) calibrated so Level=5 is ~unity loudness. */
 const OUTPUT_TRIM_DB = -16.8;
@@ -134,14 +134,7 @@ export class BossBd2Node implements AudioPedalNode {
 
   public setEnabled(enabled: boolean): void {
     this.isEnabled = enabled;
-    const now = this.ctx.currentTime;
-    if (enabled) {
-      this.dryGain.gain.setTargetAtTime(0, now, 0.015);
-      this.wetGain.gain.setTargetAtTime(1, now, 0.015);
-    } else {
-      this.wetGain.gain.setTargetAtTime(0, now, 0.015);
-      this.dryGain.gain.setTargetAtTime(1, now, 0.015);
-    }
+    applyBypassCrossfade(this.wetGain, this.dryGain, enabled, this.ctx);
   }
 
   public dispose(): void {

@@ -1,5 +1,5 @@
 import type { AudioPedalNode } from '../../../types/pedal';
-import { createDcBlocker, levelToGain } from '../dspUtils';
+import { createDcBlocker, levelToGain, applyBypassCrossfade } from '../dspUtils';
 
 /**
  * Tube Screamer family core (TS808 / TS9 / TS Mini).
@@ -213,9 +213,7 @@ export class TubeScreamerNode implements AudioPedalNode {
 
   public setEnabled(enabled: boolean): void {
     this.isEnabled = enabled;
-    const now = this.ctx.currentTime;
-    this.wetGain.gain.setTargetAtTime(enabled ? 1 : 0, now, 0.015);
-    this.dryGain.gain.setTargetAtTime(enabled ? 0 : 1, now, 0.015);
+    applyBypassCrossfade(this.wetGain, this.dryGain, enabled, this.ctx);
   }
 
   public dispose(): void {

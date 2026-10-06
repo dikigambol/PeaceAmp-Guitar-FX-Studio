@@ -160,7 +160,7 @@ export const Ts808Pedal: React.FC<PedalProps> = ({
         <div className="ts808-subtitle">Overdrive Pro &nbsp; TS808</div>
 
         {/* Square Chrome Balance Footswitch */}
-        <div className="ts808-switch-mount">
+        <div className="ts808-switch-mount" onPointerDown={(e) => e.stopPropagation()}>
           <button
             type="button"
             className={`ts808-square-switch ${isEnabled ? 'active' : ''}`}

@@ -318,23 +318,35 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
 
   // Compute active signal chain from BOARD_INPUT to BOARD_OUTPUT
+  // If the cable route is broken anywhere (not reaching BOARD_OUTPUT), the chain is incomplete
+  // and returns [] so the audio engine automatically passes through clean sound.
   const activeChain = useMemo(() => {
     const chain: PedalInstance[] = [];
     const visited = new Set<string>();
     let currNodeId = 'BOARD_INPUT';
+    let reachedOutput = false;
 
     while (currNodeId !== 'BOARD_OUTPUT') {
       const nextConn = connections.find((c) => c.fromNodeId === currNodeId);
       if (!nextConn) break;
 
       currNodeId = nextConn.toNodeId;
-      if (currNodeId === 'BOARD_OUTPUT') break;
+      if (currNodeId === 'BOARD_OUTPUT') {
+        reachedOutput = true;
+        break;
+      }
 
       if (visited.has(currNodeId)) break; // Prevent cyclic loops
       visited.add(currNodeId);
 
       const pedal = pedals.find((p) => p.id === currNodeId);
       if (pedal) chain.push(pedal);
+    }
+
+    // Critical: If the cable path did NOT reach BOARD_OUTPUT, the audio chain is disconnected.
+    // Return empty array so the signal passes through directly as Clean Sound.
+    if (!reachedOutput) {
+      return [];
     }
 
     return chain;
@@ -352,28 +364,53 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
     // Do not initiate pedal movement if user interacted with knobs, buttons, jacks, switches, or LEDs
     if (
-      target.closest('.stompbox-side-jack') ||
-      target.closest('.knob-dial-wrapper') ||
-      target.closest('.knob-container') ||
       target.closest('button') ||
       target.closest('input') ||
       target.closest('label') ||
-      target.closest('.boss-treadle-pad') ||
+      target.closest('svg') ||
+      target.closest('.stompbox-side-jack') ||
+      target.closest('.knob-dial-wrapper') ||
+      target.closest('.knob-container') ||
+      target.closest('.knob-rotary-mount') ||
+      target.closest('.classic-stomp-wrap') ||
+      target.closest('.classic-stomp-switch') ||
+      target.closest('.classic-stomp-svg') ||
+      target.closest('.classic-plunger-disc') ||
+      target.closest('.ts808-switch-mount') ||
+      target.closest('.ts808-square-switch') ||
+      target.closest('.ts808-switch-bevel') ||
+      target.closest('.ts808-switch-face') ||
       target.closest('.boss-treadle-plate') ||
+      target.closest('.boss-treadle-pad') ||
       target.closest('.boss-rubber-pad') ||
-      target.closest('.ts9-treadle-btn') ||
-      target.closest('.nobels-treadle') ||
+      target.closest('.boss-embossed-logo') ||
+      target.closest('.boss-grip-lines') ||
+      target.closest('.boss-grip-line') ||
+      target.closest('.boss-thumb-screw') ||
       target.closest('.boss-check-led-wrap') ||
+      target.closest('.boss-check-led') ||
+      target.closest('.ts9-treadle-btn') ||
+      target.closest('.ts9-treadle-face') ||
       target.closest('.ts9-led-mount') ||
       target.closest('.ts808-led-mount') ||
       target.closest('.klon-led-mount') ||
       target.closest('.klon-stomp-switch') ||
+      target.closest('.ocd-stomp-wrap') ||
+      target.closest('.ocd-stomp-switch') ||
+      target.closest('.ocd-stomp-svg') ||
       target.closest('.ocd-led-mount') ||
-      target.closest('.tsmini-led-mount') ||
-      target.closest('.nobels-led-mount') ||
-      target.closest('.archer-led-mount') ||
       target.closest('.ocd-toggle-switch') ||
-      target.closest('.nobels-mini-push')
+      target.closest('.tsmini-stomp-wrap') ||
+      target.closest('.tsmini-stomp-btn') ||
+      target.closest('.tsmini-led-mount') ||
+      target.closest('.nobels-treadle') ||
+      target.closest('.nobels-led-mount') ||
+      target.closest('.nobels-mini-push') ||
+      target.closest('.archer-led-mount') ||
+      target.closest('.pedal-footswitch-section') ||
+      target.closest('.pedal-footswitch') ||
+      target.closest('.pedal-led-section') ||
+      target.closest('.pedal-delete-button')
     ) {
       return;
     }

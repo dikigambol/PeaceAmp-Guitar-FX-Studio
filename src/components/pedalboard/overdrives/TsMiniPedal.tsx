@@ -163,7 +163,7 @@ export const TsMiniPedal: React.FC<PedalProps> = ({
         </div>
 
         {/* Chrome Heavy Stomp Switch */}
-        <div className="tsmini-stomp-wrap">
+        <div className="tsmini-stomp-wrap" onPointerDown={(e) => e.stopPropagation()}>
           <button
             type="button"
             className={`tsmini-stomp-btn ${isEnabled ? 'active' : ''}`}
