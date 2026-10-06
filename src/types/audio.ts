@@ -1,5 +1,16 @@
 export type EngineStatus = 'uninitialized' | 'suspended' | 'running' | 'error';
 
+/**
+ * How a (possibly stereo) audio-interface input is folded down to the mono guitar signal.
+ *  - sum:   L+R averaged (mono mics / guitar on both channels)
+ *  - left:  Input 1 only (typical guitar-in on a 2ch interface)
+ *  - right: Input 2 only
+ */
+export type InputChannelMode = 'sum' | 'left' | 'right';
+
+export const DEFAULT_NOISE_GATE_ENABLED = true;
+export const DEFAULT_NOISE_GATE_THRESHOLD_DB = -62;
+
 export interface AudioDeviceInfo {
   deviceId: string;
   label: string;

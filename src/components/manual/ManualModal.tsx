@@ -5,12 +5,11 @@ import {
   Layers,
   Bookmark,
   Music,
-  Repeat,
-  Cpu,
   HelpCircle,
   Headphones,
   CheckCircle2,
-  ArrowLeft
+  ArrowLeft,
+  Box
 } from 'lucide-react';
 
 interface ManualModalProps {
@@ -21,11 +20,10 @@ interface ManualModalProps {
 type ManualTab =
   | 'quickstart'
   | 'preamp'
+  | 'cabinet'
   | 'pedalboard'
   | 'presets'
   | 'tuner'
-  | 'looper'
-  | 'midi'
   | 'troubleshooting';
 
 export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => {
@@ -78,51 +76,44 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
               <span>2. Master Preamp & I/O</span>
             </button>
             <button
+              className={`manual-nav-link ${activeTab === 'cabinet' ? 'active' : ''}`}
+              onClick={() => setActiveTab('cabinet')}
+            >
+              <Box size={14} />
+              <span>3. Cabinet IR Simulator</span>
+            </button>
+            <button
               className={`manual-nav-link ${activeTab === 'pedalboard' ? 'active' : ''}`}
               onClick={() => setActiveTab('pedalboard')}
             >
               <Layers size={14} />
-              <span>3. Virtual Pedalboard</span>
+              <span>4. Virtual Pedalboard</span>
             </button>
             <button
               className={`manual-nav-link ${activeTab === 'presets' ? 'active' : ''}`}
               onClick={() => setActiveTab('presets')}
             >
               <Bookmark size={14} />
-              <span>4. Preset Rigs</span>
+              <span>5. Preset Rigs</span>
             </button>
             <button
               className={`manual-nav-link ${activeTab === 'tuner' ? 'active' : ''}`}
               onClick={() => setActiveTab('tuner')}
             >
               <Music size={14} />
-              <span>5. Chromatic Tuner</span>
-            </button>
-            <button
-              className={`manual-nav-link ${activeTab === 'looper' ? 'active' : ''}`}
-              onClick={() => setActiveTab('looper')}
-            >
-              <Repeat size={14} />
-              <span>6. Phrase Looper Pro</span>
-            </button>
-            <button
-              className={`manual-nav-link ${activeTab === 'midi' ? 'active' : ''}`}
-              onClick={() => setActiveTab('midi')}
-            >
-              <Cpu size={14} />
-              <span>7. USB MIDI Control</span>
+              <span>6. Chromatic Tuner</span>
             </button>
             <button
               className={`manual-nav-link ${activeTab === 'troubleshooting' ? 'active' : ''}`}
               onClick={() => setActiveTab('troubleshooting')}
             >
               <HelpCircle size={14} />
-              <span>8. Troubleshooting</span>
+              <span>7. Troubleshooting</span>
             </button>
           </nav>
 
           <div className="manual-sidebar-footer-tip">
-            <span>Tip: Use <code>+ ADD STOMPBOX</code> to build your custom chain.</span>
+            <span>Tip: Use <code>+ ADD PEDAL</code> to build your custom chain.</span>
           </div>
         </aside>
 
@@ -154,7 +145,7 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
                     <div className="manual-step-counter">02</div>
                     <div className="manual-step-text">
                       <h3>Select a Curated Rig Preset</h3>
-                      <p>In the header preset bar, choose from factory rigs like <em>Texas Blues Drive</em>, <em>Heavy Metal Lead</em>, <em>Clean Jazz Chorus</em>, or <em>Ambient Space</em>. The pedalboard instantly auto-arranges and cables the stompboxes in optimal studio order.</p>
+                      <p>In the header preset bar, choose from curated factory rigs. The pedalboard instantly auto-arranges and cables the pedals in optimal studio order.</p>
                     </div>
                   </div>
 
@@ -196,15 +187,56 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
               </section>
             )}
 
+            {activeTab === 'cabinet' && (
+              <section className="manual-doc-section">
+                <div className="manual-doc-chapter-tag">CHAPTER 03 / END-OF-CHAIN ACOUSTICS</div>
+                <h2 className="manual-doc-heading">Cabinet IR (Impulse Response) Simulator</h2>
+                <p className="manual-doc-lead">
+                  Positioned at the very end of your pedal effects chain before the Master Output, the Cabinet Simulator performs real-time audio convolution between your amplified guitar signal and physical speaker box impulse responses.
+                </p>
+
+                <div className="manual-doc-grid">
+                  <div className="manual-doc-card">
+                    <h4>Speaker Enclosures</h4>
+                    <p>
+                      Choose between <strong>1×8, 1×10, 1×12, 2×12, 4×10, and 4×12</strong> configurations, tailored with authentic <strong>Open Back</strong> (airy 3D chime & room reflections) or <strong>Closed Back</strong> (tight acoustic suspension & heavy low-end thump).
+                    </p>
+                  </div>
+                  <div className="manual-doc-card">
+                    <h4>Studio Microphones</h4>
+                    <p>
+                      Tailor your guitar tone with modeled studio transducers:
+                      <br />• <strong>SM57</strong>: Classic dynamic with mid-presence punch (~5 kHz).
+                      <br />• <strong>Sennheiser-style (MD421)</strong>: Aggressive upper mids and deep cut.
+                      <br />• <strong>Ribbon (R-121)</strong>: Warm body, smooth rolled-off treble without fizz.
+                      <br />• <strong>Condenser (C414)</strong>: Flat wide-spectrum response with airy top-end.
+                    </p>
+                  </div>
+                  <div className="manual-doc-card">
+                    <h4>Microphone Placement</h4>
+                    <p>
+                      Sweep the <strong>Position</strong> slider from <strong>Edge</strong> (cone boundary for warm, mellow, darker response) to <strong>Center</strong> (on-axis dust cap for maximum bright bite and immediate attack).
+                    </p>
+                  </div>
+                  <div className="manual-doc-card">
+                    <h4>Convolution Mix</h4>
+                    <p>
+                      Blend between direct preamp sound and convolved speaker cabinet using the <strong>Mix</strong> slider (0% to 100%, default 80% for natural studio punch).
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
             {activeTab === 'pedalboard' && (
               <section className="manual-doc-section">
-                <div className="manual-doc-chapter-tag">CHAPTER 03 / CANVAS & ROUTING</div>
+                <div className="manual-doc-chapter-tag">CHAPTER 04 / CANVAS & ROUTING</div>
                 <h2 className="manual-doc-heading">Virtual Modular Pedalboard</h2>
-                <p className="manual-doc-lead">A freeform virtual stage where you can position, patch, and tweak boutique stompboxes.</p>
+                <p className="manual-doc-lead">A freeform virtual stage where you can position, patch, and tweak boutique pedals.</p>
 
                 <div className="manual-doc-list">
                   <div className="manual-doc-list-item">
-                    <strong>Adding Stompboxes:</strong> Click <code>+ ADD STOMPBOX</code> on the stage toolbar to select overdrives, distortions, fuzzes, delays, reverbs, choruses, flangers, phasers, EQs, and loopers.
+                    <strong>Adding Pedals:</strong> Click <code>+ ADD PEDAL</code> on the stage toolbar to select from our boutique analog modeling library, including <strong>Category 1: Compressors</strong> (MXR Dyna Comp, Ross, Boss CS-3, Keeley C4) and <strong>Category 2: Overdrives</strong> (Tube Screamer TS-808, TS9, Boss SD-1, OD-3, BD-2 Blues Driver, Klon Centaur, Fulltone OCD, TS Mini, Nobels ODR-1, J. Rockett Archer).
                   </div>
                   <div className="manual-doc-list-item">
                     <strong>Drag & Position:</strong> Drag pedals anywhere on the pedalboard grid. Enable <code>GRID SNAP</code> for structured rack alignment.
@@ -224,7 +256,7 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
 
             {activeTab === 'presets' && (
               <section className="manual-doc-section">
-                <div className="manual-doc-chapter-tag">CHAPTER 04 / RIG MEMORY</div>
+                <div className="manual-doc-chapter-tag">CHAPTER 05 / RIG MEMORY</div>
                 <h2 className="manual-doc-heading">Rig Presets & Cloud JSON Storage</h2>
                 <p className="manual-doc-lead">Capture, store, and transport entire pedalboard rigs with comprehensive knob settings.</p>
 
@@ -247,7 +279,7 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
 
             {activeTab === 'tuner' && (
               <section className="manual-doc-section">
-                <div className="manual-doc-chapter-tag">CHAPTER 05 / PITCH DETECTION</div>
+                <div className="manual-doc-chapter-tag">CHAPTER 06 / PITCH DETECTION</div>
                 <h2 className="manual-doc-heading">Precision Chromatic Tuner</h2>
                 <p className="manual-doc-lead">Real-time pitch detector built with the YIN autocorrelation algorithm.</p>
 
@@ -275,71 +307,9 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
               </section>
             )}
 
-            {activeTab === 'looper' && (
-              <section className="manual-doc-section">
-                <div className="manual-doc-chapter-tag">CHAPTER 06 / PERFORMANCE LOOPER</div>
-                <h2 className="manual-doc-heading">Phrase Looper Pro Station</h2>
-                <p className="manual-doc-lead">Multi-layered real-time rhythm recording, overdubbing, and playback engine.</p>
-
-                <div className="manual-doc-steps">
-                  <div className="manual-doc-step">
-                    <div className="manual-step-counter">01</div>
-                    <div className="manual-step-text">
-                      <h3>Add Looper to Rig</h3>
-                      <p>If not already on your board, click <code>ADD TO RIG</code> to instantiate the pedal in your signal path.</p>
-                    </div>
-                  </div>
-                  <div className="manual-doc-step">
-                    <div className="manual-step-counter">02</div>
-                    <div className="manual-step-text">
-                      <h3>Record Initial Phrase</h3>
-                      <p>Click <code>RECORD</code> (turns red). Play your rhythm progression.</p>
-                    </div>
-                  </div>
-                  <div className="manual-doc-step">
-                    <div className="manual-step-counter">03</div>
-                    <div className="manual-step-text">
-                      <h3>Play Loop Seamlessly</h3>
-                      <p>Click again at the end of the measure. The looper immediately loops your audio (turns green <code>PLAYING</code>).</p>
-                    </div>
-                  </div>
-                  <div className="manual-doc-step">
-                    <div className="manual-step-counter">04</div>
-                    <div className="manual-step-text">
-                      <h3>Overdub Leads</h3>
-                      <p>Click while playing to layer solos and harmonies (<code>OVERDUBBING</code>). Use Stop, Undo, or Clear whenever needed.</p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {activeTab === 'midi' && (
-              <section className="manual-doc-section">
-                <div className="manual-doc-chapter-tag">CHAPTER 07 / HARDWARE INTERFACING</div>
-                <h2 className="manual-doc-heading">USB & Bluetooth MIDI Controller Support</h2>
-                <p className="manual-doc-lead">Connect stage MIDI footswitches or pedalboards for complete hands-free control.</p>
-
-                <div className="manual-doc-grid">
-                  <div className="manual-doc-card">
-                    <h4>Program Change (PC)</h4>
-                    <p>Send standard PC 0 to PC 127 messages to switch presets instantly during live songs.</p>
-                  </div>
-                  <div className="manual-doc-card">
-                    <h4>Control Change (CC)</h4>
-                    <p>Default bindings map CC 20–27 for pedal bypass switches, CC 30 for Looper control, and CC 7 / 11 for master volume.</p>
-                  </div>
-                  <div className="manual-doc-card">
-                    <h4>Web MIDI Auto-Detection</h4>
-                    <p>Plug in your USB MIDI controller and click <code>SCAN</code> in the sidebar MIDI panel to link your hardware.</p>
-                  </div>
-                </div>
-              </section>
-            )}
-
             {activeTab === 'troubleshooting' && (
               <section className="manual-doc-section">
-                <div className="manual-doc-chapter-tag">CHAPTER 08 / SYSTEM SUPPORT</div>
+                <div className="manual-doc-chapter-tag">CHAPTER 07 / SYSTEM SUPPORT</div>
                 <h2 className="manual-doc-heading">Troubleshooting & Pro Studio Tips</h2>
 
                 <div className="manual-doc-card" style={{ marginBottom: '12px' }}>

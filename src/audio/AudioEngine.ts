@@ -1,6 +1,10 @@
-import type { AudioDeviceInfo, AudioEngineMetrics, EngineStatus, MeterData } from '../types/audio';
+import type { AudioDeviceInfo, AudioEngineMetrics, EngineStatus, InputChannelMode, MeterData } from '../types/audio';
+import { DEFAULT_NOISE_GATE_ENABLED, DEFAULT_NOISE_GATE_THRESHOLD_DB } from '../types/audio';
+import { createDcBlocker } from './pedals/dspUtils';
 import type { PedalInstance } from '../types/pedal';
 import { SignalChain } from './SignalChain';
+import { CabinetNode } from './cabinet/CabinetNode';
+import type { CabinetSettings } from '../types/cabinet';
 import { detectPitch, type TunerResult } from '../dsp/tuner/pitchDetector';
 import { ensureWorkletsRegistered } from './worklets/workletBundle';
 
@@ -18,12 +22,43 @@ export class AudioEngine {
   // Audio Nodes
   private inputGainNode: GainNode | null = null;
   private inputAnalyser: AnalyserNode | null = null;
+
+  // Input conditioning: mono fold-down -> 30 Hz rumble/DC high-pass -> input gain -> noise gate
+  private inputSumNode: GainNode | null = null;
+  private inputSplitter: ChannelSplitterNode | null = null;
+  private inputLeftGain: GainNode | null = null;
+  private inputRightGain: GainNode | null = null;
+  private inputMonoBus: GainNode | null = null;
+  private inputHighpass: BiquadFilterNode | null = null;
+  private inputChannelMode: InputChannelMode = 'sum';
+
+  // Noise gate (AudioWorklet) with clean crossfade bypass
+  private noiseGateNode: AudioWorkletNode | null = null;
+  private gateOnGain: GainNode | null = null;
+  private gateBypassGain: GainNode | null = null;
+  private gateOutGain: GainNode | null = null;
+  private noiseGateEnabled = DEFAULT_NOISE_GATE_ENABLED;
+  private noiseGateThresholdDb = DEFAULT_NOISE_GATE_THRESHOLD_DB;
+
+  // Safety DC blocker at the end of the pedal chain (before cabinet)
+  private chainDcBlocker: BiquadFilterNode | null = null;
   
   // Chain hooks: between chainInputNode and chainOutputNode pedals will be connected
   private chainInputNode: GainNode | null = null;
   private chainOutputNode: GainNode | null = null;
   private signalChain: SignalChain | null = null;
   private pedalInstances: PedalInstance[] = [];
+
+  // Dedicated Cabinet IR Convolver at the end of the chain
+  private cabinetNode: CabinetNode | null = null;
+  private cabinetSettings: CabinetSettings = {
+    enabled: true,
+    model: '4x12-closed',
+    mic: 'sm57',
+    position: 0.8,
+    mix: 0.8,
+    level: 0,
+  };
 
   private masterGainNode: GainNode | null = null;
   private safetyLimiter: DynamicsCompressorNode | null = null;
@@ -80,7 +115,7 @@ export class AudioEngine {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices
-        .filter((d) => d.kind === 'audioinput')
+        .filter((d) => d.kind === 'audioinput' && d.deviceId !== 'communications')
         .map((d, index) => ({
           deviceId: d.deviceId,
           label: d.label || `Audio Input ${index + 1}`,
@@ -90,6 +125,25 @@ export class AudioEngine {
       console.error('Failed to enumerate audio devices', err);
       return [];
     }
+  }
+
+  /**
+   * Prompts the user for microphone access if needed and returns the full device list with hardware labels
+   */
+  public async requestDeviceAccess(): Promise<AudioDeviceInfo[]> {
+    try {
+      if (navigator.mediaDevices?.getUserMedia) {
+        const tempStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        tempStream.getTracks().forEach((track) => track.stop());
+      }
+    } catch (err) {
+      console.warn('Microphone permission request dismissed or failed:', err);
+    }
+    return this.getAudioDevices();
+  }
+
+  public getSelectedInputId(): string | null {
+    return this.selectedInputId;
   }
 
   /**
@@ -158,6 +212,11 @@ export class AudioEngine {
         this.signalChain.dispose();
       }
 
+      if (this.cabinetNode) {
+        this.cabinetNode.dispose();
+        this.cabinetNode = null;
+      }
+
       this.notifyState('suspended', null);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error stopping audio';
@@ -186,9 +245,37 @@ export class AudioEngine {
   private setupNodes(): void {
     if (!this.ctx) return;
 
-    // Input gain
+    // Input gain (mono)
     this.inputGainNode = this.ctx.createGain();
+    this.inputGainNode.channelCount = 1;
+    this.inputGainNode.channelCountMode = 'explicit';
     this.inputGainNode.gain.setValueAtTime(this.inputGainValue, this.ctx.currentTime);
+
+    // Mono fold-down: whichever channel the guitar is plugged into ends up as one clean mono signal
+    this.inputSumNode = this.ctx.createGain();
+    this.inputSumNode.channelCount = 1;
+    this.inputSumNode.channelCountMode = 'explicit';
+    this.inputSumNode.channelInterpretation = 'speakers';
+    this.inputSplitter = this.ctx.createChannelSplitter(2);
+    this.inputLeftGain = this.ctx.createGain();
+    this.inputRightGain = this.ctx.createGain();
+    this.inputMonoBus = this.ctx.createGain();
+    this.inputMonoBus.channelCount = 1;
+    this.inputMonoBus.channelCountMode = 'explicit';
+    this.inputSumNode.connect(this.inputMonoBus);
+    this.inputSplitter.connect(this.inputLeftGain, 0);
+    this.inputSplitter.connect(this.inputRightGain, 1);
+    this.inputLeftGain.connect(this.inputMonoBus);
+    this.inputRightGain.connect(this.inputMonoBus);
+    this.applyInputChannelMode();
+
+    // 30 Hz Butterworth high-pass: removes interface DC offset, mains rumble and handling thumps
+    this.inputHighpass = this.ctx.createBiquadFilter();
+    this.inputHighpass.type = 'highpass';
+    this.inputHighpass.frequency.setValueAtTime(30, this.ctx.currentTime);
+    this.inputHighpass.Q.setValueAtTime(0.707, this.ctx.currentTime);
+    this.inputMonoBus.connect(this.inputHighpass);
+    this.inputHighpass.connect(this.inputGainNode);
 
     // Input Analyser (2048 samples for accurate low E2 guitar pitch detection)
     this.inputAnalyser = this.ctx.createAnalyser();
@@ -225,38 +312,124 @@ export class AudioEngine {
 
     // Connect downstream graph
     this.inputGainNode.connect(this.inputAnalyser);
-    this.inputGainNode.connect(this.chainInputNode);
 
-    this.chainOutputNode.connect(this.masterGainNode);
+    // Noise gate stage (post input gain, pre pedals) with click-free crossfade bypass
+    this.gateOutGain = this.ctx.createGain();
+    this.gateBypassGain = this.ctx.createGain();
+    this.gateOnGain = this.ctx.createGain();
+    this.inputGainNode.connect(this.gateBypassGain);
+    this.gateBypassGain.connect(this.gateOutGain);
+    try {
+      this.noiseGateNode = new AudioWorkletNode(this.ctx, 'noise-gate-processor', {
+        numberOfInputs: 1,
+        numberOfOutputs: 1,
+        outputChannelCount: [1],
+        channelCount: 1,
+        channelCountMode: 'explicit',
+        parameterData: {
+          threshold: this.noiseGateThresholdDb,
+          release: 0.12,
+          hold: 0.04,
+        },
+      });
+      this.inputGainNode.connect(this.noiseGateNode);
+      this.noiseGateNode.connect(this.gateOnGain);
+      this.gateOnGain.connect(this.gateOutGain);
+    } catch (gateErr) {
+      console.warn('Noise gate unavailable, running without it:', gateErr);
+      this.noiseGateNode = null;
+    }
+    this.applyNoiseGateState(true);
+    this.gateOutGain.connect(this.chainInputNode);
+
+    // Cabinet Simulator positioned at the end of the pedal effects chain
+    // (safety DC blocker first so asymmetric clipping offsets never reach the speaker model)
+    this.chainDcBlocker = createDcBlocker(this.ctx, 15);
+    this.cabinetNode = new CabinetNode(this.ctx, this.cabinetSettings);
+    this.chainOutputNode.connect(this.chainDcBlocker);
+    this.chainDcBlocker.connect(this.cabinetNode.inputNode);
+    this.cabinetNode.outputNode.connect(this.masterGainNode);
+
     this.masterGainNode.connect(this.safetyLimiter);
     this.safetyLimiter.connect(this.outputAnalyser);
     this.outputAnalyser.connect(this.ctx.destination);
   }
 
   /**
-   * Acquire media stream with guitar-optimized constraints and resilient fallback
+   * Acquire media stream with guitar-optimized constraints and resilient fallback.
+   * Uses { exact: deviceId } when a specific hardware device is selected so the browser
+   * directly binds to the chosen physical/virtual audio input (e.g. VB-Cable, Audio Interface)
+   * without falling back to the browser's default microphone.
    */
   private async connectInputStream(deviceId: string | null): Promise<void> {
     if (!this.ctx) return;
 
-    // Disconnect previous stream
-    if (this.sourceNode) {
-      this.sourceNode.disconnect();
-      this.sourceNode = null;
-    }
-    if (this.mediaStream) {
-      this.mediaStream.getTracks().forEach((track) => track.stop());
-      this.mediaStream = null;
-    }
-
     let stream: MediaStream | null = null;
+    const targetId = deviceId && deviceId.trim() !== '' ? deviceId.trim() : null;
 
-    // 1. Try with user-selected device (using ideal instead of exact to avoid OverconstrainedError)
-    if (deviceId && deviceId.trim() !== '') {
+    // 1. Try with user-selected device
+    if (targetId && targetId !== 'default') {
+      // Attempt 1A: Exact hardware device with studio guitar constraints (unprocessed stereo)
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           audio: {
-            deviceId: { ideal: deviceId },
+            deviceId: { exact: targetId },
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+            channelCount: { ideal: 2 },
+          },
+          video: false,
+        });
+      } catch (err1) {
+        console.warn(`[AudioEngine] Exact deviceId with stereo constraints failed for "${targetId}", trying without channelCount:`, err1);
+        // Attempt 1B: Exact hardware device with studio constraints (no channelCount restriction)
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              deviceId: { exact: targetId },
+              echoCancellation: false,
+              noiseSuppression: false,
+              autoGainControl: false,
+            },
+            video: false,
+          });
+        } catch (err2) {
+          console.warn(`[AudioEngine] Exact deviceId with studio constraints failed, trying exact with raw audio:`, err2);
+          // Attempt 1C: Exact hardware device with minimal constraints
+          try {
+            stream = await navigator.mediaDevices.getUserMedia({
+              audio: {
+                deviceId: { exact: targetId },
+              },
+              video: false,
+            });
+          } catch (err3) {
+            console.warn(`[AudioEngine] Exact deviceId failed completely (${err3}), falling back to ideal preference:`, err3);
+            // Attempt 1D: Soft ideal constraint fallback
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                  deviceId: { ideal: targetId },
+                  echoCancellation: false,
+                  noiseSuppression: false,
+                  autoGainControl: false,
+                },
+                video: false,
+              });
+            } catch (err4) {
+              console.warn(`[AudioEngine] Ideal constraint also failed:`, err4);
+            }
+          }
+        }
+      }
+    }
+
+    // 2. Fallback to default audio input with studio constraints (when targetId is null or 'default')
+    if (!stream) {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
             echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false,
@@ -265,23 +438,7 @@ export class AudioEngine {
           video: false,
         });
       } catch (e) {
-        console.warn('Could not connect to requested deviceId, attempting default audio device:', e);
-      }
-    }
-
-    // 2. Fallback to default audio input with studio constraints
-    if (!stream) {
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: false,
-          },
-          video: false,
-        });
-      } catch (e) {
-        console.warn('Studio constraints failed, attempting basic audio stream:', e);
+        console.warn('[AudioEngine] Default device with studio constraints failed, attempting basic stream:', e);
       }
     }
 
@@ -295,21 +452,51 @@ export class AudioEngine {
       } catch (err: unknown) {
         const errorName = err instanceof Error ? err.name : '';
         if (errorName === 'NotFoundError' || errorName === 'OverconstrainedError' || String(err).includes('not found')) {
-          throw new Error('No active microphone or audio interface detected. Please plug in headphones, a microphone, or an audio interface to begin.');
+          throw new Error('Perangkat input audio tidak ditemukan. Pastikan soundcard, microphone, atau Virtual Cable terhubung.');
         } else if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') {
-          throw new Error('Microphone permission was denied. Please click the site settings / lock icon in your browser address bar to allow microphone access.');
+          throw new Error('Izin mikrofon ditolak oleh browser. Klik ikon gembok di address bar browser untuk mengizinkan akses audio.');
         } else {
-          throw new Error(err instanceof Error ? err.message : 'Failed to access audio input device.');
+          throw new Error(err instanceof Error ? err.message : 'Gagal mengakses perangkat input audio.');
         }
       }
     }
 
+    // 4. Safely detach and release previous stream now that new stream is verified
+    if (this.sourceNode) {
+      try {
+        this.sourceNode.disconnect();
+      } catch {
+        // ignore
+      }
+      this.sourceNode = null;
+    }
+    if (this.mediaStream) {
+      try {
+        this.mediaStream.getTracks().forEach((track) => track.stop());
+      } catch {
+        // ignore
+      }
+      this.mediaStream = null;
+    }
+
+    // 5. Connect new media stream to input graph
     this.mediaStream = stream;
     this.sourceNode = this.ctx.createMediaStreamSource(this.mediaStream);
 
-    if (this.inputGainNode) {
-      this.sourceNode.connect(this.inputGainNode);
+    if (this.inputSumNode && this.inputSplitter) {
+      this.sourceNode.connect(this.inputSumNode);
+      this.sourceNode.connect(this.inputSplitter);
     }
+
+    // 6. Record active device info
+    const activeTrack = stream.getAudioTracks()[0];
+    const reportedDeviceId = activeTrack?.getSettings?.().deviceId;
+    if (reportedDeviceId) {
+      this.selectedInputId = reportedDeviceId;
+    } else if (targetId) {
+      this.selectedInputId = targetId;
+    }
+    console.log(`[AudioEngine] Connected to audio input: "${activeTrack?.label || 'Unnamed device'}" (id: ${this.selectedInputId})`);
   }
 
   /**
@@ -319,6 +506,51 @@ export class AudioEngine {
     this.inputGainValue = Math.max(0, Math.min(val, 4.0));
     if (this.ctx && this.inputGainNode) {
       this.inputGainNode.gain.setTargetAtTime(this.inputGainValue, this.ctx.currentTime, 0.015);
+    }
+  }
+
+  /**
+   * Select how the audio-interface input is folded to mono (L+R, Input 1 only, Input 2 only)
+   */
+  public setInputChannelMode(mode: InputChannelMode): void {
+    this.inputChannelMode = mode;
+    this.applyInputChannelMode();
+  }
+
+  private applyInputChannelMode(): void {
+    if (!this.ctx || !this.inputSumNode || !this.inputLeftGain || !this.inputRightGain) return;
+    const now = this.ctx.currentTime;
+    const mode = this.inputChannelMode;
+    this.inputSumNode.gain.setTargetAtTime(mode === 'sum' ? 1 : 0, now, 0.01);
+    this.inputLeftGain.gain.setTargetAtTime(mode === 'left' ? 1 : 0, now, 0.01);
+    this.inputRightGain.gain.setTargetAtTime(mode === 'right' ? 1 : 0, now, 0.01);
+  }
+
+  /**
+   * Noise gate: enable/disable and threshold in dB (-80 .. -30)
+   */
+  public setNoiseGate(enabled: boolean, thresholdDb: number): void {
+    this.noiseGateEnabled = enabled;
+    this.noiseGateThresholdDb = Math.max(-90, Math.min(-10, thresholdDb));
+    this.applyNoiseGateState(false);
+  }
+
+  private applyNoiseGateState(immediate: boolean): void {
+    if (!this.ctx || !this.gateOnGain || !this.gateBypassGain) return;
+    const now = this.ctx.currentTime;
+    const useGate = this.noiseGateEnabled && this.noiseGateNode !== null;
+    const onTarget = useGate ? 1 : 0;
+    const bypassTarget = useGate ? 0 : 1;
+    if (immediate) {
+      this.gateOnGain.gain.setValueAtTime(onTarget, now);
+      this.gateBypassGain.gain.setValueAtTime(bypassTarget, now);
+    } else {
+      this.gateOnGain.gain.setTargetAtTime(onTarget, now, 0.02);
+      this.gateBypassGain.gain.setTargetAtTime(bypassTarget, now, 0.02);
+    }
+    const thresholdParam = this.noiseGateNode?.parameters.get('threshold');
+    if (thresholdParam) {
+      thresholdParam.setTargetAtTime(this.noiseGateThresholdDb, now, 0.02);
     }
   }
 
@@ -387,6 +619,27 @@ export class AudioEngine {
     if (this.signalChain) {
       this.signalChain.setEnabled(pedalId, enabled);
     }
+  }
+
+  /**
+   * Cabinet Simulator Configuration & Real-Time Parameter Updates
+   */
+  public updateCabinetSettings(settings: Partial<CabinetSettings>): void {
+    this.cabinetSettings = { ...this.cabinetSettings, ...settings };
+    this.cabinetNode?.updateSettings(settings);
+  }
+
+  public setCabinetCustomIR(buffer: AudioBuffer, name: string): void {
+    this.cabinetSettings = {
+      ...this.cabinetSettings,
+      model: 'custom',
+      customIrName: name,
+    };
+    this.cabinetNode?.setCustomIR(buffer, name);
+  }
+
+  public getCabinetSettings(): CabinetSettings {
+    return this.cabinetNode ? this.cabinetNode.getSettings() : this.cabinetSettings;
   }
 
   /**

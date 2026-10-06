@@ -70,11 +70,16 @@ export function generateCabinetImpulseResponse(
     const envelope = Math.exp(-decaySpeed * t);
 
     // Damped speaker cone oscillation + lowpass impulse
-    const coneResonance = Math.sin(w0 * t) * 0.4;
     const directSound = Math.exp(-wCut * t * 0.4) * (1 - t * 20);
+    const coneResonance = Math.sin(w0 * t) * 0.4;
+    // Deterministic paper cone modal resonances
+    const coneBreakup = (
+      Math.sin(2 * Math.PI * 1850 * t) * 0.015 * Math.exp(-220 * t) +
+      Math.sin(2 * Math.PI * 2750 * t) * 0.010 * Math.exp(-280 * t)
+    );
 
-    const sampleL = (directSound + coneResonance + (Math.random() * 0.05 - 0.025)) * envelope;
-    const sampleR = (directSound + coneResonance + (Math.random() * 0.05 - 0.025)) * envelope;
+    const sampleL = (directSound + coneResonance + coneBreakup) * envelope;
+    const sampleR = (directSound + coneResonance + coneBreakup) * envelope;
 
     left[i] = sampleL;
     right[i] = sampleR;

@@ -1,8 +1,23 @@
 import React from 'react';
 import type { PedalInstance, PedalMetadata } from '../../types/pedal';
 import { Knob } from '../common/Knob';
-import { Power, X, Disc } from 'lucide-react';
-import { getActiveCab } from '../../audio/pedals/CabPedalNode';
+import { Power, X } from 'lucide-react';
+import { MxrDynaCompPedal } from './compressors/MxrDynaCompPedal';
+import { RossCompressorPedal } from './compressors/RossCompressorPedal';
+import { BossCs3Pedal } from './compressors/BossCs3Pedal';
+import { KeeleyCompressorPedal } from './compressors/KeeleyCompressorPedal';
+
+// Overdrive Components
+import { Ts808Pedal } from './overdrives/Ts808Pedal';
+import { Ts9Pedal } from './overdrives/Ts9Pedal';
+import { BossSd1Pedal } from './overdrives/BossSd1Pedal';
+import { BossOd3Pedal } from './overdrives/BossOd3Pedal';
+import { BossBd2Pedal } from './overdrives/BossBd2Pedal';
+import { KlonCentaurPedal } from './overdrives/KlonCentaurPedal';
+import { FulltoneOcdPedal } from './overdrives/FulltoneOcdPedal';
+import { TsMiniPedal } from './overdrives/TsMiniPedal';
+import { NobelsOdr1Pedal } from './overdrives/NobelsOdr1Pedal';
+import { RockettArcherPedal } from './overdrives/RockettArcherPedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -19,22 +34,58 @@ interface StompboxProps {
   hasJackCable?: (pedalId: string, port: 'in' | 'out') => boolean;
 }
 
-export const Stompbox: React.FC<StompboxProps> = ({
-  instance,
-  metadata,
-  index,
-  onToggleEnabled,
-  onChangeParam,
-  onRemove,
-  onPointerDown,
-  style,
-  isDragging = false,
-  onJackClick,
-  isJackPending,
-  hasJackCable,
-}) => {
-  const isEnabled = instance.enabled;
+export const Stompbox: React.FC<StompboxProps> = (props) => {
+  const {
+    instance,
+    metadata,
+    onToggleEnabled,
+    onChangeParam,
+    onRemove,
+    onPointerDown,
+    style,
+    isDragging = false,
+    onJackClick,
+    isJackPending,
+    hasJackCable,
+  } = props;
 
+  // Render authentic pedal hardware components
+  switch (instance.type) {
+    // Category 1: Compressors
+    case 'comp-dynacomp':
+      return <MxrDynaCompPedal {...props} />;
+    case 'comp-ross':
+      return <RossCompressorPedal {...props} />;
+    case 'comp-cs3':
+      return <BossCs3Pedal {...props} />;
+    case 'comp-keeley':
+      return <KeeleyCompressorPedal {...props} />;
+
+    // Category 2: Overdrives
+    case 'od-ts808':
+      return <Ts808Pedal {...props} />;
+    case 'od-ts9':
+      return <Ts9Pedal {...props} />;
+    case 'od-sd1':
+      return <BossSd1Pedal {...props} />;
+    case 'od-od3':
+      return <BossOd3Pedal {...props} />;
+    case 'od-bd2':
+      return <BossBd2Pedal {...props} />;
+    case 'od-klon':
+      return <KlonCentaurPedal {...props} />;
+    case 'od-ocd':
+      return <FulltoneOcdPedal {...props} />;
+    case 'od-tsmini':
+      return <TsMiniPedal {...props} />;
+    case 'od-odr1':
+      return <NobelsOdr1Pedal {...props} />;
+    case 'od-archer':
+      return <RockettArcherPedal {...props} />;
+  }
+
+  // Fallback for standard analog enclosure
+  const isEnabled = instance.enabled;
   const isLeftPending = isJackPending?.(instance.id, 'in') ?? false;
   const isRightPending = isJackPending?.(instance.id, 'out') ?? false;
   const hasLeftCable = hasJackCable?.(instance.id, 'in') ?? false;
@@ -76,8 +127,6 @@ export const Stompbox: React.FC<StompboxProps> = ({
 
       {/* Top Header Bar */}
       <div className="pedal-top-bar">
-        <span className="pedal-index-badge">#{String(index).padStart(2, '0')}</span>
-
         <button
           className="pedal-mini-btn pedal-close-btn"
           onPointerDown={(e) => e.stopPropagation()}
@@ -133,52 +182,17 @@ export const Stompbox: React.FC<StompboxProps> = ({
                 onChange={(newVal) => onChangeParam(instance.id, p.id, newVal)}
                 disabled={false}
                 color={metadata.accentColor}
-                size={32}
+                size={34}
               />
             );
           })}
         </div>
-
-        {/* Custom IR Uploader for Cabinet Pedal */}
-        {instance.type === 'cab' && (
-          <div className="pedal-ir-uploader-wrap">
-            <label className="pedal-ir-btn" title="Load custom cabinet impulse response (.wav)">
-              <Disc size={11} strokeWidth={1.5} />
-              <span>LOAD IR (.WAV)</span>
-              <input
-                type="file"
-                accept=".wav,.mp3,.ogg"
-                style={{ display: 'none' }}
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file) return;
-                  try {
-                    const arrayBuffer = await file.arrayBuffer();
-                    const cab = getActiveCab(instance.id);
-                    if (cab) {
-                      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-                      const tempCtx = new AudioCtx();
-                      const decoded = await tempCtx.decodeAudioData(arrayBuffer);
-                      cab.setCustomIR(decoded, file.name);
-                      onChangeParam(instance.id, 'model', 3);
-                      await tempCtx.close();
-                    }
-                  } catch (err) {
-                    console.error('Failed to load IR:', err);
-                    alert('Failed to load IR file. Please ensure standard .wav audio format.');
-                  }
-                }}
-              />
-            </label>
-          </div>
-        )}
       </div>
 
       {/* Footswitch Stomp Section */}
       <div className="pedal-footswitch-section" onPointerDown={(e) => e.stopPropagation()}>
         <button
           className={`pedal-footswitch ${isEnabled ? 'engaged' : ''}`}
-          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
             onToggleEnabled(instance.id);

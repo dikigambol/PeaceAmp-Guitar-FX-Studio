@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { AudioEngine } from './audio/AudioEngine';
-import type { AudioDeviceInfo, AudioEngineMetrics, EngineStatus, MeterData } from './types/audio';
+import type {
+  AudioDeviceInfo,
+  AudioEngineMetrics,
+  EngineStatus,
+  InputChannelMode,
+  MeterData,
+} from './types/audio';
+import { DEFAULT_NOISE_GATE_ENABLED, DEFAULT_NOISE_GATE_THRESHOLD_DB } from './types/audio';
 import type { PedalInstance } from './types/pedal';
 import type { PresetSchema } from './types/preset';
 import type { TunerResult } from './dsp/tuner/pitchDetector';
@@ -12,16 +19,15 @@ import {
   exportPresetsToJson,
 } from './presets/presetStorage';
 import { AudioHeader } from './components/AudioHeader';
-import { PassthroughPanel } from './components/PassthroughPanel';
+import { InputPreampPanel } from './components/sidebar/InputPreampPanel';
 import { ChromaticTuner } from './components/tuner/ChromaticTuner';
+import { CabinetSimulatorPanel } from './components/sidebar/CabinetSimulatorPanel';
+import { MasterOutputPanel } from './components/sidebar/MasterOutputPanel';
 import { Pedalboard } from './components/pedalboard/Pedalboard';
-import { LooperStation } from './components/looper/LooperStation';
-import { MidiBar } from './components/midi/MidiBar';
-import { midiManager } from './midi/MidiManager';
 import { HeadphoneWarning } from './components/HeadphoneWarning';
-import { getActiveLooper } from './audio/pedals/LooperPedalNode';
 import { ManualModal } from './components/manual/ManualModal';
 import { DesktopOnlyBlocker } from './components/common/DesktopOnlyBlocker';
+import type { CabinetSettings } from './types/cabinet';
 import { AlertOctagon, X, BookOpen } from 'lucide-react';
 import './index.css';
 
@@ -55,6 +61,9 @@ export function App() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
 
   const [inputGain, setInputGain] = useState(1.0);
+  const [inputChannelMode, setInputChannelMode] = useState<InputChannelMode>('sum');
+  const [noiseGateEnabled, setNoiseGateEnabled] = useState(DEFAULT_NOISE_GATE_ENABLED);
+  const [noiseGateThreshold, setNoiseGateThreshold] = useState(DEFAULT_NOISE_GATE_THRESHOLD_DB);
   const [masterVolume, setMasterVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -64,6 +73,16 @@ export function App() {
 
   // Active pedals list (initialized as empty board by default)
   const [pedals, setPedals] = useState<PedalInstance[]>([]);
+
+  // Dedicated Cabinet IR Simulator State
+  const [cabinetSettings, setCabinetSettings] = useState<CabinetSettings>({
+    enabled: true,
+    model: '4x12-closed',
+    mic: 'sm57',
+    position: 0.8,
+    mix: 0.8,
+    level: 0,
+  });
 
   // Tuner & Telemetry
   const [tunerResult, setTunerResult] = useState<TunerResult | null>(null);
@@ -137,12 +156,50 @@ export function App() {
 
   const refreshDevices = useCallback(async () => {
     if (!engineRef.current) return;
-    const devList = await engineRef.current.getAudioDevices();
-    setDevices(devList);
-    if (devList.length > 0 && !selectedDeviceId) {
-      setSelectedDeviceId(devList[0].deviceId);
+    try {
+      const devList = await engineRef.current.getAudioDevices();
+      setDevices(devList);
+      if (devList.length > 0) {
+        const activeId = engineRef.current.getSelectedInputId();
+        if (activeId && devList.some((d) => d.deviceId === activeId)) {
+          setSelectedDeviceId(activeId);
+        } else if (!selectedDeviceId || !devList.some((d) => d.deviceId === selectedDeviceId)) {
+          setSelectedDeviceId(devList[0].deviceId);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to enumerate audio devices:', err);
     }
   }, [selectedDeviceId]);
+
+  const handleRefreshDevices = useCallback(async () => {
+    if (!engineRef.current) return;
+    try {
+      const devList = await engineRef.current.requestDeviceAccess();
+      setDevices(devList);
+      if (devList.length > 0) {
+        const activeId = engineRef.current.getSelectedInputId();
+        if (activeId && devList.some((d) => d.deviceId === activeId)) {
+          setSelectedDeviceId(activeId);
+        } else if (!selectedDeviceId || !devList.some((d) => d.deviceId === selectedDeviceId)) {
+          setSelectedDeviceId(devList[0].deviceId);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to request device access:', err);
+    }
+  }, [selectedDeviceId]);
+
+  // Automatically refresh device list when audio hardware or virtual cables are plugged/unplugged
+  useEffect(() => {
+    const onDeviceChange = () => {
+      refreshDevices();
+    };
+    navigator.mediaDevices?.addEventListener?.('devicechange', onDeviceChange);
+    return () => {
+      navigator.mediaDevices?.removeEventListener?.('devicechange', onDeviceChange);
+    };
+  }, [refreshDevices]);
 
   const handleTogglePower = async () => {
     if (!engineRef.current) return;
@@ -167,13 +224,33 @@ export function App() {
   const handleDeviceChange = async (deviceId: string) => {
     setSelectedDeviceId(deviceId);
     if (engineRef.current) {
-      await engineRef.current.setInputDevice(deviceId);
+      try {
+        await engineRef.current.setInputDevice(deviceId);
+        const activeId = engineRef.current.getSelectedInputId();
+        if (activeId) {
+          setSelectedDeviceId(activeId);
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Gagal beralih ke input audio yang dipilih';
+        setErrorMessage(msg);
+      }
     }
   };
 
   const handleInputGainChange = useCallback((val: number) => {
     setInputGain(val);
     engineRef.current?.setInputGain(val);
+  }, []);
+
+  const handleInputChannelModeChange = useCallback((mode: InputChannelMode) => {
+    setInputChannelMode(mode);
+    engineRef.current?.setInputChannelMode(mode);
+  }, []);
+
+  const handleNoiseGateChange = useCallback((enabled: boolean, thresholdDb: number) => {
+    setNoiseGateEnabled(enabled);
+    setNoiseGateThreshold(thresholdDb);
+    engineRef.current?.setNoiseGate(enabled, thresholdDb);
   }, []);
 
   const handleMasterVolumeChange = useCallback((val: number) => {
@@ -267,6 +344,15 @@ export function App() {
     engineRef.current?.setPedalInstances(activePedals);
   }, []);
 
+  // Cabinet Actions
+  const handleUpdateCabinetSettings = useCallback((newSettings: Partial<CabinetSettings>) => {
+    setCabinetSettings((prev) => {
+      const updated = { ...prev, ...newSettings };
+      engineRef.current?.updateCabinetSettings(newSettings);
+      return updated;
+    });
+  }, []);
+
   // Preset Actions
   const handleSelectPreset = useCallback((preset: PresetSchema) => {
     setCurrentPresetId(preset.id);
@@ -279,7 +365,10 @@ export function App() {
     engineRef.current?.setPedalInstances(activePedals);
     if (preset.inputGain !== undefined) handleInputGainChange(preset.inputGain);
     if (preset.masterVolume !== undefined) handleMasterVolumeChange(preset.masterVolume);
-  }, [handleInputGainChange, handleMasterVolumeChange]);
+    if (preset.cabinet) {
+      handleUpdateCabinetSettings(preset.cabinet);
+    }
+  }, [handleInputGainChange, handleMasterVolumeChange, handleUpdateCabinetSettings]);
 
   const handleSaveCurrentAsPreset = (name: string) => {
     const newPreset = saveUserPreset({
@@ -288,6 +377,7 @@ export function App() {
       pedals: JSON.parse(JSON.stringify(pedals)),
       inputGain,
       masterVolume,
+      cabinet: cabinetSettings,
     });
     const updated = loadAllPresets();
     setPresets(updated);
@@ -325,45 +415,7 @@ export function App() {
     }
   };
 
-  const hasLooperInChain = pedals.some((p) => p.type === 'looper');
 
-  const handleAddLooper = useCallback(() => {
-    handleAddPedal('looper');
-  }, [handleAddPedal]);
-
-  // Register Web MIDI controller handlers
-  useEffect(() => {
-    midiManager.registerHandlers({
-      onPresetChange: (presetIdx) => {
-        if (presets[presetIdx]) {
-          handleSelectPreset(presets[presetIdx]);
-        }
-      },
-      onPedalToggle: (pedalIdx) => {
-        if (pedals[pedalIdx]) {
-          handleTogglePedalEnabled(pedals[pedalIdx].id);
-        }
-      },
-      onMasterVolume: (val) => {
-        handleMasterVolumeChange(val * 1.5);
-      },
-      onLooperAction: (action) => {
-        const looper = getActiveLooper();
-        if (!looper) return;
-        if (action === 'main') {
-          const t = looper.getTelemetry();
-          if (t.state === 'idle' || t.state === 'stopped') {
-            if (!t.hasLoop) looper.record();
-            else looper.play();
-          } else if (t.state === 'recording') looper.play();
-          else if (t.state === 'playing') looper.overdub();
-          else if (t.state === 'overdubbing') looper.play();
-        } else if (action === 'stop') looper.stop();
-        else if (action === 'clear') looper.clear();
-        else if (action === 'undo') looper.undo();
-      },
-    });
-  }, [presets, pedals, handleSelectPreset, handleTogglePedalEnabled, handleMasterVolumeChange]);
 
   return (
     <div className="app-viewport">
@@ -388,27 +440,24 @@ export function App() {
           {/* Headphone caution banner */}
           <HeadphoneWarning />
 
-          {/* 1. Master Passthrough & I/O Rack Unit */}
-          <PassthroughPanel
+          {/* 1. Input Preamp & Device Selector */}
+          <InputPreampPanel
             devices={devices}
             selectedDeviceId={selectedDeviceId}
             onSelectDevice={handleDeviceChange}
-            onRefreshDevices={refreshDevices}
+            onRefreshDevices={handleRefreshDevices}
             inputGain={inputGain}
             onInputGainChange={handleInputGainChange}
-            masterVolume={masterVolume}
-            onMasterVolumeChange={handleMasterVolumeChange}
-            isMuted={isMuted}
-            onToggleMute={handleToggleMute}
+            inputChannelMode={inputChannelMode}
+            onInputChannelModeChange={handleInputChannelModeChange}
+            noiseGateEnabled={noiseGateEnabled}
+            noiseGateThreshold={noiseGateThreshold}
+            onNoiseGateChange={handleNoiseGateChange}
             inputMeter={inputMeter}
-            outputMeter={outputMeter}
             isEngineRunning={status === 'running'}
           />
 
-          {/* 2. USB MIDI Controller Monitor */}
-          <MidiBar />
-
-          {/* 4. Precision Chromatic Tuner */}
+          {/* 2. Precision Chromatic Tuner (Tapped directly from clean input) */}
           <ChromaticTuner
             tunerResult={tunerResult}
             isEngineRunning={status === 'running'}
@@ -416,12 +465,20 @@ export function App() {
             onToggleMute={handleToggleMute}
           />
 
-          {/* 5. Phrase Looper Pro Station */}
-          <LooperStation
-            hasLooperInChain={hasLooperInChain}
-            onAddLooper={handleAddLooper}
+          {/* 3. Dedicated Cabinet IR Simulator (Positioned at the end of the signal chain) */}
+          <CabinetSimulatorPanel
+            settings={cabinetSettings}
+            onUpdateSettings={handleUpdateCabinetSettings}
+          />
+
+          {/* 4. Master Output Stage & Safety Limiter */}
+          <MasterOutputPanel
+            masterVolume={masterVolume}
+            onMasterVolumeChange={handleMasterVolumeChange}
+            isMuted={isMuted}
+            onToggleMute={handleToggleMute}
+            outputMeter={outputMeter}
             isEngineRunning={status === 'running'}
-            onNotify={(msg) => setErrorMessage(msg)}
           />
         </aside>
 

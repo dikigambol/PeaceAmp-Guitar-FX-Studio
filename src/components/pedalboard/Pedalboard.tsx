@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import type { PedalInstance } from '../../types/pedal';
 import { PEDAL_DEFINITIONS } from '../../audio/pedals/registry';
 import { Stompbox } from './Stompbox';
-import { Plus, SlidersHorizontal, Cable, Magnet, Unplug, RotateCcw } from 'lucide-react';
+import { Plus, SlidersHorizontal, Cable, Magnet, Unplug, RotateCcw, Search, X } from 'lucide-react';
 
 export interface PatchConnection {
   id: string;
@@ -42,11 +42,26 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   isEngineRunning: _isEngineRunning,
 }) => {
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [pedalSearch, setPedalSearch] = useState('');
+  const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'dynamics' | 'drive'>('all');
+  const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
   const [snapToGrid, setSnapToGrid] = useState<boolean>(() => {
     return localStorage.getItem('web_guitar_snap_grid') !== 'false';
   });
   const [draggingId, setDraggingId] = useState<string | null>(null);
+
+  // Close add pedal dropdown on click outside
+  useEffect(() => {
+    if (!showAddMenu) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (addMenuRef.current && !addMenuRef.current.contains(e.target as Node)) {
+        setShowAddMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showAddMenu]);
 
   // Surface measured width (tracks responsive width of dashboard canvas stage)
   const [surfaceWidth, setSurfaceWidth] = useState<number>(1200);
@@ -134,14 +149,14 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       }
 
       const availableW = Math.max(480, surfaceWidth - 240);
-      const maxCols = Math.max(1, Math.min(4, Math.floor(availableW / 235)));
+      const maxCols = Math.max(1, Math.min(4, Math.floor(availableW / 285)));
 
       const nextPos: Record<string, Position> = {};
       pedalList.forEach((p, idx) => {
         const col = idx % maxCols;
         const row = Math.floor(idx / maxCols);
         nextPos[p.id] = {
-          x: 120 + col * 230,
+          x: 120 + col * 280,
           y: 40 + row * 410,
         };
       });
@@ -287,15 +302,19 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       }
 
       const pos = positions[nodeId] || { x: 120, y: 40 };
+      const pedal = pedals.find((p) => p.id === nodeId);
+      const isWide = pedal?.type === 'od-klon' || pedal?.type === 'klon-centaur';
+      const isMini = pedal?.type === 'od-tsmini' || pedal?.type === 'ts-mini';
+      const curWidth = isWide ? 260 : isMini ? 140 : PEDAL_WIDTH;
       if (port === 'in') {
         // Left side jack
         return { x: pos.x - 2, y: pos.y + JACK_Y_OFFSET };
       } else {
         // Right side jack
-        return { x: pos.x + PEDAL_WIDTH + 2, y: pos.y + JACK_Y_OFFSET };
+        return { x: pos.x + curWidth + 2, y: pos.y + JACK_Y_OFFSET };
       }
     },
-    [surfaceWidth, positions]
+    [surfaceWidth, positions, pedals]
   );
 
   // Compute active signal chain from BOARD_INPUT to BOARD_OUTPUT
@@ -331,14 +350,30 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
     if (e.button !== 0) return;
     const target = e.target as HTMLElement;
 
-    // Do not initiate pedal movement if user interacted with knobs, buttons, jacks, or inputs
+    // Do not initiate pedal movement if user interacted with knobs, buttons, jacks, switches, or LEDs
     if (
       target.closest('.stompbox-side-jack') ||
       target.closest('.knob-dial-wrapper') ||
       target.closest('.knob-container') ||
       target.closest('button') ||
       target.closest('input') ||
-      target.closest('label')
+      target.closest('label') ||
+      target.closest('.boss-treadle-pad') ||
+      target.closest('.boss-treadle-plate') ||
+      target.closest('.boss-rubber-pad') ||
+      target.closest('.ts9-treadle-btn') ||
+      target.closest('.nobels-treadle') ||
+      target.closest('.boss-check-led-wrap') ||
+      target.closest('.ts9-led-mount') ||
+      target.closest('.ts808-led-mount') ||
+      target.closest('.klon-led-mount') ||
+      target.closest('.klon-stomp-switch') ||
+      target.closest('.ocd-led-mount') ||
+      target.closest('.tsmini-led-mount') ||
+      target.closest('.nobels-led-mount') ||
+      target.closest('.archer-led-mount') ||
+      target.closest('.ocd-toggle-switch') ||
+      target.closest('.nobels-mini-push')
     ) {
       return;
     }
@@ -372,7 +407,11 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
     // Constrain X strictly between left input box and right output box so no horizontal scroll can ever occur
     const minX = 110;
-    const maxX = Math.max(minX, surfaceWidth - PEDAL_WIDTH - 110);
+    const pedal = pedals.find((p) => p.id === dragRef.current?.id);
+    const isWide = pedal?.type === 'od-klon' || pedal?.type === 'klon-centaur';
+    const isMini = pedal?.type === 'od-tsmini' || pedal?.type === 'ts-mini';
+    const curWidth = isWide ? 260 : isMini ? 140 : PEDAL_WIDTH;
+    const maxX = Math.max(minX, surfaceWidth - curWidth - 110);
     const newX = Math.max(minX, Math.min(maxX, targetX));
     const newY = Math.max(20, targetY);
 
@@ -577,9 +616,35 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
   const availablePedals = Object.values(PEDAL_DEFINITIONS);
 
+  const filteredPedals = useMemo(() => {
+    const q = pedalSearch.toLowerCase().trim();
+    return availablePedals.filter((def) => {
+      const matchCat =
+        activeCategoryTab === 'all' || def.category === activeCategoryTab;
+      if (!matchCat) return false;
+      if (!q) return true;
+      const catLabel = def.category === 'dynamics' ? 'compressor dynamics' : 'overdrive drive boost';
+      return (
+        def.name.toLowerCase().includes(q) ||
+        def.subtitle.toLowerCase().includes(q) ||
+        catLabel.includes(q)
+      );
+    });
+  }, [availablePedals, pedalSearch, activeCategoryTab]);
+
+  const compressors = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'dynamics'),
+    [filteredPedals]
+  );
+  const overdrives = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'drive'),
+    [filteredPedals]
+  );
+
   const handleSelectAdd = (type: string) => {
     onAddPedal(type);
     setShowAddMenu(false);
+    setPedalSearch('');
   };
 
   const isRigActive = activeChain.length > 0;
@@ -592,7 +657,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           <SlidersHorizontal size={15} strokeWidth={1.5} className="text-brass" />
           <div className="title-texts">
             <h3>VIRTUAL PEDALBOARD CANVAS</h3>
-            <span>Manual Patching Modular Studio Deck • {pedals.length} stompboxes loaded</span>
+            <span>Manual Patching Modular Studio Deck • {pedals.length} pedals loaded</span>
           </div>
         </div>
 
@@ -644,35 +709,145 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
             <span>UNPLUG ALL</span>
           </button>
 
-          {/* Add Stompbox Dropdown */}
-          <div className="add-pedal-wrapper">
+          {/* Add Pedal Dropdown / Modal */}
+          <div className="add-pedal-wrapper" ref={addMenuRef}>
             <button
-              className="btn-add-pedal"
-              onClick={() => setShowAddMenu((prev) => !prev)}
+              className={`btn-add-pedal ${showAddMenu ? 'menu-open' : ''}`}
+              onClick={() => {
+                setShowAddMenu((prev) => !prev);
+                if (!showAddMenu) setPedalSearch('');
+              }}
             >
               <Plus size={14} strokeWidth={1.5} />
-              <span>ADD STOMPBOX</span>
+              <span>ADD PEDAL</span>
             </button>
 
             {showAddMenu && (
               <div className="add-pedal-dropdown">
-                <div className="dropdown-header">SELECT ANALOG PEDAL</div>
-                {availablePedals.map((def) => (
+                <div className="dropdown-header-bar">
+                  <div className="dropdown-title">SELECT ANALOG PEDAL</div>
                   <button
-                    key={def.type}
-                    className="dropdown-item"
-                    onClick={() => handleSelectAdd(def.type)}
+                    className="dropdown-close-btn"
+                    onClick={() => setShowAddMenu(false)}
+                    title="Close"
                   >
-                    <div
-                      className="dropdown-color-dot"
-                      style={{ backgroundColor: def.accentColor }}
-                    />
-                    <div className="dropdown-item-info">
-                      <strong className="item-name">{def.name}</strong>
-                      <span className="item-desc">{def.subtitle}</span>
-                    </div>
+                    <X size={13} />
                   </button>
-                ))}
+                </div>
+
+                {/* Search Bar */}
+                <div className="dropdown-search-box">
+                  <Search size={13} className="search-icon" />
+                  <input
+                    type="text"
+                    value={pedalSearch}
+                    onChange={(e) => setPedalSearch(e.target.value)}
+                    placeholder="Search pedals (e.g. ts9, dyna, comp)..."
+                    className="dropdown-search-input"
+                    autoFocus
+                  />
+                  {pedalSearch && (
+                    <button
+                      className="search-clear-btn"
+                      onClick={() => setPedalSearch('')}
+                      title="Clear search"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Category Filter Tabs */}
+                <div className="dropdown-category-tabs">
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'all' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('all')}
+                  >
+                    All ({availablePedals.length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'dynamics' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('dynamics')}
+                  >
+                    Compressor ({availablePedals.filter((p) => p.category === 'dynamics').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'drive' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('drive')}
+                  >
+                    Overdrive ({availablePedals.filter((p) => p.category === 'drive').length})
+                  </button>
+                </div>
+
+                {/* Filtered Pedals List */}
+                <div className="dropdown-pedals-list">
+                  {filteredPedals.length === 0 ? (
+                    <div className="dropdown-empty-state">
+                      <span>No pedals found</span>
+                      <small>No matches found for "{pedalSearch}"</small>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Category: Compressors */}
+                      {compressors.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag comp-tag">COMPRESSOR</span>
+                            <span className="group-count">{compressors.length} pedals</span>
+                          </div>
+                          {compressors.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge comp">COMPRESSOR</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Overdrives */}
+                      {overdrives.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag od-tag">OVERDRIVE</span>
+                            <span className="group-count">{overdrives.length} pedals</span>
+                          </div>
+                          {overdrives.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge od">OVERDRIVE</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -684,7 +859,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
         <span>
           {pendingJack ? (
             <strong className="text-brass">
-              🔌 Patching from {pendingJack.nodeId === 'BOARD_INPUT' ? 'GUITAR INPUT' : pendingJack.nodeId}... Click any {pendingJack.port === 'out' ? 'INPUT (IN)' : 'OUTPUT (OUT)'} jack to plug in, or click canvas to cancel.
+              Patching from {pendingJack.nodeId === 'BOARD_INPUT' ? 'GUITAR INPUT' : pendingJack.nodeId}... Click any {pendingJack.port === 'out' ? 'INPUT (IN)' : 'OUTPUT (OUT)'} jack to plug in, or click canvas to cancel.
             </strong>
           ) : (
             'Click any side jack to plug in a cable. Click an existing cable to unplug it.'
@@ -823,12 +998,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           {pedals.length === 0 && (
             <div className="canvas-simple-empty">
               <div className="empty-simple-pill">
-                <span>NO STOMPBOX</span>
+                <span>NO PEDAL</span>
               </div>
             </div>
           )}
 
-          {/* Stompboxes on Canvas */}
+          {/* Pedals on Canvas */}
           {pedals.map((instance, idx) => {
             const metadata = PEDAL_DEFINITIONS[instance.type];
             if (!metadata) return null;

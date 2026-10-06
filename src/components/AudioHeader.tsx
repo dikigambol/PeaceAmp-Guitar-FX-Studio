@@ -106,31 +106,41 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
           }}
           title="Choose Amp & Rig Preset"
         >
-          {!currentPresetId && (
+          {presets.length === 0 ? (
             <option value="" disabled>
-              SELECT PRESET RIG...
+              CLEAN BOARD (RECONSTRUCTION MODE)
             </option>
-          )}
-          <optgroup label="FACTORY PRESETS">
-            {presets
-              .filter((p) => p.category === 'factory')
-              .map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
+          ) : (
+            <>
+              {!currentPresetId && (
+                <option value="" disabled>
+                  SELECT PRESET RIG...
                 </option>
-              ))}
-          </optgroup>
+              )}
+              {presets.some((p) => p.category === 'factory') && (
+                <optgroup label="FACTORY PRESETS">
+                  {presets
+                    .filter((p) => p.category === 'factory')
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                </optgroup>
+              )}
 
-          {presets.some((p) => p.category === 'user') && (
-            <optgroup label="USER PRESETS">
-              {presets
-                .filter((p) => p.category === 'user')
-                .map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-            </optgroup>
+              {presets.some((p) => p.category === 'user') && (
+                <optgroup label="USER PRESETS">
+                  {presets
+                    .filter((p) => p.category === 'user')
+                    .map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}
+                      </option>
+                    ))}
+                </optgroup>
+              )}
+            </>
           )}
         </select>
 

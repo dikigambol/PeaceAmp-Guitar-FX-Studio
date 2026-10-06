@@ -39,7 +39,7 @@ export const DesktopOnlyBlocker: React.FC = () => {
         <div className="desktop-classic-badges-row">
           <div className="desktop-classic-pill">
             <Layers size={13} />
-            <span>MODULAR STOMPBOX CANVAS</span>
+            <span>MODULAR PEDALBOARD CANVAS</span>
           </div>
           <div className="desktop-classic-pill">
             <Sliders size={13} />
@@ -47,7 +47,7 @@ export const DesktopOnlyBlocker: React.FC = () => {
           </div>
           <div className="desktop-classic-pill">
             <Volume2 size={13} />
-            <span>PRO PHRASE LOOPER</span>
+            <span>PRECISION CHROMATIC TUNER</span>
           </div>
         </div>
 

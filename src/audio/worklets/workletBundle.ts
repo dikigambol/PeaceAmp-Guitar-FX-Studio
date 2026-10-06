@@ -19,9 +19,9 @@ class NoiseGateProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
     this.envelope = 0;
-    this.gain = 1.0;
+    this.gain = 0.0;
+    this.isOpen = false;
     this.holdCounter = 0;
-    this.sampleRate = 48000;
   }
 
   process(inputs, outputs, parameters) {
@@ -34,47 +34,49 @@ class NoiseGateProcessor extends AudioWorkletProcessor {
     const outputL = output[0];
     const outputR = output.length > 1 ? output[1] : output[0];
 
-    const thresholdDb = parameters.threshold.length > 1 ? parameters.threshold[0] : parameters.threshold[0];
-    const releaseTime = parameters.release.length > 1 ? parameters.release[0] : parameters.release[0];
-    const holdTime = parameters.hold.length > 1 ? parameters.hold[0] : parameters.hold[0];
+    const thresholdDb = parameters.threshold[0];
+    const releaseTime = parameters.release[0];
+    const holdTime = parameters.hold[0];
 
-    // Convert threshold dB to linear amplitude
-    const thresholdLinear = Math.pow(10, thresholdDb / 20);
-    const hysteresisLinear = thresholdLinear * 1.35; // 2.6 dB higher to close
+    // 'sampleRate' is the AudioWorkletGlobalScope sample rate (44.1k / 48k / 96k ...)
+    const openThreshold = Math.pow(10, thresholdDb / 20);
+    const closeThreshold = openThreshold * 0.74; // ~2.6 dB hysteresis to stop chatter
 
-    const releaseSamples = Math.max(1, releaseTime * 48000);
-    const holdSamples = holdTime * 48000;
-    const releaseCoeff = Math.exp(-1.0 / releaseSamples);
-    const attackCoeff = 0.85; // fast attack
+    const holdSamples = holdTime * sampleRate;
+    const releaseCoeff = Math.exp(-1.0 / Math.max(1, releaseTime * sampleRate));
+    const attackCoeff = 1.0 - Math.exp(-1.0 / (0.001 * sampleRate)); // ~1 ms, click-free
+    // Peak envelope with ~40 ms decay: rides through low-note zero crossings
+    const envDecay = Math.exp(-1.0 / (0.04 * sampleRate));
 
     for (let i = 0; i < inputL.length; i++) {
       const sL = inputL[i];
       const sR = inputR[i];
       const peak = Math.max(Math.abs(sL), Math.abs(sR));
 
-      // Fast RMS/Peak tracker
-      this.envelope = Math.max(peak, this.envelope * 0.99);
+      this.envelope = Math.max(peak, this.envelope * envDecay);
 
-      let targetGain = 0.0;
-      if (this.envelope > thresholdLinear) {
-        targetGain = 1.0;
+      if (!this.isOpen) {
+        if (this.envelope > openThreshold) {
+          this.isOpen = true;
+          this.holdCounter = holdSamples;
+        }
+      } else if (this.envelope > closeThreshold) {
         this.holdCounter = holdSamples;
       } else if (this.holdCounter > 0) {
-        targetGain = 1.0;
         this.holdCounter--;
       } else {
-        targetGain = 0.0;
+        this.isOpen = false;
       }
 
-      if (targetGain > this.gain) {
-        this.gain += (targetGain - this.gain) * attackCoeff;
+      if (this.isOpen) {
+        this.gain += (1.0 - this.gain) * attackCoeff;
       } else {
         this.gain *= releaseCoeff;
         if (this.gain < 0.0001) this.gain = 0;
       }
 
       outputL[i] = sL * this.gain;
-      outputR[i] = sR * this.gain;
+      if (outputR !== outputL) outputR[i] = sR * this.gain;
     }
 
     return true;
@@ -299,8 +301,82 @@ class LooperProcessor extends AudioWorkletProcessor {
   }
 }
 
+class CompressorProcessor extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    return [
+      { name: 'threshold', defaultValue: -24, minValue: -90, maxValue: 0, automationRate: 'k-rate' },
+      { name: 'ratio', defaultValue: 4, minValue: 1, maxValue: 40, automationRate: 'k-rate' },
+      { name: 'attack', defaultValue: 0.01, minValue: 0.0001, maxValue: 0.5, automationRate: 'k-rate' },
+      { name: 'release', defaultValue: 0.2, minValue: 0.01, maxValue: 3, automationRate: 'k-rate' },
+      { name: 'knee', defaultValue: 6, minValue: 0, maxValue: 30, automationRate: 'k-rate' },
+      { name: 'rmsMix', defaultValue: 0, minValue: 0, maxValue: 1, automationRate: 'k-rate' },
+    ];
+  }
+
+  constructor() {
+    super();
+    this.grDb = 0;
+    this.rmsSq = 0;
+  }
+
+  process(inputs, outputs, parameters) {
+    const input = inputs[0];
+    const output = outputs[0];
+    if (!input || input.length === 0 || !output || output.length === 0) return true;
+
+    const channels = Math.min(input.length, output.length);
+    const len = input[0].length;
+
+    const thr = parameters.threshold[0];
+    const ratio = Math.max(1, parameters.ratio[0]);
+    const knee = parameters.knee[0];
+    const rmsMix = parameters.rmsMix[0];
+    const atkC = Math.exp(-1.0 / (parameters.attack[0] * sampleRate));
+    const relC = Math.exp(-1.0 / (parameters.release[0] * sampleRate));
+    const rmsC = Math.exp(-1.0 / (0.012 * sampleRate));
+    const slope = 1.0 / ratio - 1.0;
+
+    for (let i = 0; i < len; i++) {
+      let peak = 0;
+      for (let ch = 0; ch < channels; ch++) {
+        const a = Math.abs(input[ch][i]);
+        if (a > peak) peak = a;
+      }
+
+      // Level detector: peak, blended towards RMS (sine RMS * sqrt2 == peak)
+      this.rmsSq = rmsC * this.rmsSq + (1.0 - rmsC) * peak * peak;
+      const det = (1.0 - rmsMix) * peak + rmsMix * Math.sqrt(this.rmsSq) * 1.41421356;
+      const levelDb = 20.0 * Math.log10(det + 1e-9);
+
+      // Static gain computer with soft knee (gain reduction in dB, <= 0)
+      const over = levelDb - thr;
+      let targetGr = 0.0;
+      if (knee < 0.1) {
+        if (over > 0) targetGr = slope * over;
+      } else if (2.0 * over > knee) {
+        targetGr = slope * over;
+      } else if (2.0 * over > -knee) {
+        const t = over + knee / 2.0;
+        targetGr = (slope * t * t) / (2.0 * knee);
+      }
+
+      // Smooth the gain reduction itself (log domain): attack when reducing more, else release
+      const c = targetGr < this.grDb ? atkC : relC;
+      this.grDb = c * this.grDb + (1.0 - c) * targetGr;
+      const g = Math.pow(10.0, this.grDb / 20.0);
+
+      for (let ch = 0; ch < channels; ch++) {
+        output[ch][i] = input[ch][i] * g;
+      }
+    }
+
+    return true;
+  }
+}
+
 registerProcessor('noise-gate-processor', NoiseGateProcessor);
 registerProcessor('looper-processor', LooperProcessor);
+registerProcessor('compressor-processor', CompressorProcessor);
 `;
 
 let workletModuleUrl: string | null = null;
