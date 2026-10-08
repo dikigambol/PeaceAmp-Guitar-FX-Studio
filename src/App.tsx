@@ -85,14 +85,14 @@ export function App() {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.5,
-    mix: 0.5,
+    mix: 1.0,
     level: 0,
   });
 
   // Dedicated Guitar Amp Head State (Preamp Tube Drive, FMV Tone Stack, Power Sag)
   const [ampHeadSettings, setAmpHeadSettings] = useState<AmpHeadSettings>({
     enabled: true,
-    model: 'clean-tweed',
+    model: 'pristine-clean',
     gain: 5.0,
     bass: 5.0,
     mid: 5.0,
@@ -153,9 +153,9 @@ export function App() {
         const currentMetrics = engineRef.current.getMetrics();
         setMetrics(currentMetrics);
 
-        // Run chromatic pitch detection every 3 frames (~20Hz refresh) to conserve CPU
+        // Run chromatic pitch detection every 2 frames (~30Hz refresh) for responsive needle tracking
         frameCount++;
-        if (frameCount % 3 === 0) {
+        if (frameCount % 2 === 0) {
           const pitch = engineRef.current.detectTunerPitch();
           setTunerResult(pitch);
         }

@@ -1,4 +1,5 @@
 export type AmpModelId =
+  | 'pristine-clean'
   | 'clean-tweed'
   | 'crunch-plexi'
   | 'chime-ac30'
@@ -26,10 +27,17 @@ export interface AmpHeadSettings {
 
 export const AMP_MODELS: AmpModelOption[] = [
   {
+    id: 'pristine-clean',
+    name: 'Studio Pristine Clean',
+    category: 'Ultra Clean',
+    description: '100% crystal clean, zero breakup, ultra-high headroom — the ultimate pedal platform.',
+    character: 'Roland JC-120 / Hiwatt DR103 style',
+  },
+  {
     id: 'clean-tweed',
     name: '59 American Tweed',
     category: 'Vintage Clean',
-    description: 'Warm glass harmonics, woody low-end, and open dynamic headroom.',
+    description: 'Warm glass harmonics, woody low-end, and subtle edge-of-breakup dynamic character.',
     character: 'Fender 5F6-A Bassman / Twin style',
   },
   {

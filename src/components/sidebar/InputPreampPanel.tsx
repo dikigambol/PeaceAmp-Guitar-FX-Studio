@@ -161,7 +161,7 @@ export const InputPreampPanel: React.FC<InputPreampPanelProps> = ({
             <input
               type="range"
               min={-80}
-              max={-30}
+              max={-15}
               step={1}
               value={noiseGateThreshold}
               disabled={!noiseGateEnabled}

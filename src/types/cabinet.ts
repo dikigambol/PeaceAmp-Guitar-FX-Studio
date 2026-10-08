@@ -16,7 +16,7 @@ export interface CabinetSettings {
   model: CabinetModelId;
   mic: MicModelId;
   position: number; // 0.0 (Edge) to 1.0 (Center)
-  mix: number;      // 0.0 (Dry) to 1.0 (Wet) - default 0.8 (80%)
+  mix: number;      // 0.0 (Dry) to 1.0 (Wet) - default 1.0 (100% Wet)
   level: number;    // dB trim (-12 to +6)
   customIrName?: string;
 }

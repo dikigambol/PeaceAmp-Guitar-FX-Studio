@@ -30,9 +30,17 @@ export class AmpHeadNode {
   private powerAmpGain: GainNode;
   private powerAmpShaper: WaveShaperNode;
 
+  // Pre-computed Shaper Curves
+  private curvePristinePreamp: Float32Array<ArrayBuffer>;
+  private curveTweedPreamp: Float32Array<ArrayBuffer>;
+  private curveStandardTubePreamp: Float32Array<ArrayBuffer>;
+  private curvePristinePowerAmp: Float32Array<ArrayBuffer>;
+  private curveTubePowerAmp: Float32Array<ArrayBuffer>;
+  private currentAppliedModel: AmpModelId | null = null;
+
   private settings: AmpHeadSettings = {
     enabled: true,
-    model: 'clean-tweed',
+    model: 'pristine-clean',
     gain: 5.0,
     bass: 5.0,
     mid: 5.0,
@@ -43,6 +51,13 @@ export class AmpHeadNode {
 
   constructor(ctx: AudioContext, initialSettings?: Partial<AmpHeadSettings>) {
     this.ctx = ctx;
+
+    // Pre-calculate specialized shaper curves
+    this.curvePristinePreamp = this.createPristineCleanCurve(4096) as Float32Array<ArrayBuffer>;
+    this.curveTweedPreamp = this.createTweedCurve(4096) as Float32Array<ArrayBuffer>;
+    this.curveStandardTubePreamp = this.create12Ax7Curve(4096) as Float32Array<ArrayBuffer>;
+    this.curvePristinePowerAmp = this.createPristinePowerAmpCurve(2048) as Float32Array<ArrayBuffer>;
+    this.curveTubePowerAmp = this.createPowerTubeCurve(2048) as Float32Array<ArrayBuffer>;
 
     if (initialSettings) {
       this.settings = { ...this.settings, ...initialSettings };
@@ -62,11 +77,10 @@ export class AmpHeadNode {
     this.preVoicingPeak = ctx.createBiquadFilter();
     this.preVoicingPeak.type = 'peaking';
 
-    // 2. Preamp Tube Stage (12AX7)
+    // 2. Preamp Tube Stage
     this.preampGain = ctx.createGain();
     this.tubeShaper = ctx.createWaveShaper();
     this.tubeShaper.oversample = '4x';
-    this.tubeShaper.curve = this.create12Ax7Curve(4096) as Float32Array<ArrayBuffer>;
     this.dcBlocker = createDcBlocker(ctx, 15);
 
     // 3. Interactive Tone Stack
@@ -92,7 +106,6 @@ export class AmpHeadNode {
     this.powerAmpGain = ctx.createGain();
     this.powerAmpShaper = ctx.createWaveShaper();
     this.powerAmpShaper.oversample = '2x';
-    this.powerAmpShaper.curve = this.createPowerTubeCurve(2048) as Float32Array<ArrayBuffer>;
 
     // Graph Connection:
     // inputNode -> bypassDry -> outputNode
@@ -120,20 +133,76 @@ export class AmpHeadNode {
   }
 
   /**
+   * Ultra-High Headroom Pristine Clean Preamp Curve.
+   * Completely linear across the full musical range with transparent soft-clip protection
+   * only at extreme signal overshoots (>0.92), ensuring 100% distortion-free pristine reproduction.
+   */
+  private createPristineCleanCurve(samples: number): Float32Array {
+    const curve = new Float32Array(samples);
+    for (let i = 0; i < samples; ++i) {
+      const x = (i * 2) / (samples - 1) - 1; // -1 to +1
+      if (Math.abs(x) <= 0.90) {
+        curve[i] = x;
+      } else {
+        const sign = Math.sign(x);
+        const over = Math.abs(x) - 0.90;
+        curve[i] = sign * (0.90 + 0.08 * Math.tanh(over / 0.08));
+      }
+    }
+    return curve;
+  }
+
+  /**
+   * Vintage Tweed Preamp Curve:
+   * Clean and clear at light pick dynamics (|x| < 0.25), smoothly transitioning into
+   * warm organic 12AX7 even-order tube compression on heavy strikes.
+   */
+  private createTweedCurve(samples: number): Float32Array {
+    const curve = new Float32Array(samples);
+    for (let i = 0; i < samples; ++i) {
+      const x = (i * 2) / (samples - 1) - 1;
+      if (Math.abs(x) < 0.25) {
+        curve[i] = x;
+      } else if (x >= 0.25) {
+        const xOff = x - 0.25;
+        curve[i] = 0.25 + Math.tanh(1.5 * xOff) * 0.70;
+      } else {
+        const xOff = Math.abs(x) - 0.25;
+        curve[i] = -(0.25 + Math.tanh(2.1 * xOff) * 0.65);
+      }
+    }
+    return curve;
+  }
+
+  /**
    * 12AX7 Asymmetrical Dual-Triode pre-amplification curve.
-   * Produces rich even-order 2nd harmonics on light pick attack,
-   * transitioning into saturated tube compression at higher signal levels.
+   * Produces rich even-order 2nd harmonics and aggressive tube saturation for Crunch/Lead/Djent.
    */
   private create12Ax7Curve(samples: number): Float32Array {
     const curve = new Float32Array(samples);
     for (let i = 0; i < samples; ++i) {
       const x = (i * 2) / (samples - 1) - 1;
       if (x >= 0) {
-        // Positive swing: soft tube saturation
         curve[i] = Math.tanh(1.8 * x) * 0.95;
       } else {
-        // Negative swing: grid-conduction soft compression
         curve[i] = Math.tanh(2.6 * x) * 0.78;
+      }
+    }
+    return curve;
+  }
+
+  /**
+   * Pristine Power Amp Curve:
+   * Pure transparent linear response for pristine clean amplification.
+   */
+  private createPristinePowerAmpCurve(samples: number): Float32Array {
+    const curve = new Float32Array(samples);
+    for (let i = 0; i < samples; ++i) {
+      const x = (i * 2) / (samples - 1) - 1;
+      if (Math.abs(x) <= 0.95) {
+        curve[i] = x;
+      } else {
+        curve[i] = Math.sign(x) * (0.95 + 0.04 * Math.tanh((Math.abs(x) - 0.95) / 0.04));
       }
     }
     return curve;
@@ -152,6 +221,26 @@ export class AmpHeadNode {
     return curve;
   }
 
+  private updateCurvesForModel(model: AmpModelId): void {
+    if (this.currentAppliedModel === model) return;
+    this.currentAppliedModel = model;
+
+    switch (model) {
+      case 'pristine-clean':
+        this.tubeShaper.curve = this.curvePristinePreamp;
+        this.powerAmpShaper.curve = this.curvePristinePowerAmp;
+        break;
+      case 'clean-tweed':
+        this.tubeShaper.curve = this.curveTweedPreamp;
+        this.powerAmpShaper.curve = this.curveTubePowerAmp;
+        break;
+      default:
+        this.tubeShaper.curve = this.curveStandardTubePreamp;
+        this.powerAmpShaper.curve = this.curveTubePowerAmp;
+        break;
+    }
+  }
+
   private applySettings(immediate = false): void {
     const now = this.ctx.currentTime;
     const tc = immediate ? 0.001 : 0.02;
@@ -161,6 +250,9 @@ export class AmpHeadNode {
       else param.setTargetAtTime(val, now, tc);
     };
 
+    // 0. Update Shaper Curves if model changed
+    this.updateCurvesForModel(this.settings.model);
+
     // 1. Voicing Configuration by Amp Model
     this.configureVoicing(this.settings.model, set);
 
@@ -168,8 +260,13 @@ export class AmpHeadNode {
     const gainNorm = Math.max(0, Math.min(10, this.settings.gain)) / 10;
     let gainMult: number;
     switch (this.settings.model) {
+      case 'pristine-clean':
+        // 100% transparent unity-to-mild boost (0.9x to 2.0x), zero breakup
+        gainMult = 0.9 + Math.pow(gainNorm, 1.2) * 1.1;
+        break;
       case 'clean-tweed':
-        gainMult = 1.0 + Math.pow(gainNorm, 1.4) * 4.5;
+        // Clean at low gain (0.75x), warm natural edge-of-breakup at higher gain
+        gainMult = 0.75 + Math.pow(gainNorm, 1.5) * 3.8;
         break;
       case 'crunch-plexi':
         gainMult = 1.2 + Math.pow(gainNorm, 1.5) * 12.0;
@@ -200,7 +297,7 @@ export class AmpHeadNode {
 
     // 5. Master Output calculation (normalized volume scale with headroom compensation)
     const masterNorm = Math.max(0, Math.min(10, this.settings.master)) / 10;
-    const masterGainLinear = Math.pow(masterNorm, 1.3) * 1.5;
+    const masterGainLinear = Math.pow(masterNorm, 1.3) * (this.settings.model === 'pristine-clean' ? 1.4 : 1.5);
     set(this.powerAmpGain.gain, masterGainLinear);
 
     // 6. Bypass State Crossfade
@@ -212,6 +309,13 @@ export class AmpHeadNode {
     set: (param: AudioParam, val: number) => void
   ): void {
     switch (model) {
+      case 'pristine-clean':
+        set(this.preHighpass.frequency, 40); // Deep, unrestricted low-end headroom
+        set(this.preVoicingPeak.frequency, 1200);
+        set(this.preVoicingPeak.Q, 0.7);
+        set(this.preVoicingPeak.gain, 0.0); // Completely flat, pristine studio response
+        break;
+
       case 'clean-tweed':
         set(this.preHighpass.frequency, 65);
         set(this.preVoicingPeak.frequency, 450);

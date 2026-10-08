@@ -45,8 +45,8 @@ class NoiseGateProcessor extends AudioWorkletProcessor {
     const holdSamples = holdTime * sampleRate;
     const releaseCoeff = Math.exp(-1.0 / Math.max(1, releaseTime * sampleRate));
     const attackCoeff = 1.0 - Math.exp(-1.0 / (0.001 * sampleRate)); // ~1 ms, click-free
-    // Peak envelope with ~40 ms decay: rides through low-note zero crossings
-    const envDecay = Math.exp(-1.0 / (0.04 * sampleRate));
+    // Fast peak envelope with ~18 ms decay: tracks guitar palm-mutes & hand-stops quickly
+    const envDecay = Math.exp(-1.0 / (0.018 * sampleRate));
 
     for (let i = 0; i < inputL.length; i++) {
       const sL = inputL[i];
@@ -380,7 +380,7 @@ registerProcessor('compressor-processor', CompressorProcessor);
 `;
 
 let workletModuleUrl: string | null = null;
-let workletRegistrationPromise: Promise<void> | null = null;
+const registeredContexts = new WeakSet<AudioContext>();
 
 export async function ensureWorkletsRegistered(ctx: AudioContext): Promise<void> {
   if (!ctx.audioWorklet) {
@@ -388,22 +388,20 @@ export async function ensureWorkletsRegistered(ctx: AudioContext): Promise<void>
     return;
   }
 
-  if (workletRegistrationPromise) {
-    return workletRegistrationPromise;
+  if (registeredContexts.has(ctx)) {
+    return;
   }
 
-  workletRegistrationPromise = (async () => {
-    if (!workletModuleUrl) {
-      const blob = new Blob([WORKLET_CODE], { type: 'application/javascript' });
-      workletModuleUrl = URL.createObjectURL(blob);
-    }
-    try {
-      await ctx.audioWorklet.addModule(workletModuleUrl);
-    } catch (err) {
-      console.error('Failed to register audio worklet module:', err);
-      throw err;
-    }
-  })();
+  if (!workletModuleUrl) {
+    const blob = new Blob([WORKLET_CODE], { type: 'application/javascript' });
+    workletModuleUrl = URL.createObjectURL(blob);
+  }
 
-  return workletRegistrationPromise;
+  try {
+    await ctx.audioWorklet.addModule(workletModuleUrl);
+    registeredContexts.add(ctx);
+  } catch (err) {
+    console.error('Failed to register audio worklet module:', err);
+    throw err;
+  }
 }

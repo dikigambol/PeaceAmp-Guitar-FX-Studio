@@ -25,14 +25,14 @@ export class AudioEngine {
   private inputGainNode: GainNode | null = null;
   private inputAnalyser: AnalyserNode | null = null;
 
-  // Input conditioning: mono fold-down -> 30 Hz rumble/DC high-pass -> input gain -> noise gate
-  private inputSumNode: GainNode | null = null;
+  // Input conditioning: discrete channel splitter -> 30 Hz rumble/DC high-pass -> input gain -> noise gate
   private inputSplitter: ChannelSplitterNode | null = null;
   private inputLeftGain: GainNode | null = null;
   private inputRightGain: GainNode | null = null;
   private inputMonoBus: GainNode | null = null;
   private inputHighpass: BiquadFilterNode | null = null;
   private inputChannelMode: InputChannelMode = 'sum';
+  private detectedInputChannels = 2;
 
   // Noise gate (AudioWorklet) with clean crossfade bypass
   private noiseGateNode: AudioWorkletNode | null = null;
@@ -55,7 +55,7 @@ export class AudioEngine {
   private ampHeadNode: AmpHeadNode | null = null;
   private ampHeadSettings: AmpHeadSettings = {
     enabled: true,
-    model: 'clean-tweed',
+    model: 'pristine-clean',
     gain: 5.0,
     bass: 5.0,
     mid: 5.0,
@@ -71,7 +71,7 @@ export class AudioEngine {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.5,
-    mix: 0.5,
+    mix: 1.0,
     level: 0,
   };
 
@@ -271,20 +271,24 @@ export class AudioEngine {
     this.inputGainNode.channelCountMode = 'explicit';
     this.inputGainNode.gain.setValueAtTime(this.inputGainValue, this.ctx.currentTime);
 
-    // Mono fold-down: whichever channel the guitar is plugged into ends up as one clean mono signal
-    this.inputSumNode = this.ctx.createGain();
-    this.inputSumNode.channelCount = 1;
-    this.inputSumNode.channelCountMode = 'explicit';
-    this.inputSumNode.channelInterpretation = 'speakers';
+    // Discrete Channel Splitter: separates Hardware Input 1 (Left / Ch 0) and Input 2 (Right / Ch 1).
+    // Using 'discrete' interpretation prevents Web Audio from auto-upmixing mono to duplicate onto In 2.
     this.inputSplitter = this.ctx.createChannelSplitter(2);
+    this.inputSplitter.channelCountMode = 'explicit';
+    this.inputSplitter.channelCount = 2;
+    this.inputSplitter.channelInterpretation = 'discrete';
+
     this.inputLeftGain = this.ctx.createGain();
     this.inputRightGain = this.ctx.createGain();
     this.inputMonoBus = this.ctx.createGain();
     this.inputMonoBus.channelCount = 1;
     this.inputMonoBus.channelCountMode = 'explicit';
-    this.inputSumNode.connect(this.inputMonoBus);
+
+    // Channel 0 (Input 1 / Left) -> Left Gain -> Mono Bus
     this.inputSplitter.connect(this.inputLeftGain, 0);
+    // Channel 1 (Input 2 / Right) -> Right Gain -> Mono Bus
     this.inputSplitter.connect(this.inputRightGain, 1);
+
     this.inputLeftGain.connect(this.inputMonoBus);
     this.inputRightGain.connect(this.inputMonoBus);
     this.applyInputChannelMode();
@@ -348,8 +352,8 @@ export class AudioEngine {
         channelCountMode: 'explicit',
         parameterData: {
           threshold: this.noiseGateThresholdDb,
-          release: 0.12,
-          hold: 0.04,
+          release: 0.06,
+          hold: 0.02,
         },
       });
       this.inputGainNode.connect(this.noiseGateNode);
@@ -400,7 +404,7 @@ export class AudioEngine {
             echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false,
-            channelCount: { ideal: 2 },
+            channelCount: 2,
           },
           video: false,
         });
@@ -437,6 +441,7 @@ export class AudioEngine {
                   echoCancellation: false,
                   noiseSuppression: false,
                   autoGainControl: false,
+                  channelCount: 2,
                 },
                 video: false,
               });
@@ -456,7 +461,7 @@ export class AudioEngine {
             echoCancellation: false,
             noiseSuppression: false,
             autoGainControl: false,
-            channelCount: { ideal: 2 },
+            channelCount: 2,
           },
           video: false,
         });
@@ -506,20 +511,32 @@ export class AudioEngine {
     this.mediaStream = stream;
     this.sourceNode = this.ctx.createMediaStreamSource(this.mediaStream);
 
-    if (this.inputSumNode && this.inputSplitter) {
-      this.sourceNode.connect(this.inputSumNode);
+    // CRITICAL: Set discrete channel interpretation!
+    // Prevents Web Audio from auto-upmixing mono onto channel 1 (IN 2),
+    // and preserves isolated hardware Input 1 (Left) and Input 2 (Right) channels.
+    this.sourceNode.channelInterpretation = 'discrete';
+
+    if (this.inputSplitter) {
       this.sourceNode.connect(this.inputSplitter);
     }
 
-    // 6. Record active device info
+    // 6. Record active device info and hardware channel capabilities
     const activeTrack = stream.getAudioTracks()[0];
-    const reportedDeviceId = activeTrack?.getSettings?.().deviceId;
+    const reportedSettings = activeTrack?.getSettings?.();
+    this.detectedInputChannels = reportedSettings?.channelCount || 1;
+    const reportedDeviceId = reportedSettings?.deviceId;
     if (reportedDeviceId) {
       this.selectedInputId = reportedDeviceId;
     } else if (targetId) {
       this.selectedInputId = targetId;
     }
-    console.log(`[AudioEngine] Connected to audio input: "${activeTrack?.label || 'Unnamed device'}" (id: ${this.selectedInputId})`);
+
+    console.log(
+      `[AudioEngine] Connected to audio input: "${activeTrack?.label || 'Unnamed device'}" (id: ${this.selectedInputId}) - Detected channels: ${this.detectedInputChannels} (${this.detectedInputChannels >= 2 ? 'Stereo / Dual-Channel' : 'Mono'})`
+    );
+
+    // Apply active input channel routing to the newly connected source
+    this.applyInputChannelMode();
   }
 
   /**
@@ -541,12 +558,28 @@ export class AudioEngine {
   }
 
   private applyInputChannelMode(): void {
-    if (!this.ctx || !this.inputSumNode || !this.inputLeftGain || !this.inputRightGain) return;
+    if (!this.ctx || !this.inputLeftGain || !this.inputRightGain) return;
     const now = this.ctx.currentTime;
     const mode = this.inputChannelMode;
-    this.inputSumNode.gain.setTargetAtTime(mode === 'sum' ? 1 : 0, now, 0.01);
-    this.inputLeftGain.gain.setTargetAtTime(mode === 'left' ? 1 : 0, now, 0.01);
-    this.inputRightGain.gain.setTargetAtTime(mode === 'right' ? 1 : 0, now, 0.01);
+
+    switch (mode) {
+      case 'left':
+        // Only Hardware Input 1 (Left Channel / Ch 0)
+        this.inputLeftGain.gain.setTargetAtTime(1.0, now, 0.01);
+        this.inputRightGain.gain.setTargetAtTime(0.0, now, 0.01);
+        break;
+      case 'right':
+        // Only Hardware Input 2 (Right Channel / Ch 1)
+        this.inputLeftGain.gain.setTargetAtTime(0.0, now, 0.01);
+        this.inputRightGain.gain.setTargetAtTime(1.0, now, 0.01);
+        break;
+      case 'sum':
+      default:
+        // L+R (Both channels active, summed)
+        this.inputLeftGain.gain.setTargetAtTime(1.0, now, 0.01);
+        this.inputRightGain.gain.setTargetAtTime(1.0, now, 0.01);
+        break;
+    }
   }
 
   /**

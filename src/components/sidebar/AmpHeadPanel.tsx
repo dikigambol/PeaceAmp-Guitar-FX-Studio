@@ -13,7 +13,7 @@ export const AmpHeadPanel: React.FC<AmpHeadPanelProps> = ({
   settings,
   onUpdateSettings,
 }) => {
-  const currentModel = AMP_MODELS.find((m) => m.id === settings.model) || AMP_MODELS[1];
+  const currentModel = AMP_MODELS.find((m) => m.id === settings.model) || AMP_MODELS[0];
 
   const formatPercent = (v: number) => `${Math.round((v / 10) * 100)}%`;
   const formatGain = (v: number) => `${(1 + v * 1.8).toFixed(1)}x`;

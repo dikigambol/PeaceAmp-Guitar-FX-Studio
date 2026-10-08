@@ -9,7 +9,7 @@ export type EngineStatus = 'uninitialized' | 'suspended' | 'running' | 'error';
 export type InputChannelMode = 'sum' | 'left' | 'right';
 
 export const DEFAULT_NOISE_GATE_ENABLED = true;
-export const DEFAULT_NOISE_GATE_THRESHOLD_DB = -62;
+export const DEFAULT_NOISE_GATE_THRESHOLD_DB = -46;
 
 export interface AudioDeviceInfo {
   deviceId: string;

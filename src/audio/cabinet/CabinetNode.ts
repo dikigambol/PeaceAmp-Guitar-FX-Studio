@@ -22,7 +22,7 @@ export class CabinetNode {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.5,
-    mix: 0.5, // 50% wet/dry mix by default
+    mix: 1.0, // 100% WET by default (authentic guitar cabinet simulator standard)
     level: 0,
   };
 
@@ -40,7 +40,7 @@ export class CabinetNode {
     this.outputNode = ctx.createGain();
 
     this.convolver = ctx.createConvolver();
-    this.convolver.normalize = true;
+    this.convolver.normalize = false;
 
     this.dryGain = ctx.createGain();
     this.wetGain = ctx.createGain();
@@ -48,11 +48,6 @@ export class CabinetNode {
 
     this.bypassDry = ctx.createGain();
     this.bypassWet = ctx.createGain();
-
-    // Setup initial gains
-    this.applyMixAndLevel();
-    this.applyBypassState();
-    this.updateImpulseResponse();
 
     // Wiring graph:
     // inputNode
@@ -72,29 +67,59 @@ export class CabinetNode {
     this.wetGain.connect(this.levelGain);
 
     this.levelGain.connect(this.outputNode);
+
+    // Initial setup
+    this.applyMixAndLevel();
+    this.applyBypassState();
+    this.updateImpulseResponse();
   }
 
+  /**
+   * Recreates and hot-swaps the ConvolverNode with the newly generated IR buffer.
+   * In Chromium and WebKit Web Audio engines, reusing an existing ConvolverNode with
+   * buffer re-assignment can be silently ignored or cause glitch states. Re-instantiating
+   * guarantees instant, seamless, reliable IR switching on every knob/dropdown tweak.
+   */
   private updateImpulseResponse(): void {
+    let buffer: AudioBuffer;
+
     if (this.settings.model === 'custom' && this.customBuffer) {
-      this.convolver.normalize = true;
-      this.convolver.buffer = this.customBuffer;
+      buffer = this.customBuffer;
     } else {
-      const buffer = generateCabinetImpulseResponse(
+      buffer = generateCabinetImpulseResponse(
         this.ctx,
         this.settings.model,
         this.settings.mic,
         this.settings.position
       );
-      // IR is already unity-energy normalized; avoid the convolver's extra attenuation
-      this.convolver.normalize = false;
-      this.convolver.buffer = buffer;
     }
+
+    // Create a fresh ConvolverNode
+    const newConvolver = this.ctx.createConvolver();
+    newConvolver.normalize = false;
+    newConvolver.buffer = buffer;
+
+    // Connect new convolver to the audio graph
+    this.bypassWet.connect(newConvolver);
+    newConvolver.connect(this.wetGain);
+
+    // Disconnect and retire the old convolver cleanly
+    const oldConvolver = this.convolver;
+    try {
+      this.bypassWet.disconnect(oldConvolver);
+      oldConvolver.disconnect();
+    } catch {
+      // Ignore disconnect errors during hot-swap
+    }
+
+    this.convolver = newConvolver;
   }
 
   private applyMixAndLevel(): void {
     const now = this.ctx.currentTime;
     const mix = Math.max(0, Math.min(1, this.settings.mix));
-    // Equal-power crossfade for natural perceived volume across mix range
+
+    // Equal-power crossfade between raw direct amp output (Dry) and mic'd cabinet IR (Wet)
     const dryAmt = Math.cos(mix * 0.5 * Math.PI);
     const wetAmt = Math.sin(mix * 0.5 * Math.PI);
 
@@ -149,8 +174,7 @@ export class CabinetNode {
     this.customIrName = name;
     this.settings.model = 'custom';
     this.settings.customIrName = name;
-    this.convolver.normalize = true;
-    this.convolver.buffer = buffer;
+    this.updateImpulseResponse();
   }
 
   public setEnabled(enabled: boolean): void {
