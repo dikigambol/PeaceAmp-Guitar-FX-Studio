@@ -7291,48 +7291,148 @@ body {
 }
 
 /* ==========================================================================
-   6. EARTHQUAKER DEVICES HOOF (GOLD SPARKLE & SHIFT EQ)
+   6. EARTHQUAKER DEVICES HOOF (EXACT SAMPLE PHOTO REPLICA)
    ========================================================================== */
 .pedal-eqd-hoof {
-  background: radial-gradient(circle at 45% 20%, #f59e0b 0%, #d97706 45%, #b45309 80%, #78350f 100%) !important;
-  border: 2px solid #78350f !important;
-  border-radius: 8px !important;
+  width: 164px !important;
+  max-width: 164px !important;
+  min-height: 284px !important;
+  background: linear-gradient(180deg, #caa137 0%, #ba9028 35%, #ad831e 70%, #9e7514 100%) !important;
+  border: 2px solid #855b0f !important;
+  border-radius: 12px !important;
   box-shadow:
-    0 16px 36px rgba(0, 0, 0, 0.85),
-    inset 0 1px 2px rgba(255, 255, 255, 0.6),
-    inset 0 -3px 8px rgba(0, 0, 0, 0.7) !important;
-  padding: 8px 10px 12px !important;
+    0 18px 40px rgba(0, 0, 0, 0.85),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.5),
+    inset 1.5px 0 2px rgba(255, 255, 255, 0.4),
+    inset -1.5px 0 2px rgba(0, 0, 0, 0.3) !important;
+  padding: 4px 6px 6px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  user-select: none !important;
 }
 
+/* Decorative Top Jack Nuts Peeking Over Top */
+.hoof-top-jack-nuts {
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 30px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.hoof-top-jack-nut {
+  width: 18px;
+  height: 6px;
+  background: linear-gradient(180deg, #94a3b8 0%, #cbd5e1 40%, #64748b 100%);
+  border: 1px solid #334155;
+  border-radius: 2px 2px 0 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Close button mounted on top-right in EQD style */
+.pedal-eqd-hoof .hoof-top-bar {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  width: auto;
+  z-index: 35;
+  padding: 0;
+}
+
+.pedal-eqd-hoof .hoof-close-btn {
+  color: #451a03;
+  opacity: 0.75;
+  transition: all 0.15s ease;
+}
+
+.pedal-eqd-hoof .hoof-close-btn:hover {
+  color: #09090b;
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+/* 1/4" Side Patch Jacks aligned on sides (center at y=104) */
+.pedal-eqd-hoof .stompbox-side-jack {
+  top: 93px !important;
+  z-index: 25 !important;
+}
+
+.pedal-eqd-hoof .stompbox-side-jack.jack-left {
+  left: -4px !important;
+}
+
+.pedal-eqd-hoof .stompbox-side-jack.jack-right {
+  right: -4px !important;
+}
+
+/* Gold Faceplate */
 .hoof-faceplate {
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.hoof-power-mark {
-  font-family: var(--font-mono), monospace;
-  font-size: 7.5px;
-  font-weight: 900;
-  color: #18181b;
-  letter-spacing: 1px;
-  margin-top: 1px;
-}
-
-.hoof-knobs-shield {
-  width: 96%;
-  background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
-  border-radius: 6px;
-  border: 1px solid #27272a;
-  padding: 6px 4px 8px;
+  position: relative;
   box-sizing: border-box;
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(255, 255, 255, 0.2);
-  margin-top: 3px;
+}
+
+/* Clean Black Box with Border Radius for Controls (Kotak Hitam dengan Border Radius) */
+.hoof-knobs-box {
+  width: 93%;
+  background: linear-gradient(180deg, #1c1c1f 0%, #111113 100%);
+  border: 1.5px solid #27272a;
+  border-radius: 9px;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    0 0 1px rgba(255, 255, 255, 0.15);
+  padding: 5px 4px 7px;
+  box-sizing: border-box;
+  margin-top: 6px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 4px;
+  z-index: 5;
+}
+
+.hoof-box-power-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+  margin-bottom: 2px;
+  user-select: none;
+}
+
+.hoof-polarity-svg {
+  width: 22px;
+  height: 9px;
+}
+
+.hoof-9v-text {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 7.5px;
+  font-weight: 900;
+  color: #facc15;
+  letter-spacing: 0.5px;
+  line-height: 0.9;
+}
+
+/* 2x2 Knobs Field inside Black Box */
+.hoof-knobs-area {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
 }
 
 .hoof-knobs-row {
@@ -7340,6 +7440,8 @@ body {
   display: flex;
   justify-content: space-around;
   align-items: center;
+  padding: 0 2px;
+  box-sizing: border-box;
 }
 
 .hoof-knob-col {
@@ -7350,68 +7452,107 @@ body {
 }
 
 .hoof-knob-lbl {
-  font-family: 'Times New Roman', 'Palatino', serif;
-  font-size: 9.5px;
+  font-family: 'Georgia', 'Palatino', serif;
+  font-size: 10.5px;
   font-weight: 700;
-  color: #f59e0b;
+  color: #facc15;
   letter-spacing: 0.5px;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-}
-
-.hoof-lower-section {
-  width: 100%;
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-}
-
-.hoof-stomp-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.hoof-led {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #713f12 0%, #451a03 100%);
-  border: 1px solid #1c1917;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
-  transition: all 0.15s ease;
-}
-
-.hoof-led.active {
-  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fef08a 40%, #eab308 100%);
-  box-shadow: 0 0 10px #fef08a, 0 0 20px rgba(234, 179, 8, 0.9);
-  border-color: #fef08a;
-}
-
-.hoof-branding {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  user-select: none;
   line-height: 1;
 }
 
-.hoof-title {
-  font-family: 'Book Antiqua', 'Palatino', 'Georgia', serif;
-  font-size: 26px;
-  font-weight: 800;
-  color: #18181b;
-  letter-spacing: 1.5px;
+/* Actuator Row: Left Chrome Bezel LED + Center Soft-Touch Footswitch */
+.hoof-actuator-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  margin-bottom: 0px;
+  transform: translateY(6px);
+  z-index: 5;
+  position: relative;
+  box-sizing: border-box;
 }
 
-.hoof-subtitle {
-  font-family: var(--font-ui), sans-serif;
+.hoof-led-mount-left {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hoof-chrome-bezel {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 45%, #64748b 85%, #334155 100%);
+  border: 1px solid #1e293b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hoof-pilot-dome {
+  width: 7.5px;
+  height: 7.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e2e8f0 45%, #94a3b8 100%);
+  border: 0.8px solid #475569;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  transition: all 0.15s ease;
+}
+
+.hoof-pilot-dome.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fef08a 35%, #eab308 70%, #ca8a04 100%);
+  box-shadow: 0 0 10px #facc15, 0 0 22px rgba(250, 204, 21, 0.95);
+  border-color: #fef08a;
+}
+
+.hoof-stomp-center {
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Bottom Typography: Authentic Hoof™ and EarthQuakerDevices™ */
+.hoof-bottom-branding {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  z-index: 5;
+  margin-top: 5px;
+  margin-bottom: 3px;
+  user-select: none;
+}
+
+.hoof-title-logo-svg {
+  width: 80px;
+  height: 26px;
+}
+
+.hoof-eqd-company-name {
+  font-family: 'Arial Black', Impact, 'Helvetica Neue', sans-serif;
   font-size: 8px;
   font-weight: 900;
   color: #18181b;
-  letter-spacing: 0.8px;
-  margin-top: 1px;
+  letter-spacing: 0.1px;
+  text-align: center;
+  line-height: 1;
+}
+
+.hoof-tm-sup {
+  font-size: 5px;
+  vertical-align: super;
+  font-weight: 800;
+  margin-left: 1px;
 }
 
 /* KNOB DIAL SVG & AUTHENTIC PEDAL VARIANTS */

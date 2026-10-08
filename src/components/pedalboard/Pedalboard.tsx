@@ -309,8 +309,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       const isToneBender = pedal?.type === 'fuzz-tonebender';
       const isFuzzFactory = pedal?.type === 'fuzz-fuzzfactory';
       const isFlatiron = pedal?.type === 'fuzz-flatiron';
-      const curWidth = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : PEDAL_WIDTH;
-      const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isFlatiron ? 114 : JACK_Y_OFFSET;
+      const isHoof = pedal?.type === 'fuzz-hoof';
+      const curWidth = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : PEDAL_WIDTH;
+      const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isFlatiron ? 114 : isHoof ? 104 : JACK_Y_OFFSET;
       if (port === 'in') {
         // Left side jack
         return { x: pos.x - 2, y: pos.y + curJackY };

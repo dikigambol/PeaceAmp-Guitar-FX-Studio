@@ -2,22 +2,26 @@ import type { AudioPedalNode } from '../../../types/pedal';
 import { levelToGain, applyBypassCrossfade, driveDependentTrimDb, createDcBlocker } from '../dspUtils';
 
 /**
- * Output trim (dB) calibrated so Level=5 is ~unity loudness at default settings.
+ * Output trim (dB) calibrated so Level=5 delivers authoritative unity loudness
+ * with the massive output boost headroom the real Hoof is famous for.
  */
-const TRIM_UNITY_DB = -1.0;
-const TRIM_SAT_DB = -11.0;
+const TRIM_UNITY_DB = 0.0;
+const TRIM_SAT_DB = -7.0;
 
 /**
  * EarthQuaker Devices Hoof (2006)
  * 
  * Authentic analog circuit model of the hybrid Germanium / Silicon Green Russian Muff:
- *   - LEVEL: Master output with massive boost headroom.
- *   - FUZZ: Drive amount through dual-stage hybrid Germanium + Silicon clipping stages.
- *   - TONE: Bass/Treble tilt EQ (counter-clockwise = heavy bass; clockwise = treble bite).
- *   - SHIFT: Signature EQD control! Shifts the mid frequency response:
- *            Counter-clockwise (0) gives deep classic mid-scoop;
- *            Clockwise (10) boosts punchy midrange (+6 dB) to cut through heavy band mixes.
- *   - Hybrid Ge/Si diodes: warmer, more dynamic, less fizzy than standard silicon muffs.
+ *   - Q1: Input stage with Russian Muff 60 Hz coupling cap and 4.6 kHz RF filter.
+ *   - Q2 (Stage 1): Silicon diode pair clipping with 3.2 kHz Miller feedback capacitor.
+ *   - Q3 (Stage 2): Hand-matched Germanium saturation stage delivering rich, velvety compression
+ *                   and blooming sustain without harsh bee-in-a-jar fizz.
+ *   - Tone & Shift Stack:
+ *       * TONE: Bridges low-end weight (320 Hz) and treble cut (2.2 kHz).
+ *       * SHIFT: Sweeps mid contour from classic Russian deep scoop (-8.5 dB at 1 kHz)
+ *                to pronounced punchy mid-boost (+6.5 dB at 820 Hz) to cut through any band mix.
+ *   - Anti-Fizz Ceiling: 4.8 kHz smooth analog ceiling replicating vintage transistor recovery.
+ *   - Linear small-signal transfer eliminates idle hum/noise amplification when not playing.
  */
 export class EqdHoofNode implements AudioPedalNode {
   public id: string;
@@ -26,29 +30,31 @@ export class EqdHoofNode implements AudioPedalNode {
 
   private ctx: AudioContext;
 
-  // Q1 Input Buffer
+  // Q1 Input Pre-Conditioning
   private inputHighpass: BiquadFilterNode;
-  private inputPreGain: GainNode;
+  private inputRfFilter: BiquadFilterNode;
+  private q1PreGain: GainNode;
 
-  // Q2 Stage 1 (Silicon clipper with Miller roll-off)
+  // Q2 Stage 1 (Fuzz gain + Silicon diode pair + 3.2 kHz Miller feedback)
   private fuzzGain: GainNode;
   private siliconShaper: WaveShaperNode;
-  private stage1Miller: BiquadFilterNode;
+  private stage1MillerFilter: BiquadFilterNode;
 
-  // Q3 Stage 2 (Germanium clipper with soft compression)
+  // Q3 Stage 2 (Cascading Germanium hybrid compression + 3.4 kHz Miller feedback)
   private interstageGain: GainNode;
   private germaniumShaper: WaveShaperNode;
-  private stage2Miller: BiquadFilterNode;
+  private stage2MillerFilter: BiquadFilterNode;
 
   // DC Blocker
   private dcBlocker: BiquadFilterNode;
 
-  // Hoof Tone & Shift EQ Stack
+  // Hoof Tone & Shift Stack
   private toneLowShelf: BiquadFilterNode;
   private toneHighShelf: BiquadFilterNode;
   private shiftMidFilter: BiquadFilterNode;
 
-  // Output Recovery & Level
+  // Q4 Recovery Stage Anti-Fizz Filter
+  private antiFizzFilter: BiquadFilterNode;
   private postGain: GainNode;
 
   // Bypass crossfade
@@ -75,152 +81,227 @@ export class EqdHoofNode implements AudioPedalNode {
     this.inputNode = ctx.createGain();
     this.outputNode = ctx.createGain();
 
-    // 1. Input Buffer: Russian Muff coupling (70 Hz HPF)
+    // 1. Q1 Input Stage: 60 Hz coupling cap + 4.6 kHz RF filter + clean transistor buffer boost
     this.inputHighpass = ctx.createBiquadFilter();
     this.inputHighpass.type = 'highpass';
-    this.inputHighpass.frequency.setValueAtTime(70, ctx.currentTime);
+    this.inputHighpass.frequency.setValueAtTime(60, ctx.currentTime);
     this.inputHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
-    this.inputPreGain = ctx.createGain();
-    this.inputPreGain.gain.setValueAtTime(2.2, ctx.currentTime);
+    this.inputRfFilter = ctx.createBiquadFilter();
+    this.inputRfFilter.type = 'lowpass';
+    this.inputRfFilter.frequency.setValueAtTime(4600, ctx.currentTime);
+    this.inputRfFilter.Q.setValueAtTime(0.707, ctx.currentTime);
 
-    // 2. Fuzz Gain Stage
+    this.q1PreGain = ctx.createGain();
+    this.q1PreGain.gain.setValueAtTime(2.4, ctx.currentTime);
+
+    // 2. Q2 Stage 1: Fuzz pot controls drive into silicon diode clipper
     this.fuzzGain = ctx.createGain();
-
-    // 3. Stage 1 Silicon Shaper
     this.siliconShaper = ctx.createWaveShaper();
-    this.siliconShaper.curve = this.createSiliconCurve(4096) as Float32Array<ArrayBuffer>;
+    this.siliconShaper.curve = this.createSiliconDiodeCurve(8192, 0.62, 0.58) as Float32Array<ArrayBuffer>;
     this.siliconShaper.oversample = '4x';
 
-    this.stage1Miller = ctx.createBiquadFilter();
-    this.stage1Miller.type = 'lowpass';
-    this.stage1Miller.frequency.setValueAtTime(4200, ctx.currentTime);
+    // 470pF Miller feedback capacitor (smooths high-frequency spikes above 3.2 kHz)
+    this.stage1MillerFilter = ctx.createBiquadFilter();
+    this.stage1MillerFilter.type = 'lowpass';
+    this.stage1MillerFilter.frequency.setValueAtTime(3200, ctx.currentTime);
+    this.stage1MillerFilter.Q.setValueAtTime(0.65, ctx.currentTime);
 
-    // 4. Stage 2 Germanium Shaper
+    // 3. Q3 Stage 2: Cascading Germanium hybrid clipping stage (warm, singing, velvety sustain)
     this.interstageGain = ctx.createGain();
-    this.interstageGain.gain.setValueAtTime(2.6, ctx.currentTime);
+    this.interstageGain.gain.setValueAtTime(2.5, ctx.currentTime);
 
     this.germaniumShaper = ctx.createWaveShaper();
-    this.germaniumShaper.curve = this.createGermaniumCurve(4096) as Float32Array<ArrayBuffer>;
+    this.germaniumShaper.curve = this.createGermaniumHybridCurve(8192, 0.48, 0.42) as Float32Array<ArrayBuffer>;
     this.germaniumShaper.oversample = '4x';
 
-    this.stage2Miller = ctx.createBiquadFilter();
-    this.stage2Miller.type = 'lowpass';
-    this.stage2Miller.frequency.setValueAtTime(4500, ctx.currentTime);
+    // Second Miller feedback cap (rolls off above 3.4 kHz)
+    this.stage2MillerFilter = ctx.createBiquadFilter();
+    this.stage2MillerFilter.type = 'lowpass';
+    this.stage2MillerFilter.frequency.setValueAtTime(3400, ctx.currentTime);
+    this.stage2MillerFilter.Q.setValueAtTime(0.65, ctx.currentTime);
 
-    // 5. DC Blocker
+    // 4. DC Blocker
     this.dcBlocker = createDcBlocker(ctx, 16);
 
-    // 6. Hoof Tone Stack:
-    // Low Shelf (120 Hz)
+    // 5. Authentic Hoof Tone & Shift Stack
+    // Low-shelf (320 Hz guitar body & punch)
     this.toneLowShelf = ctx.createBiquadFilter();
     this.toneLowShelf.type = 'lowshelf';
-    this.toneLowShelf.frequency.setValueAtTime(120, ctx.currentTime);
+    this.toneLowShelf.frequency.setValueAtTime(320, ctx.currentTime);
 
-    // High Shelf (2800 Hz)
+    // High-shelf (2200 Hz harmonic bite & clarity)
     this.toneHighShelf = ctx.createBiquadFilter();
     this.toneHighShelf.type = 'highshelf';
-    this.toneHighShelf.frequency.setValueAtTime(2800, ctx.currentTime);
+    this.toneHighShelf.frequency.setValueAtTime(2200, ctx.currentTime);
 
-    // Shift Mid Filter (850 - 1050 Hz peaking EQ)
+    // Shift Mid Filter (820 - 1000 Hz peaking EQ)
     this.shiftMidFilter = ctx.createBiquadFilter();
     this.shiftMidFilter.type = 'peaking';
     this.shiftMidFilter.frequency.setValueAtTime(900, ctx.currentTime);
-    this.shiftMidFilter.Q.setValueAtTime(1.1, ctx.currentTime);
+    this.shiftMidFilter.Q.setValueAtTime(0.95, ctx.currentTime);
 
-    // 7. Post Gain / Level
+    // 6. Q4 Recovery Anti-Fizz Filter (4.8 kHz smooth analog ceiling)
+    this.antiFizzFilter = ctx.createBiquadFilter();
+    this.antiFizzFilter.type = 'lowpass';
+    this.antiFizzFilter.frequency.setValueAtTime(4800, ctx.currentTime);
+    this.antiFizzFilter.Q.setValueAtTime(0.707, ctx.currentTime);
+
+    // 7. Output Level
     this.postGain = ctx.createGain();
 
-    // Wet / Dry for seamless click-free true bypass
+    // Click-free True Bypass crossfade nodes
     this.wetGain = ctx.createGain();
     this.dryGain = ctx.createGain();
     this.wetGain.gain.setValueAtTime(enabled ? 1.0 : 0.0, ctx.currentTime);
     this.dryGain.gain.setValueAtTime(enabled ? 0.0 : 1.0, ctx.currentTime);
 
-    // Audio Graph Wiring
-    // Dry Path
+    // Connect Bypass path:
     this.inputNode.connect(this.dryGain);
     this.dryGain.connect(this.outputNode);
 
-    // Wet Path
+    // Connect Wet Signal Path:
+    // Input -> Highpass -> RF Filter -> Q1 PreGain -> Fuzz Gain -> Silicon Shaper -> Miller 1 ->
+    // Interstage Gain -> Germanium Shaper -> Miller 2 -> DC Blocker -> Tone LowShelf -> Tone HighShelf ->
+    // Shift MidFilter -> Anti-Fizz Filter -> PostGain -> WetGain -> Output
     this.inputNode.connect(this.inputHighpass);
-    this.inputHighpass.connect(this.inputPreGain);
-    this.inputPreGain.connect(this.fuzzGain);
+    this.inputHighpass.connect(this.inputRfFilter);
+    this.inputRfFilter.connect(this.q1PreGain);
+    this.q1PreGain.connect(this.fuzzGain);
     this.fuzzGain.connect(this.siliconShaper);
-    this.siliconShaper.connect(this.stage1Miller);
-    this.stage1Miller.connect(this.interstageGain);
+    this.siliconShaper.connect(this.stage1MillerFilter);
+    this.stage1MillerFilter.connect(this.interstageGain);
     this.interstageGain.connect(this.germaniumShaper);
-    this.germaniumShaper.connect(this.stage2Miller);
-    this.stage2Miller.connect(this.dcBlocker);
+    this.germaniumShaper.connect(this.stage2MillerFilter);
+    this.stage2MillerFilter.connect(this.dcBlocker);
     this.dcBlocker.connect(this.toneLowShelf);
     this.toneLowShelf.connect(this.toneHighShelf);
     this.toneHighShelf.connect(this.shiftMidFilter);
-    this.shiftMidFilter.connect(this.postGain);
+    this.shiftMidFilter.connect(this.antiFizzFilter);
+    this.antiFizzFilter.connect(this.postGain);
     this.postGain.connect(this.wetGain);
     this.wetGain.connect(this.outputNode);
 
-    this.recalculate();
+    this.applyParameters(true);
   }
 
-  private createSiliconCurve(samples: number): Float32Array {
+  /**
+   * Stage 1: Fast silicon diode clipping curve (1N4148 pair).
+   * Tight, punchy distortion edge with clean small-signal noise floor.
+   */
+  private createSiliconDiodeCurve(samples: number, vPos = 0.62, vNeg = 0.58): Float32Array {
     const curve = new Float32Array(samples);
-    const knee = 0.42;
-    for (let i = 0; i < samples; i++) {
-      const x = (i / (samples - 1)) * 2 - 1;
-      const scaled = x / knee;
-      curve[i] = (knee * scaled) / Math.pow(1 + Math.pow(Math.abs(scaled), 2.8), 1 / 2.8);
-    }
-    return curve;
-  }
+    const half = samples / 2;
 
-  private createGermaniumCurve(samples: number): Float32Array {
-    const curve = new Float32Array(samples);
-    const kneePos = 0.32;
-    const kneeNeg = 0.25;
     for (let i = 0; i < samples; i++) {
-      const x = (i / (samples - 1)) * 2 - 1;
+      const x = (i - half) / half;
+
+      // Small-signal transparency eliminates background hum & hiss amplification
+      if (Math.abs(x) < 0.04) {
+        curve[i] = x * 0.95;
+        continue;
+      }
+
       if (x >= 0) {
-        const scaled = x / kneePos;
-        curve[i] = (kneePos * scaled) / Math.pow(1 + Math.pow(scaled, 2.0), 1 / 2.0);
+        const scaled = x / vPos;
+        const compressed = scaled / Math.pow(1 + Math.pow(scaled, 2.4), 1 / 2.4);
+        curve[i] = vPos * compressed;
       } else {
-        const scaled = -x / kneeNeg;
-        curve[i] = -(kneeNeg * scaled) / Math.pow(1 + Math.pow(scaled, 1.7), 1 / 1.7);
+        const scaled = Math.abs(x) / vNeg;
+        const compressed = scaled / Math.pow(1 + Math.pow(scaled, 2.4), 1 / 2.4);
+        curve[i] = -vNeg * compressed;
       }
     }
     return curve;
   }
 
-  private recalculate(): void {
+  /**
+   * Stage 2: Hand-matched Germanium/Silicon hybrid diode curve.
+   * Softer knee (exponent 1.8), warm saturation, and singing, blooming sustain.
+   */
+  private createGermaniumHybridCurve(samples: number, vPos = 0.48, vNeg = 0.42): Float32Array {
+    const curve = new Float32Array(samples);
+    const half = samples / 2;
+
+    for (let i = 0; i < samples; i++) {
+      const x = (i - half) / half;
+
+      if (Math.abs(x) < 0.04) {
+        curve[i] = x * 0.95;
+        continue;
+      }
+
+      if (x >= 0) {
+        const scaled = x / vPos;
+        // Soft Germanium rounding curve
+        const compressed = scaled / Math.pow(1 + Math.pow(scaled, 1.8), 1 / 1.8);
+        curve[i] = vPos * compressed;
+      } else {
+        const scaled = Math.abs(x) / vNeg;
+        const compressed = scaled / Math.pow(1 + Math.pow(scaled, 1.7), 1 / 1.7);
+        curve[i] = -vNeg * compressed;
+      }
+    }
+    return curve;
+  }
+
+  private applyParameters(immediate = false): void {
     const now = this.ctx.currentTime;
+    const rampTime = immediate ? 0 : 0.02;
 
-    // Fuzz Gain (1.2x to 38x)
+    // 1. Fuzz Potentiometer:
+    // Smooth transition from rich, woolly edge up to thunderous, infinite Green Russian fuzz
     const fuzzNorm = Math.max(0, Math.min(10, this.fuzzVal)) / 10;
-    const fuzzMult = 1.2 + 36.8 * Math.pow(fuzzNorm, 2.1);
-    this.fuzzGain.gain.setTargetAtTime(fuzzMult, now, 0.02);
+    const stage1Drive = 1.6 + Math.pow(fuzzNorm, 1.6) * 18.4; // 1.6x up to 20.0x
 
-    // Tone Tilt EQ:
-    // When tone = 0: Lows +8 dB, Highs -8 dB
-    // When tone = 10: Lows -8 dB, Highs +8 dB
+    if (immediate) {
+      this.fuzzGain.gain.setValueAtTime(stage1Drive, now);
+    } else {
+      this.fuzzGain.gain.setTargetAtTime(stage1Drive, now, rampTime);
+    }
+
+    // 2. Tone Tilt:
+    // Tone = 0: Thunderous, deep Russian Muff bass (+9 dB at 320 Hz, -9 dB at 2.2 kHz)
+    // Tone = 5: Balanced Russian Muff body
+    // Tone = 10: Searing, singing harmonic bite (+9 dB at 2.2 kHz, -9 dB at 320 Hz)
     const toneNorm = Math.max(0, Math.min(10, this.toneVal)) / 10;
-    const lowGain = (1 - toneNorm) * 16 - 8;
-    const highGain = toneNorm * 16 - 8;
-    this.toneLowShelf.gain.setTargetAtTime(lowGain, now, 0.02);
-    this.toneHighShelf.gain.setTargetAtTime(highGain, now, 0.02);
+    const lowGain = (1 - toneNorm) * 18 - 9;
+    const highGain = toneNorm * 18 - 9;
 
-    // Shift Mid EQ:
-    // 0: Deep scoop (-9 dB at 1050 Hz)
-    // 5: Neutral scoop (-1.5 dB at 920 Hz)
-    // 10: Aggressive mid boost (+6 dB at 820 Hz)
+    if (immediate) {
+      this.toneLowShelf.gain.setValueAtTime(lowGain, now);
+      this.toneHighShelf.gain.setValueAtTime(highGain, now);
+    } else {
+      this.toneLowShelf.gain.setTargetAtTime(lowGain, now, rampTime);
+      this.toneHighShelf.gain.setTargetAtTime(highGain, now, rampTime);
+    }
+
+    // 3. Signature EQD Shift Control:
+    // Shift = 0: Classic Russian Muff deep mid-scoop (-8.5 dB at 1000 Hz)
+    // Shift = 5: Musical modern scoop (-2.5 dB at 900 Hz)
+    // Shift = 10: Searing, punchy mid-boost (+6.5 dB at 820 Hz) that cuts right through heavy mixes
     const shiftNorm = Math.max(0, Math.min(10, this.shiftVal)) / 10;
-    const midFreq = 1050 - shiftNorm * 230; // 1050 Hz down to 820 Hz
-    const midGain = -9.0 + shiftNorm * 15.0; // -9 dB up to +6 dB
-    this.shiftMidFilter.frequency.setTargetAtTime(midFreq, now, 0.02);
-    this.shiftMidFilter.gain.setTargetAtTime(midGain, now, 0.02);
+    const midFreq = 1000 - shiftNorm * 180; // 1000 Hz down to 820 Hz
+    const midGain = -8.5 + shiftNorm * 15.0; // -8.5 dB up to +6.5 dB
 
-    // Dynamic output trim and level
-    const trim = driveDependentTrimDb(fuzzMult, TRIM_UNITY_DB, TRIM_SAT_DB, 10);
+    if (immediate) {
+      this.shiftMidFilter.frequency.setValueAtTime(midFreq, now);
+      this.shiftMidFilter.gain.setValueAtTime(midGain, now);
+    } else {
+      this.shiftMidFilter.frequency.setTargetAtTime(midFreq, now, rampTime);
+      this.shiftMidFilter.gain.setTargetAtTime(midGain, now, rampTime);
+    }
+
+    // 4. Master Level:
+    // Dynamic output trim preserves clarity and authority without squashing volume
+    const trim = driveDependentTrimDb(stage1Drive, TRIM_UNITY_DB, TRIM_SAT_DB, 8);
     const levelGain = levelToGain(this.levelVal, trim);
-    this.postGain.gain.setTargetAtTime(levelGain, now, 0.02);
+
+    if (immediate) {
+      this.postGain.gain.setValueAtTime(levelGain, now);
+    } else {
+      this.postGain.gain.setTargetAtTime(levelGain, now, rampTime);
+    }
   }
 
   public updateParameter(paramId: string, value: number): void {
@@ -229,7 +310,7 @@ export class EqdHoofNode implements AudioPedalNode {
     else if (paramId === 'tone') this.toneVal = value;
     else if (paramId === 'shift') this.shiftVal = value;
 
-    this.recalculate();
+    this.applyParameters(false);
   }
 
   public setEnabled(enabled: boolean): void {
@@ -245,17 +326,19 @@ export class EqdHoofNode implements AudioPedalNode {
       this.dryGain.disconnect();
       this.wetGain.disconnect();
       this.inputHighpass.disconnect();
-      this.inputPreGain.disconnect();
+      this.inputRfFilter.disconnect();
+      this.q1PreGain.disconnect();
       this.fuzzGain.disconnect();
       this.siliconShaper.disconnect();
-      this.stage1Miller.disconnect();
+      this.stage1MillerFilter.disconnect();
       this.interstageGain.disconnect();
       this.germaniumShaper.disconnect();
-      this.stage2Miller.disconnect();
+      this.stage2MillerFilter.disconnect();
       this.dcBlocker.disconnect();
       this.toneLowShelf.disconnect();
       this.toneHighShelf.disconnect();
       this.shiftMidFilter.disconnect();
+      this.antiFizzFilter.disconnect();
       this.postGain.disconnect();
     } catch {
       // Ignore disconnect errors

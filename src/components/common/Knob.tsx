@@ -25,6 +25,7 @@ export interface KnobProps {
     | 'boss-gold'
     | 'klon-oxblood'
     | 'ocd'
+    | 'davies'
     | 'nobels'
     | 'archer'
     | 'bigmuff'
@@ -460,6 +461,79 @@ const OcdKnobDial: React.FC = () => (
       strokeWidth="3.2"
       strokeLinecap="round"
       filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.9))"
+    />
+  </svg>
+);
+
+const DaviesKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="davies-skirt-grad" cx="42%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#27272a" />
+        <stop offset="55%" stopColor="#18181b" />
+        <stop offset="100%" stopColor="#09090b" />
+      </radialGradient>
+      <linearGradient id="davies-pointer-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#18181b" />
+        <stop offset="25%" stopColor="#27272a" />
+        <stop offset="50%" stopColor="#3f3f46" />
+        <stop offset="75%" stopColor="#27272a" />
+        <stop offset="100%" stopColor="#09090b" />
+      </linearGradient>
+      <radialGradient id="davies-cap-highlight" cx="50%" cy="28%" r="55%">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.25)" />
+        <stop offset="50%" stopColor="rgba(255,255,255,0.06)" />
+        <stop offset="100%" stopColor="rgba(0,0,0,0.5)" />
+      </radialGradient>
+      <radialGradient id="davies-brass-screw" cx="35%" cy="35%" r="65%">
+        <stop offset="0%" stopColor="#fef08a" />
+        <stop offset="60%" stopColor="#ca8a04" />
+        <stop offset="100%" stopColor="#713f12" />
+      </radialGradient>
+      <filter id="davies-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.85" />
+      </filter>
+    </defs>
+    {/* Fluted Base Skirt with Flutes & Brass Screw */}
+    <circle cx="50" cy="50" r="47.5" fill="url(#davies-skirt-grad)" stroke="#09090b" strokeWidth="1.5" filter="url(#davies-shadow)" />
+    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="0.8" />
+    {/* Skirt Flute Notches */}
+    {Array.from({ length: 24 }).map((_, i) => {
+      const a = (i * 15 * Math.PI) / 180;
+      const x1 = 50 + 44 * Math.sin(a);
+      const y1 = 50 - 44 * Math.cos(a);
+      const x2 = 50 + 47.5 * Math.sin(a);
+      const y2 = 50 - 47.5 * Math.cos(a);
+      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#09090b" strokeWidth="1.2" opacity={0.7} />;
+    })}
+    {/* Inner collar step */}
+    <circle cx="50" cy="50" r="35" fill="#18181b" stroke="#09090b" strokeWidth="1" />
+
+    {/* Authentic Davies 1900H Fluted Pointer Beak / Body */}
+    <path
+      d="M 50 10 C 53 10 59 18 61 28 C 63 36 61 42 63 48 C 65 54 66 60 66 67 C 66 77 59 84 50 84 C 41 84 34 77 34 67 C 34 60 35 54 37 48 C 39 42 37 36 39 28 C 41 18 47 10 50 10 Z"
+      fill="url(#davies-pointer-grad)"
+      stroke="#09090b"
+      strokeWidth="1.2"
+      filter="url(#davies-shadow)"
+    />
+
+    {/* Top Surface Highlight Overlay */}
+    <path
+      d="M 50 11 C 52.5 11 57.5 18.5 59.5 28 C 61.5 35.5 59.5 41.5 61.5 47.5 C 63.5 53.5 64.5 59.5 64.5 66.5 C 64.5 75.5 58 82 50 82 C 42 82 35.5 75.5 35.5 66.5 C 35.5 59.5 36.5 53.5 38.5 47.5 C 40.5 41.5 38.5 35.5 40.5 28 C 42.5 18.5 47.5 11 50 11 Z"
+      fill="url(#davies-cap-highlight)"
+    />
+
+    {/* Crisp White Radial Indicator Line */}
+    <line
+      x1="50"
+      y1="11"
+      x2="50"
+      y2="44"
+      stroke="#ffffff"
+      strokeWidth="3.4"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.95))"
     />
   </svg>
 );
@@ -1019,6 +1093,7 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'boss-gold' && <BossGoldKnobDial />}
           {variant === 'klon-oxblood' && <KlonOxbloodKnobDial />}
           {variant === 'ocd' && <OcdKnobDial />}
+          {variant === 'davies' && <DaviesKnobDial />}
           {variant === 'nobels' && <NobelsKnobDial />}
           {variant === 'archer' && <ArcherKnobDial />}
           {variant === 'bigmuff' && <BigMuffKnobDial />}
