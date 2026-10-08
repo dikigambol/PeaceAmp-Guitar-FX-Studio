@@ -19,6 +19,11 @@ import { TsMiniPedal } from './overdrives/TsMiniPedal';
 import { NobelsOdr1Pedal } from './overdrives/NobelsOdr1Pedal';
 import { RockettArcherPedal } from './overdrives/RockettArcherPedal';
 import { BigMuffPedal } from './fuzz/BigMuffPedal';
+import { FuzzFacePedal } from './fuzz/FuzzFacePedal';
+import { ToneBenderPedal } from './fuzz/ToneBenderPedal';
+import { FuzzFactoryPedal } from './fuzz/FuzzFactoryPedal';
+import { FlatironFuzzPedal } from './fuzz/FlatironFuzzPedal';
+import { EqdHoofPedal } from './fuzz/EqdHoofPedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -87,6 +92,16 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
     // Category 4: Fuzz
     case 'fuzz-bigmuff':
       return <BigMuffPedal {...props} />;
+    case 'fuzz-fuzzface':
+      return <FuzzFacePedal {...props} />;
+    case 'fuzz-tonebender':
+      return <ToneBenderPedal {...props} />;
+    case 'fuzz-fuzzfactory':
+      return <FuzzFactoryPedal {...props} />;
+    case 'fuzz-flatiron':
+      return <FlatironFuzzPedal {...props} />;
+    case 'fuzz-hoof':
+      return <EqdHoofPedal {...props} />;
   }
 
   // Fallback for standard analog enclosure

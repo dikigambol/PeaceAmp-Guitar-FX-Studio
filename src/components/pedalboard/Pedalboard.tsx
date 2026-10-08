@@ -305,13 +305,18 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       const pedal = pedals.find((p) => p.id === nodeId);
       const isWide = pedal?.type === 'od-klon' || pedal?.type === 'klon-centaur';
       const isMini = pedal?.type === 'od-tsmini' || pedal?.type === 'ts-mini';
-      const curWidth = isWide ? 260 : isMini ? 140 : PEDAL_WIDTH;
+      const isFuzzFace = pedal?.type === 'fuzz-fuzzface';
+      const isToneBender = pedal?.type === 'fuzz-tonebender';
+      const isFuzzFactory = pedal?.type === 'fuzz-fuzzfactory';
+      const isFlatiron = pedal?.type === 'fuzz-flatiron';
+      const curWidth = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : PEDAL_WIDTH;
+      const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isFlatiron ? 114 : JACK_Y_OFFSET;
       if (port === 'in') {
         // Left side jack
-        return { x: pos.x - 2, y: pos.y + JACK_Y_OFFSET };
+        return { x: pos.x - 2, y: pos.y + curJackY };
       } else {
         // Right side jack
-        return { x: pos.x + curWidth + 2, y: pos.y + JACK_Y_OFFSET };
+        return { x: pos.x + curWidth + 2, y: pos.y + curJackY };
       }
     },
     [surfaceWidth, positions, pedals]

@@ -16,6 +16,11 @@ import { TsMiniNode } from './overdrive/TsMiniNode';
 import { NobelsOdr1Node } from './overdrive/NobelsOdr1Node';
 import { RockettArcherNode } from './overdrive/RockettArcherNode';
 import { BigMuffNode } from './fuzz/BigMuffNode';
+import { FuzzFaceNode } from './fuzz/FuzzFaceNode';
+import { ToneBenderNode } from './fuzz/ToneBenderNode';
+import { FuzzFactoryNode } from './fuzz/FuzzFactoryNode';
+import { FlatironFuzzNode } from './fuzz/FlatironFuzzNode';
+import { EqdHoofNode } from './fuzz/EqdHoofNode';
 
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
@@ -225,6 +230,72 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       { id: 'sustain', name: 'SUSTAIN', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
     ],
   },
+  'fuzz-fuzzface': {
+    type: 'fuzz-fuzzface',
+    name: 'Fuzz Face',
+    subtitle: 'Dallas Arbiter Germanium PNP',
+    category: 'fuzz',
+    chassisColor: '#dc2626',
+    accentColor: '#ffffff',
+    parameters: [
+      { id: 'volume', name: 'VOLUME', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'fuzz', name: 'FUZZ', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
+  'fuzz-tonebender': {
+    type: 'fuzz-tonebender',
+    name: 'Tone Bender',
+    subtitle: 'Sola Sound Professional MKII',
+    category: 'fuzz',
+    chassisColor: '#94a3b8',
+    accentColor: '#0f172a',
+    parameters: [
+      { id: 'level', name: 'LEVEL', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'attack', name: 'ATTACK', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
+  'fuzz-fuzzfactory': {
+    type: 'fuzz-fuzzfactory',
+    name: 'ZVEX Fuzz Factory',
+    subtitle: '5-Knob Oscillating Germanium Fuzz',
+    category: 'fuzz',
+    chassisColor: '#e2e8f0',
+    accentColor: '#0f172a',
+    parameters: [
+      { id: 'vol', name: 'VOL', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'gate', name: 'GATE', min: 0, max: 10, step: 0.1, defaultValue: 4, formatValue: (v) => v.toFixed(1) },
+      { id: 'comp', name: 'COMP', min: 0, max: 10, step: 0.1, defaultValue: 3, formatValue: (v) => v.toFixed(1) },
+      { id: 'drive', name: 'DRIVE', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+      { id: 'stab', name: 'STAB', min: 0, max: 10, step: 0.1, defaultValue: 8.5, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
+  'fuzz-flatiron': {
+    type: 'fuzz-flatiron',
+    name: 'Electro-Harmonix Fuzz',
+    subtitle: 'Flatiron Op-Amp Hard Clipper',
+    category: 'fuzz',
+    chassisColor: '#f8fafc',
+    accentColor: '#ea580c',
+    parameters: [
+      { id: 'vol', name: 'VOL', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'drive', name: 'DRIVE', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+      { id: 'filter', name: 'FILTER', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
+  'fuzz-hoof': {
+    type: 'fuzz-hoof',
+    name: 'EarthQuaker Devices Hoof',
+    subtitle: 'Hybrid Ge/Si Fuzz with Shift EQ',
+    category: 'fuzz',
+    chassisColor: '#b45309',
+    accentColor: '#18181b',
+    parameters: [
+      { id: 'shift', name: 'SHIFT', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'tone', name: 'TONE', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'level', name: 'LEVEL', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'fuzz', name: 'FUZZ', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -270,6 +341,16 @@ export function createPedalAudioNode(
     // Fuzz
     case 'fuzz-bigmuff':
       return new BigMuffNode(ctx, id, initialParams, enabled);
+    case 'fuzz-fuzzface':
+      return new FuzzFaceNode(ctx, id, initialParams, enabled);
+    case 'fuzz-tonebender':
+      return new ToneBenderNode(ctx, id, initialParams, enabled);
+    case 'fuzz-fuzzfactory':
+      return new FuzzFactoryNode(ctx, id, initialParams, enabled);
+    case 'fuzz-flatiron':
+      return new FlatironFuzzNode(ctx, id, initialParams, enabled);
+    case 'fuzz-hoof':
+      return new EqdHoofNode(ctx, id, initialParams, enabled);
 
     default:
       throw new Error(`Unknown pedal type: ${type}`);

@@ -294,6 +294,7 @@ body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -6134,6 +6135,7 @@ body {
   box-shadow: inset 0 0.5px 1px rgba(0, 0, 0, 0.6), 0 1px 2px rgba(0, 0, 0, 0.4);
   z-index: 6;
 }
+
 .bm-screw::after {
   content: '';
   position: absolute;
@@ -6144,10 +6146,26 @@ body {
   background: #1e293b;
   transform: translateY(-50%) rotate(42deg);
 }
-.bm-screw.top-left { top: 8px; left: 6px; }
-.bm-screw.top-right { top: 8px; right: 6px; }
-.bm-screw.bottom-left { bottom: 8px; left: 6px; }
-.bm-screw.bottom-right { bottom: 8px; right: 6px; }
+
+.bm-screw.top-left {
+  top: 8px;
+  left: 6px;
+}
+
+.bm-screw.top-right {
+  top: 8px;
+  right: 6px;
+}
+
+.bm-screw.bottom-left {
+  bottom: 8px;
+  left: 6px;
+}
+
+.bm-screw.bottom-right {
+  bottom: 8px;
+  right: 6px;
+}
 
 /* Main Faceplate Silkscreen Border */
 .bigmuff-faceplate {
@@ -6173,6 +6191,7 @@ body {
   margin-top: 1px;
   margin-bottom: 2px;
 }
+
 .bm-io-label {
   font-family: var(--font-ui), sans-serif;
   font-size: 8px;
@@ -6209,9 +6228,11 @@ body {
   align-items: center;
   gap: 0;
 }
+
 .knob-variant-bigmuff .knob-dial-wrapper {
   order: 1;
 }
+
 .knob-variant-bigmuff .knob-label {
   order: 2;
   margin-top: 3px;
@@ -6327,12 +6348,14 @@ body {
   margin-top: 1px;
   margin-bottom: 4px;
 }
+
 .bigmuff-stomp-wrap {
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .bigmuff-switch-nut {
   width: 36px;
   height: 36px;
@@ -6345,9 +6368,11 @@ body {
   justify-content: center;
   transition: transform 0.08s ease;
 }
+
 .bigmuff-stomp-wrap:active .bigmuff-switch-nut {
   transform: scale(0.92);
 }
+
 .bigmuff-switch-plunger {
   width: 19px;
   height: 19px;
@@ -6364,6 +6389,7 @@ body {
   align-items: center;
   margin-top: 0;
 }
+
 .bigmuff-brand {
   font-family: 'Bookman Old Style', 'Georgia', 'Times New Roman', serif;
   font-style: italic;
@@ -6373,6 +6399,7 @@ body {
   letter-spacing: 0.5px;
   line-height: 1;
 }
+
 .bigmuff-origin {
   font-family: var(--font-ui), sans-serif;
   font-size: 7.5px;
@@ -6390,6 +6417,1001 @@ body {
   letter-spacing: 1.2px;
   margin-top: 2px;
   text-align: center;
+}
+
+/* ==========================================================================
+   2. FUZZ FACE (DALLAS ARBITER GERMANIUM MINI ROUND DISC CHASSIS)
+   ========================================================================== */
+.pedal-fuzzface {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 270px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+}
+
+/* Side phone jacks: directly hugging the circular disc perimeter at Y = 86px */
+.pedal-fuzzface .stompbox-side-jack {
+  top: 75px !important;
+  z-index: 20 !important;
+}
+
+.pedal-fuzzface .stompbox-side-jack.jack-left {
+  left: -4px !important;
+}
+
+.pedal-fuzzface .stompbox-side-jack.jack-right {
+  right: -4px !important;
+}
+
+.fuzzface-circular-body {
+  width: 204px;
+  height: 204px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 32%, #ef4444 0%, #dc2626 25%, #b91c1c 60%, #991b1b 85%, #6f121b 100%);
+  border: 2.5px solid #450a0a;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.9),
+    inset 0 2px 5px rgba(255, 255, 255, 0.5),
+    inset 0 -6px 14px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin-top: 10px;
+}
+
+/* Close button mounted cleanly on top-right in Big Muff style */
+.pedal-fuzzface .ff-top-bar {
+  position: absolute;
+  top: 6px;
+  right: 18px;
+  width: auto;
+  z-index: 35;
+  padding: 0;
+}
+
+.fuzzface-curved-banner {
+  width: 100%;
+  height: 38px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.fuzzface-banner-svg {
+  width: 160px;
+  height: 38px;
+}
+
+.fuzzface-svg-title {
+  font-family: 'Arial Rounded MT Bold', 'Chalkboard SE', 'Comic Sans MS', cursive, sans-serif;
+  font-size: 14.5px;
+  font-weight: 900;
+  fill: #ffffff;
+  letter-spacing: 2.2px;
+  filter: drop-shadow(0 1.5px 2px rgba(0, 0, 0, 0.95));
+}
+
+.fuzzface-center-led-mount {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.fuzzface-led-bezel {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 50%, #475569 100%);
+  border: 1.2px solid #0f172a;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fuzzface-blue-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1e3a8a 0%, #0c1833 100%);
+  border: 0.5px solid #000000;
+  transition: all 0.15s ease;
+}
+
+.fuzzface-blue-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #7dd3fc 35%, #0284c7 75%, #0369a1 100%);
+  box-shadow: 0 0 10px #38bdf8, 0 0 20px #0284c7;
+  border-color: #bae6fd;
+}
+
+.fuzzface-knobs-spread {
+  width: 100%;
+  position: absolute;
+  top: 48px;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 14px;
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+.fuzzface-knob-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.fuzzface-pot-label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 9.5px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95);
+  margin-top: 1px;
+}
+
+.fuzzface-teardrop {
+  width: 9px;
+  height: 9px;
+}
+
+.fuzzface-teardrop.left {
+  transform: rotate(-90deg);
+}
+
+.fuzzface-teardrop.right {
+  transform: rotate(90deg);
+}
+
+.fuzzface-smile-wedge {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 108px;
+  height: 96px;
+  background: #18181b;
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 12px;
+  box-sizing: border-box;
+  z-index: 6;
+  border-bottom: 2px solid #09090b;
+}
+
+.fuzzface-rubber-texture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(90deg, #18181b 0px, #18181b 3px, #27272a 4px, #09090b 5.5px);
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+.fuzzface-bottom-teeth {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92px;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, #18181b 0px, #18181b 3px, transparent 3px, transparent 6px);
+  z-index: 7;
+}
+
+/* ==========================================================================
+   3. TONE BENDER (SOLA SOUND MKII VINTAGE SMOOTH CURVED CHASSIS)
+   ========================================================================== */
+.pedal-tonebender {
+  width: 186px !important;
+  max-width: 186px !important;
+  min-height: 300px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+}
+
+/* Close button mounted cleanly on top-right in Big Muff style */
+.pedal-tonebender .tb-top-bar {
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  width: auto;
+  z-index: 35;
+  padding: 0;
+}
+
+/* 1/4" Side Patch Jacks hugging the curved chassis sides */
+.pedal-tonebender .stompbox-side-jack {
+  top: 57px !important;
+  z-index: 25 !important;
+}
+
+.pedal-tonebender .stompbox-side-jack.jack-left {
+  left: -4px !important;
+}
+
+.pedal-tonebender .stompbox-side-jack.jack-right {
+  right: -4px !important;
+}
+
+/* Main Chassis Container with Rounded Curves */
+.tonebender-chassis {
+  width: 186px;
+  height: 300px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Vector Artwork for Smooth Cast-Metal Rim with Curvature */
+.tb-chassis-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Chassis Content Container */
+.tb-chassis-content {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 22px 10px 14px;
+  box-sizing: border-box;
+}
+
+/* Vintage British Sola Sound Grotesque Typography: Tone Bender */
+.tb-brand-area {
+  margin-top: 14px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 0.9;
+  user-select: none;
+}
+
+.tb-title-tone {
+  font-family: 'Gill Sans', 'Century Gothic', 'Trebuchet MS', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.3);
+  margin-right: 18px;
+}
+
+.tb-title-bender {
+  font-family: 'Gill Sans', 'Century Gothic', 'Trebuchet MS', sans-serif;
+  font-size: 27px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.3);
+  margin-left: 20px;
+}
+
+/* 2 Knobs: LEVEL and ATTACK */
+.tb-knobs-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 4px;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.tb-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.tb-knob-title {
+  font-family: 'Century Gothic', 'Trebuchet MS', 'Gill Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Knob variant for Tone Bender Chicken-Head */
+.knob-variant-tonebender {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+
+.knob-variant-tonebender .knob-dial-wrapper {
+  cursor: ns-resize;
+}
+
+/* Classic 3PDT Footswitch Section */
+.tb-stomp-section {
+  margin-top: auto;
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ==========================================================================
+   4. ZVEX FUZZ FACTORY (HORIZONTAL WIDESCREEN BRUSHED ALUMINUM VEXTER)
+   ========================================================================== */
+.pedal-fuzzfactory {
+  width: 250px !important;
+  max-width: 250px !important;
+  min-height: 176px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 30%, #cbd5e1 70%, #94a3b8 100%) !important;
+  border: 2px solid #64748b !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.8),
+    inset 0 1px 3px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.45) !important;
+  padding: 10px 10px 12px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* Close button mounted on top-right in Big Muff style */
+.pedal-fuzzfactory .ff-top-bar {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: auto;
+  z-index: 35;
+  padding: 0;
+}
+
+/* 1/4" Side Patch Jacks hugging horizontal edges */
+.pedal-fuzzfactory .stompbox-side-jack {
+  top: 77px !important;
+  z-index: 25 !important;
+}
+
+.pedal-fuzzfactory .stompbox-side-jack.jack-left {
+  left: -4px !important;
+}
+
+.pedal-fuzzfactory .stompbox-side-jack.jack-right {
+  right: -4px !important;
+}
+
+.fuzzfactory-faceplate {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* 5 Knobs Row */
+.ff-knobs-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.ff-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ff-knob-name {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+  font-size: 11.5px;
+  font-weight: 900;
+  color: #111827;
+  letter-spacing: 0.5px;
+  margin-top: 1px;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Bottom Deck: Psychedelic Logo (left), Actuator/LED (center), Branding (right) */
+.ff-bottom-deck {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+/* Psychedelic Bubble Logo */
+.ff-psychedelic-logo {
+  display: flex;
+  flex-direction: column;
+  line-height: 0.9;
+  user-select: none;
+  margin-bottom: 0px;
+  transform: translateY(9px);
+}
+
+.ff-bubble-fuzz {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #ef4444;
+  -webkit-text-stroke: 1.2px #111827;
+  text-shadow: 2px 2px 0 #111827;
+}
+
+.ff-bubble-factory {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #f97316;
+  -webkit-text-stroke: 1px #111827;
+  text-shadow: 1.5px 1.5px 0 #111827;
+  margin-top: 3px;
+}
+
+/* Center Footswitch & Saturn Mount */
+.ff-center-actuator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  transform: translateY(8px);
+}
+
+.ff-saturn-led-mount {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transform: translateY(1px);
+}
+
+.ff-saturn-svg {
+  width: 24px;
+  height: 12px;
+}
+
+.ff-pilot-led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #7f1d1d 0%, #450a0a 100%);
+  border: 0.8px solid #0f172a;
+  transition: all 0.15s ease;
+}
+
+.ff-pilot-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 45%, #b91c1c 100%);
+  box-shadow: 0 0 10px #ef4444, 0 0 18px rgba(239, 68, 68, 0.9);
+  border-color: #fca5a5;
+}
+
+/* Right Vexter ZVEX Branding */
+.ff-branding-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+  user-select: none;
+  margin-bottom: 0px;
+  transform: translateY(7px);
+}
+
+.ff-vexter-label {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 7px;
+  font-weight: 800;
+  color: #475569;
+  letter-spacing: 1.2px;
+}
+
+.ff-zvex-logo {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  color: #111827;
+  letter-spacing: 2px;
+  margin: 1px 0;
+}
+
+.ff-effects-label {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  color: #334155;
+  letter-spacing: 2.2px;
+}
+
+/* Hand-drawn OUT and IN labels */
+.ff-io-handwrite {
+  position: absolute;
+  top: 76px;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-size: 9px;
+  font-weight: 900;
+  color: #1e293b;
+  user-select: none;
+}
+
+.ff-io-handwrite.left {
+  left: 5px;
+}
+
+.ff-io-handwrite.right {
+  right: 5px;
+}
+
+/* ==========================================================================
+   5. FLATIRON FUZZ (ELECTRO-HARMONIX RETRO ANALOG ORANGE NANO)
+   ========================================================================== */
+.pedal-flatiron {
+  width: 148px !important;
+  max-width: 148px !important;
+  min-height: 242px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 40%, #e2e8f0 100%) !important;
+  border: 2px solid #cbd5e1 !important;
+  border-radius: 14px !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.85),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.95),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.35) !important;
+  padding: 6px 7px 8px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* Close button mounted on top-right in Big Muff style */
+.pedal-flatiron .flatiron-top-bar {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  width: auto;
+  z-index: 35;
+  padding: 0;
+}
+
+/* 1/4" Side Patch Jacks aligned on sides */
+.pedal-flatiron .stompbox-side-jack {
+  top: 103px !important;
+  z-index: 25 !important;
+}
+
+.pedal-flatiron .stompbox-side-jack.jack-left {
+  left: -4px !important;
+}
+
+.pedal-flatiron .stompbox-side-jack.jack-right {
+  right: -4px !important;
+}
+
+/* Vibrant Retro Orange Silkscreen Faceplate */
+.flatiron-faceplate {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #ea580c 0%, #f97316 45%, #ea580c 100%);
+  border: 2px solid #ffffff;
+  outline: 2px solid #ea580c;
+  border-radius: 10px;
+  padding: 4px 6px 6px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 10px rgba(124, 45, 18, 0.5);
+}
+
+/* Flatiron Building Skyscraper Background Graphic */
+.flatiron-building-svg-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flatiron-building-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 9V DC Power Tag at Top */
+.flatiron-power-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: #ffffff;
+  margin-top: 1px;
+  z-index: 5;
+  user-select: none;
+}
+
+.fl-power-text {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.fl-power-icon {
+  width: 15px;
+  height: 8px;
+}
+
+/* Side Jacks Silk Text: AMP. & INPUT */
+.flatiron-side-text {
+  position: absolute;
+  top: 106px;
+  font-family: var(--font-ui), sans-serif;
+  font-size: 7px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  z-index: 5;
+  user-select: none;
+}
+
+.fl-side-arrow {
+  font-size: 6px;
+}
+
+.flatiron-side-text.left {
+  left: -10px;
+  transform: translateY(-50%) rotate(-90deg);
+}
+
+.flatiron-side-text.right {
+  right: -10px;
+  transform: translateY(-50%) rotate(90deg);
+}
+
+/* Triangle Knobs Configuration */
+.flatiron-knobs-area {
+  width: 100%;
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 5;
+}
+
+.flatiron-knobs-top-row {
+  width: 92%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flatiron-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.flatiron-knob-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  margin-top: -3px;
+}
+
+.flatiron-knob-lbl {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  user-select: none;
+}
+
+/* Retro 1970s Inline Block Typography: FLATIRON */
+.flatiron-logo-wrap {
+  margin-top: 18px;
+  margin-bottom: 2px;
+  text-align: center;
+  z-index: 5;
+  user-select: none;
+}
+
+.flatiron-title-art {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 14.5px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1.2px;
+  -webkit-text-stroke: 0.7px #7c2d12;
+  text-shadow:
+    0 0 1px #7c2d12,
+    1.5px 1.5px 0 #7c2d12;
+}
+
+/* Stomp Switch & Red Bezel Pilot LED - Strictly Centered Horizontally & Vertically */
+.flatiron-stomp-row {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: auto 0;
+  z-index: 5;
+}
+
+.flatiron-stomp-row .classic-stomp-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flatiron-led-mount {
+  position: absolute;
+  left: calc(50% + 24px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flatiron-led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #7f1d1d 0%, #450a0a 100%);
+  border: 1.2px solid #e2e8f0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8), 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: all 0.15s ease;
+}
+
+.flatiron-led.active {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 45%, #b91c1c 100%);
+  box-shadow: 0 0 10px #ef4444, 0 0 18px rgba(239, 68, 68, 0.9);
+  border-color: #fca5a5;
+}
+
+/* Retro 1970s Inline Block Typography: FUZZ */
+.flatiron-fuzz-wrap {
+  margin-top: 2px;
+  margin-bottom: 4px;
+  text-align: center;
+  z-index: 5;
+  user-select: none;
+}
+
+.flatiron-fuzz-art {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 3px;
+  -webkit-text-stroke: 0.8px #7c2d12;
+  text-shadow:
+    0 0 1px #7c2d12,
+    1.5px 1.5px 0 #7c2d12;
+}
+
+/* Footer: electro-harmonix & NEW YORK CITY, USA */
+.flatiron-footer {
+  margin-top: 0;
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  z-index: 5;
+  user-select: none;
+}
+
+.flatiron-ehx-text {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-style: italic;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.flatiron-nyc-text {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 6px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1.2px;
+  margin-top: 1.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ==========================================================================
+   6. EARTHQUAKER DEVICES HOOF (GOLD SPARKLE & SHIFT EQ)
+   ========================================================================== */
+.pedal-eqd-hoof {
+  background: radial-gradient(circle at 45% 20%, #f59e0b 0%, #d97706 45%, #b45309 80%, #78350f 100%) !important;
+  border: 2px solid #78350f !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.7) !important;
+  padding: 8px 10px 12px !important;
+}
+
+.hoof-faceplate {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hoof-power-mark {
+  font-family: var(--font-mono), monospace;
+  font-size: 7.5px;
+  font-weight: 900;
+  color: #18181b;
+  letter-spacing: 1px;
+  margin-top: 1px;
+}
+
+.hoof-knobs-shield {
+  width: 96%;
+  background: linear-gradient(180deg, #18181b 0%, #09090b 100%);
+  border-radius: 6px;
+  border: 1px solid #27272a;
+  padding: 6px 4px 8px;
+  box-sizing: border-box;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(255, 255, 255, 0.2);
+  margin-top: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hoof-knobs-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.hoof-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.hoof-knob-lbl {
+  font-family: 'Times New Roman', 'Palatino', serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #f59e0b;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.hoof-lower-section {
+  width: 100%;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.hoof-stomp-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hoof-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #713f12 0%, #451a03 100%);
+  border: 1px solid #1c1917;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  transition: all 0.15s ease;
+}
+
+.hoof-led.active {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fef08a 40%, #eab308 100%);
+  box-shadow: 0 0 10px #fef08a, 0 0 20px rgba(234, 179, 8, 0.9);
+  border-color: #fef08a;
+}
+
+.hoof-branding {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.hoof-title {
+  font-family: 'Book Antiqua', 'Palatino', 'Georgia', serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #18181b;
+  letter-spacing: 1.5px;
+}
+
+.hoof-subtitle {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  color: #18181b;
+  letter-spacing: 0.8px;
+  margin-top: 1px;
 }
 
 /* KNOB DIAL SVG & AUTHENTIC PEDAL VARIANTS */

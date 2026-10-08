@@ -28,6 +28,10 @@ export interface KnobProps {
     | 'nobels'
     | 'archer'
     | 'bigmuff'
+    | 'fuzzface'
+    | 'tonebender'
+    | 'fuzzfactory'
+    | 'flatiron'
     | 'tsmini-small'
     | 'tsmini-large';
   showLabel?: boolean;
@@ -688,6 +692,228 @@ const BigMuffKnobDial: React.FC = () => (
   </svg>
 );
 
+const FuzzFaceKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="ff-dial-body-grad" cx="42%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#373d48" />
+        <stop offset="45%" stopColor="#1e222a" />
+        <stop offset="85%" stopColor="#101217" />
+        <stop offset="100%" stopColor="#08090c" />
+      </radialGradient>
+      <radialGradient id="ff-dial-cap-grad" cx="44%" cy="40%" r="60%">
+        <stop offset="0%" stopColor="#404754" />
+        <stop offset="55%" stopColor="#222630" />
+        <stop offset="100%" stopColor="#0d0f14" />
+      </radialGradient>
+      <filter id="ff-dial-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.85" />
+      </filter>
+      <mask id="ff-scallop-mask">
+        <rect x="0" y="0" width="100" height="100" fill="#ffffff" />
+        {/* 6 authentic Dunlop/Arbiter scallop indentations */}
+        <circle cx="50" cy="2" r="10.5" fill="#000000" />
+        <circle cx="91.56" cy="26" r="10.5" fill="#000000" />
+        <circle cx="91.56" cy="74" r="10.5" fill="#000000" />
+        <circle cx="50" cy="98" r="10.5" fill="#000000" />
+        <circle cx="8.44" cy="74" r="10.5" fill="#000000" />
+        <circle cx="8.44" cy="26" r="10.5" fill="#000000" />
+      </mask>
+    </defs>
+    {/* Scalloped outer skirt */}
+    <circle
+      cx="50"
+      cy="50"
+      r="48"
+      fill="url(#ff-dial-body-grad)"
+      filter="url(#ff-dial-shadow)"
+      mask="url(#ff-scallop-mask)"
+    />
+    {/* Outer bevel ring */}
+    <circle cx="50" cy="50" r="46.5" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="0.8" />
+    {/* Inner smooth raised cap */}
+    <circle cx="50" cy="50" r="33" fill="url(#ff-dial-cap-grad)" stroke="#090b0e" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="31.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
+    {/* Crisp White Radial Indicator Line */}
+    <line
+      x1="50"
+      y1="8"
+      x2="50"
+      y2="42"
+      stroke="#ffffff"
+      strokeWidth="3.4"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.9))"
+    />
+  </svg>
+);
+
+const ToneBenderChickenHeadDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      {/* Glossy Bakelite Circular Base Gradient */}
+      <radialGradient id="tb-base-grad" cx="42%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#374151" />
+        <stop offset="55%" stopColor="#1e242d" />
+        <stop offset="100%" stopColor="#0a0c10" />
+      </radialGradient>
+      {/* Chicken Head Left Bevel / Shadow Facet */}
+      <linearGradient id="tb-facet-left" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#11151c" />
+        <stop offset="60%" stopColor="#1f252e" />
+        <stop offset="100%" stopColor="#2e3642" />
+      </linearGradient>
+      {/* Chicken Head Right Bevel / Specular Highlight Facet */}
+      <linearGradient id="tb-facet-right" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stopColor="#3a4452" />
+        <stop offset="40%" stopColor="#252c38" />
+        <stop offset="100%" stopColor="#0d1015" />
+      </linearGradient>
+      {/* Realistic Drop Shadow */}
+      <filter id="tb-chicken-shadow" x="-30%" y="-30%" width="160%" height="160%">
+        <feDropShadow dx="0" dy="3" stdDeviation="2.8" floodColor="#000000" floodOpacity="0.85" />
+      </filter>
+    </defs>
+
+    {/* Circular Skirt / Base Flange */}
+    <circle
+      cx="50"
+      cy="50"
+      r="44"
+      fill="url(#tb-base-grad)"
+      filter="url(#tb-chicken-shadow)"
+    />
+    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
+    <circle cx="50" cy="50" r="32" fill="none" stroke="#090c10" strokeWidth="1.2" />
+
+    {/* Raised Pointer Body / Beak - Main Silhouette */}
+    <g filter="url(#tb-chicken-shadow)">
+      {/* Left Half of Chicken Head (Darker faceted ridge) */}
+      <path
+        d="M 50 7 C 48 7, 45 12, 42 24 C 38 36, 32 46, 32 58 C 32 70, 40 78, 50 78 Z"
+        fill="url(#tb-facet-left)"
+        stroke="#090b0e"
+        strokeWidth="1"
+      />
+      {/* Right Half of Chicken Head (Glossy specular facet) */}
+      <path
+        d="M 50 7 C 52 7, 55 12, 58 24 C 62 36, 68 46, 68 58 C 68 70, 60 78, 50 78 Z"
+        fill="url(#tb-facet-right)"
+        stroke="#090b0e"
+        strokeWidth="1"
+      />
+    </g>
+
+    {/* Center Spine highlight line */}
+    <line
+      x1="50"
+      y1="9"
+      x2="50"
+      y2="76"
+      stroke="rgba(255,255,255,0.18)"
+      strokeWidth="0.75"
+    />
+
+    {/* Central Screw Boss / Center Cap */}
+    <circle cx="50" cy="52" r="9" fill="#181c24" stroke="#090b0e" strokeWidth="1" />
+    <circle cx="50" cy="52" r="7.5" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.6" />
+    <circle cx="50" cy="52" r="3.2" fill="#080a0d" />
+
+    {/* Crisp White Vintage Pointer Indicator Line (guaranteed x=50, perpendicular) */}
+    <line
+      x1="50"
+      y1="8"
+      x2="50"
+      y2="38"
+      stroke="#ffffff"
+      strokeWidth="3.2"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.95))"
+    />
+  </svg>
+);
+
+const FuzzFactoryKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="ffact-body-grad" cx="40%" cy="35%" r="65%">
+        <stop offset="0%" stopColor="#374151" />
+        <stop offset="50%" stopColor="#181c24" />
+        <stop offset="100%" stopColor="#080a0e" />
+      </radialGradient>
+      <radialGradient id="ffact-cap-grad" cx="42%" cy="38%" r="60%">
+        <stop offset="0%" stopColor="#333b47" />
+        <stop offset="60%" stopColor="#1a1e27" />
+        <stop offset="100%" stopColor="#0c0e13" />
+      </radialGradient>
+      <filter id="ffact-dial-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2.2" floodColor="#000000" floodOpacity="0.8" />
+      </filter>
+    </defs>
+    {/* Fluted circular outer body */}
+    <circle cx="50" cy="50" r="48" fill="url(#ffact-body-grad)" filter="url(#ffact-dial-shadow)" />
+    {/* Davies 1900h flutes around rim */}
+    <circle cx="50" cy="50" r="47" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
+    {/* Inner raised smooth cap */}
+    <circle cx="50" cy="50" r="33" fill="url(#ffact-cap-grad)" stroke="#080a0e" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="31.5" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="0.75" />
+    {/* Thick Crisp White Radial Pointer Line */}
+    <line
+      x1="50"
+      y1="8"
+      x2="50"
+      y2="42"
+      stroke="#ffffff"
+      strokeWidth="3.6"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.9))"
+    />
+  </svg>
+);
+
+const FlatironKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="fl-body-grad" cx="44%" cy="38%" r="62%">
+        <stop offset="0%" stopColor="#374151" />
+        <stop offset="45%" stopColor="#1f2937" />
+        <stop offset="85%" stopColor="#111827" />
+        <stop offset="100%" stopColor="#030712" />
+      </radialGradient>
+      <radialGradient id="fl-cap-grad" cx="42%" cy="36%" r="60%">
+        <stop offset="0%" stopColor="#4b5563" />
+        <stop offset="35%" stopColor="#29303d" />
+        <stop offset="75%" stopColor="#131722" />
+        <stop offset="100%" stopColor="#080a0e" />
+      </radialGradient>
+      <linearGradient id="fl-rim-bevel" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.3)" />
+        <stop offset="100%" stopColor="rgba(0,0,0,0.6)" />
+      </linearGradient>
+      <filter id="fl-dial-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.85" />
+      </filter>
+    </defs>
+    {/* Smooth Round Cylindrical Outer Skirt */}
+    <circle cx="50" cy="50" r="48" fill="url(#fl-body-grad)" filter="url(#fl-dial-shadow)" />
+    <circle cx="50" cy="50" r="47.5" fill="none" stroke="url(#fl-rim-bevel)" strokeWidth="1" />
+    {/* Inner Smooth Rounded Dome */}
+    <circle cx="50" cy="50" r="36" fill="url(#fl-cap-grad)" stroke="#090c10" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="34.5" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="0.8" />
+    {/* Crisp White Radial Indicator Stripe */}
+    <line
+      x1="50"
+      y1="7"
+      x2="50"
+      y2="38"
+      stroke="#ffffff"
+      strokeWidth="3.6"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.9))"
+    />
+  </svg>
+);
+
 export const Knob: React.FC<KnobProps> = ({
   label,
   value,
@@ -796,6 +1022,10 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'nobels' && <NobelsKnobDial />}
           {variant === 'archer' && <ArcherKnobDial />}
           {variant === 'bigmuff' && <BigMuffKnobDial />}
+          {variant === 'fuzzface' && <FuzzFaceKnobDial />}
+          {variant === 'tonebender' && <ToneBenderChickenHeadDial />}
+          {variant === 'fuzzfactory' && <FuzzFactoryKnobDial />}
+          {variant === 'flatiron' && <FlatironKnobDial />}
           {variant === 'tsmini-small' && <TsMiniSmallDial />}
           {variant === 'tsmini-large' && <TsMiniLargeDial />}
           {variant === 'default' && <DefaultKnobDial color={color} />}
