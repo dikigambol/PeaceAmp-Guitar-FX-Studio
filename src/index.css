@@ -2477,7 +2477,8 @@ body {
 }
 
 .dropdown-category-tabs {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 5px;
   padding: 7px 12px;
   background: #121620;
@@ -2485,14 +2486,19 @@ body {
 }
 
 .cat-tab-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
   background: #1c2230;
   border: 1px solid #2a3346;
   color: #94a3b8;
   font-size: 9.5px;
   font-weight: 700;
   border-radius: 12px;
-  padding: 2.5px 9px;
+  padding: 3px 6px;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.15s ease;
 }
 
@@ -2568,9 +2574,9 @@ body {
 }
 
 .fuzz-tag {
-  background: rgba(225, 29, 72, 0.18);
-  color: #fb7185;
-  border: 1px solid rgba(225, 29, 72, 0.4);
+  background: rgba(200, 166, 101, 0.18);
+  color: #d4b476;
+  border: 1px solid rgba(200, 166, 101, 0.4);
 }
 
 .group-count {
@@ -2676,9 +2682,9 @@ body {
 }
 
 .item-pill-badge.fuzz {
-  background: rgba(225, 29, 72, 0.18);
-  color: #fb7185;
-  border: 1px solid rgba(225, 29, 72, 0.4);
+  background: rgba(200, 166, 101, 0.18);
+  color: #d4b476;
+  border: 1px solid rgba(200, 166, 101, 0.4);
 }
 
 .dropdown-item-info .item-desc {

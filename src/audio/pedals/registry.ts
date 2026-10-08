@@ -287,7 +287,7 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
     name: 'EarthQuaker Devices Hoof',
     subtitle: 'Hybrid Ge/Si Fuzz with Shift EQ',
     category: 'fuzz',
-    chassisColor: '#b45309',
+    chassisColor: '#caa137',
     accentColor: '#18181b',
     parameters: [
       { id: 'shift', name: 'SHIFT', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
