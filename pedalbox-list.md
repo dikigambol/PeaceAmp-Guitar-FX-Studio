@@ -18,10 +18,9 @@
 
 3. Distortion
 -Boss DS-1
--Boss DS-2 Turbo Distortion
--ProCo RAT
 -Boss MT-2 Metal Zone
 -Boss HM-2 Heavy Metal
+-ProCo RAT
 -MXR Distortion+
 -Marshall ShredMaster
 -Ibanez SM7 Smash Box
@@ -45,8 +44,6 @@
 
 7. EQ
 -Boss GE-7
--MXR 10-Band EQ
--Boss EQ-200
 
 8. Chorus
 -Boss CE-2

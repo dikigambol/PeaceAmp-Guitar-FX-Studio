@@ -22,6 +22,9 @@ import { FuzzFactoryNode } from './fuzz/FuzzFactoryNode';
 import { FlatironFuzzNode } from './fuzz/FlatironFuzzNode';
 import { EqdHoofNode } from './fuzz/EqdHoofNode';
 
+// Distortion Nodes
+import { BossDs1Node } from './distortion/BossDs1Node';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -216,6 +219,21 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
     ],
   },
 
+  // Category 3: Distortion
+  'dist-ds1': {
+    type: 'dist-ds1',
+    name: 'Boss DS-1',
+    subtitle: 'Classic Orange Distortion',
+    category: 'distortion',
+    chassisColor: '#fa5c1b',
+    accentColor: '#111827',
+    parameters: [
+      { id: 'tone', name: 'TONE', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'level', name: 'LEVEL', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'dist', name: 'DIST', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
+
   // Category 4: Fuzz
   'fuzz-bigmuff': {
     type: 'fuzz-bigmuff',
@@ -337,6 +355,10 @@ export function createPedalAudioNode(
       return new NobelsOdr1Node(ctx, id, initialParams, enabled);
     case 'od-archer':
       return new RockettArcherNode(ctx, id, initialParams, enabled);
+
+    // Distortion
+    case 'dist-ds1':
+      return new BossDs1Node(ctx, id, initialParams, enabled);
 
     // Fuzz
     case 'fuzz-bigmuff':

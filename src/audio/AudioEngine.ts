@@ -86,6 +86,7 @@ export class AudioEngine {
   // State
   private status: EngineStatus = 'uninitialized';
   private selectedInputId: string | null = null;
+  private selectedOutputId: string | null = null;
   private inputGainValue = 1.0;
   private masterVolumeValue = 0.8;
   private isMuted = false;
@@ -157,17 +158,75 @@ export class AudioEngine {
     return this.getAudioDevices();
   }
 
+  /**
+   * Enumerate available speaker / headphone / audio interface output devices
+   */
+  public async getAudioOutputDevices(): Promise<AudioDeviceInfo[]> {
+    if (!navigator.mediaDevices?.enumerateDevices) {
+      return [];
+    }
+
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      return devices
+        .filter((d) => d.kind === 'audiooutput' && d.deviceId !== 'communications')
+        .map((d, index) => ({
+          deviceId: d.deviceId,
+          label: d.label || `Audio Output ${index + 1}`,
+          groupId: d.groupId,
+        }));
+    } catch (err) {
+      console.error('Failed to enumerate audio output devices', err);
+      return [];
+    }
+  }
+
+  /**
+   * Check if the browser supports AudioContext.setSinkId for hardware output routing
+   */
+  public isOutputSelectionSupported(): boolean {
+    return (
+      (typeof AudioContext !== 'undefined' && 'setSinkId' in AudioContext.prototype) ||
+      (this.ctx !== null && 'setSinkId' in this.ctx)
+    );
+  }
+
   public getSelectedInputId(): string | null {
     return this.selectedInputId;
+  }
+
+  public getSelectedOutputId(): string | null {
+    return this.selectedOutputId;
+  }
+
+  /**
+   * Switch output device dynamically (via AudioContext.setSinkId)
+   */
+  public async setOutputDevice(deviceId: string): Promise<boolean> {
+    this.selectedOutputId = deviceId;
+    if (this.ctx && 'setSinkId' in this.ctx) {
+      try {
+        const targetSink = deviceId && deviceId !== 'default' ? deviceId : '';
+        await (this.ctx as unknown as { setSinkId: (sink: string) => Promise<void> }).setSinkId(targetSink);
+        return true;
+      } catch (err) {
+        console.warn('Failed to switch audio output device:', err);
+        return false;
+      }
+    }
+    return false;
   }
 
   /**
    * Initializes and starts the audio engine
    */
-  public async start(deviceId?: string): Promise<void> {
+  public async start(deviceId?: string, outputDeviceId?: string): Promise<void> {
     try {
       if (deviceId) {
         this.selectedInputId = deviceId;
+      }
+      if (outputDeviceId) {
+        this.selectedOutputId = outputDeviceId;
       }
 
       // 1. Create or resume AudioContext
@@ -180,6 +239,16 @@ export class AudioEngine {
 
       if (this.ctx.state === 'suspended') {
         await this.ctx.resume();
+      }
+
+      // Apply output sink if configured and supported
+      if (this.selectedOutputId && 'setSinkId' in this.ctx) {
+        try {
+          const targetSink = this.selectedOutputId !== 'default' ? this.selectedOutputId : '';
+          await (this.ctx as unknown as { setSinkId: (sink: string) => Promise<void> }).setSinkId(targetSink);
+        } catch (sinkErr) {
+          console.warn('Initial output sinkId assignment failed:', sinkErr);
+        }
       }
 
       // Register real-time AudioWorklets (Noise Gate, Looper)

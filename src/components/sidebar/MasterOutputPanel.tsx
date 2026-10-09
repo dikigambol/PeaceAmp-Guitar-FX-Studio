@@ -1,10 +1,16 @@
 import React from 'react';
-import type { MeterData } from '../../types/audio';
+import type { AudioDeviceInfo, MeterData } from '../../types/audio';
 import { Knob } from '../common/Knob';
 import { VuMeter } from '../meters/VuMeter';
-import { Volume2, VolumeX, ShieldCheck } from 'lucide-react';
+import { Volume2, VolumeX, ShieldCheck, Headphones, RefreshCw } from 'lucide-react';
 
 interface MasterOutputPanelProps {
+  outputDevices: AudioDeviceInfo[];
+  selectedOutputDeviceId: string;
+  onSelectOutputDevice: (deviceId: string) => void;
+  onRefreshDevices?: () => void;
+  isRefreshingDevices?: boolean;
+  isOutputSelectionSupported?: boolean;
   masterVolume: number;
   onMasterVolumeChange: (volume: number) => void;
   isMuted: boolean;
@@ -14,6 +20,12 @@ interface MasterOutputPanelProps {
 }
 
 export const MasterOutputPanel: React.FC<MasterOutputPanelProps> = ({
+  outputDevices,
+  selectedOutputDeviceId,
+  onSelectOutputDevice,
+  onRefreshDevices,
+  isRefreshingDevices = false,
+  isOutputSelectionSupported = true,
   masterVolume,
   onMasterVolumeChange,
   isMuted,
@@ -39,6 +51,42 @@ export const MasterOutputPanel: React.FC<MasterOutputPanelProps> = ({
       </div>
 
       <div className="mini-module-body">
+        {/* Output Device Select Bar */}
+        <div className="mini-device-bar">
+          <Headphones size={12} className="text-brass shrink-0" />
+          <select
+            className="mini-device-select"
+            value={selectedOutputDeviceId}
+            onChange={(e) => onSelectOutputDevice(e.target.value)}
+            title={
+              isOutputSelectionSupported
+                ? 'Pilih perangkat output audio (Speaker / Headphones / Audio Interface)'
+                : 'Peramban ini tidak mendukung AudioContext.setSinkId (output default sistem digunakan)'
+            }
+          >
+            {outputDevices.length === 0 && <option value="">(Default Audio Output)</option>}
+            {outputDevices.length > 0 && selectedOutputDeviceId && !outputDevices.some((d) => d.deviceId === selectedOutputDeviceId) && (
+              <option value={selectedOutputDeviceId} disabled>
+                Device connected...
+              </option>
+            )}
+            {outputDevices.map((d) => (
+              <option key={d.deviceId} value={d.deviceId}>
+                {d.label || `Output ${d.deviceId.slice(0, 6)}`}
+              </option>
+            ))}
+          </select>
+          {onRefreshDevices && (
+            <button
+              onClick={onRefreshDevices}
+              className={`mini-icon-btn ${isRefreshingDevices ? 'is-refreshing' : ''}`}
+              disabled={isRefreshingDevices}
+              title={isRefreshingDevices ? 'Memindai perangkat audio...' : 'Scan & refresh perangkat audio'}
+            >
+              <RefreshCw size={11} className={isRefreshingDevices ? 'is-spinning' : ''} />
+            </button>
+          )}
+        </div>
         {/* MASTER VOLUME STAGE */}
         <div className="mini-stage-block">
           <div className="mini-stage-header">

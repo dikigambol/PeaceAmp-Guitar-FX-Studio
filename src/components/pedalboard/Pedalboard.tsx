@@ -43,7 +43,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 }) => {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
-  const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'dynamics' | 'drive' | 'fuzz'>('all');
+  const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz'>('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
   const [snapToGrid, setSnapToGrid] = useState<boolean>(() => {
@@ -674,7 +674,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           ? 'compressor dynamics'
           : def.category === 'drive'
           ? 'overdrive drive boost'
-          : 'fuzz sustainer big muff distortion';
+          : def.category === 'distortion'
+          ? 'distortion ds1 crunch heavy'
+          : 'fuzz sustainer big muff';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -689,6 +691,10 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const overdrives = useMemo(
     () => filteredPedals.filter((p) => p.category === 'drive'),
+    [filteredPedals]
+  );
+  const distortions = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'distortion'),
     [filteredPedals]
   );
   const fuzzes = useMemo(
@@ -833,6 +839,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                     Overdrive ({availablePedals.filter((p) => p.category === 'drive').length})
                   </button>
                   <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'distortion' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('distortion')}
+                  >
+                    Distortion ({availablePedals.filter((p) => p.category === 'distortion').length})
+                  </button>
+                  <button
                     className={`cat-tab-btn ${activeCategoryTab === 'fuzz' ? 'active' : ''}`}
                     onClick={() => setActiveCategoryTab('fuzz')}
                   >
@@ -899,6 +911,35 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                                 <div className="item-title-row">
                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge od">OVERDRIVE</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Distortions */}
+                      {distortions.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag dist-tag">DISTORTION</span>
+                            <span className="group-count">{distortions.length} pedals</span>
+                          </div>
+                          {distortions.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge dist">DISTORTION</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>

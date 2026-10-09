@@ -61,6 +61,9 @@ export function App() {
 
   const [devices, setDevices] = useState<AudioDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
+  const [outputDevices, setOutputDevices] = useState<AudioDeviceInfo[]>([]);
+  const [selectedOutputDeviceId, setSelectedOutputDeviceId] = useState<string>('');
+  const [isOutputSelectionSupported, setIsOutputSelectionSupported] = useState<boolean>(true);
   const [isRefreshingDevices, setIsRefreshingDevices] = useState(false);
 
   const [inputGain, setInputGain] = useState(1.0);
@@ -116,13 +119,22 @@ export function App() {
     engine.setPedalInstances([]);
     engineRef.current = engine;
 
-    // Load available devices
+    // Load available input and output devices
     engine.getAudioDevices().then((devList) => {
       setDevices(devList);
       if (devList.length > 0) {
         setSelectedDeviceId((prev) => prev || devList[0].deviceId);
       }
     });
+
+    engine.getAudioOutputDevices().then((outList) => {
+      setOutputDevices(outList);
+      if (outList.length > 0) {
+        setSelectedOutputDeviceId((prev) => prev || outList[0].deviceId);
+      }
+    });
+
+    setIsOutputSelectionSupported(engine.isOutputSelectionSupported());
 
     return () => {
       engine.stop();
@@ -174,8 +186,13 @@ export function App() {
   const refreshDevices = useCallback(async () => {
     if (!engineRef.current) return;
     try {
-      const devList = await engineRef.current.getAudioDevices();
+      const [devList, outList] = await Promise.all([
+        engineRef.current.getAudioDevices(),
+        engineRef.current.getAudioOutputDevices(),
+      ]);
       setDevices(devList);
+      setOutputDevices(outList);
+
       if (devList.length > 0) {
         const activeId = engineRef.current.getSelectedInputId();
         if (activeId && devList.some((d) => d.deviceId === activeId)) {
@@ -184,23 +201,47 @@ export function App() {
           setSelectedDeviceId(devList[0].deviceId);
         }
       }
+
+      if (outList.length > 0) {
+        const activeOutId = engineRef.current.getSelectedOutputId();
+        if (activeOutId && outList.some((d) => d.deviceId === activeOutId)) {
+          setSelectedOutputDeviceId(activeOutId);
+        } else if (!selectedOutputDeviceId || !outList.some((d) => d.deviceId === selectedOutputDeviceId)) {
+          setSelectedOutputDeviceId(outList[0].deviceId);
+        }
+      }
     } catch (err) {
       console.warn('Failed to enumerate audio devices:', err);
     }
-  }, [selectedDeviceId]);
+  }, [selectedDeviceId, selectedOutputDeviceId]);
 
   const handleRefreshDevices = useCallback(async () => {
     if (!engineRef.current) return;
     setIsRefreshingDevices(true);
     try {
-      const devList = await engineRef.current.requestDeviceAccess();
+      await engineRef.current.requestDeviceAccess();
+      const [devList, outList] = await Promise.all([
+        engineRef.current.getAudioDevices(),
+        engineRef.current.getAudioOutputDevices(),
+      ]);
       setDevices(devList);
+      setOutputDevices(outList);
+
       if (devList.length > 0) {
         const activeId = engineRef.current.getSelectedInputId();
         if (activeId && devList.some((d) => d.deviceId === activeId)) {
           setSelectedDeviceId(activeId);
         } else if (!selectedDeviceId || !devList.some((d) => d.deviceId === selectedDeviceId)) {
           setSelectedDeviceId(devList[0].deviceId);
+        }
+      }
+
+      if (outList.length > 0) {
+        const activeOutId = engineRef.current.getSelectedOutputId();
+        if (activeOutId && outList.some((d) => d.deviceId === activeOutId)) {
+          setSelectedOutputDeviceId(activeOutId);
+        } else if (!selectedOutputDeviceId || !outList.some((d) => d.deviceId === selectedOutputDeviceId)) {
+          setSelectedOutputDeviceId(outList[0].deviceId);
         }
       }
     } catch (err) {
@@ -210,7 +251,7 @@ export function App() {
         setIsRefreshingDevices(false);
       }, 500);
     }
-  }, [selectedDeviceId]);
+  }, [selectedDeviceId, selectedOutputDeviceId]);
 
   // Automatically refresh device list when audio hardware or virtual cables are plugged/unplugged
   useEffect(() => {
@@ -232,7 +273,7 @@ export function App() {
     } else {
       setIsLoading(true);
       try {
-        await engineRef.current.start(selectedDeviceId || undefined);
+        await engineRef.current.start(selectedDeviceId || undefined, selectedOutputDeviceId || undefined);
         await refreshDevices();
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Error starting audio';
@@ -254,6 +295,21 @@ export function App() {
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : 'Gagal beralih ke input audio yang dipilih';
+        setErrorMessage(msg);
+      }
+    }
+  };
+
+  const handleOutputDeviceChange = async (deviceId: string) => {
+    setSelectedOutputDeviceId(deviceId);
+    if (engineRef.current) {
+      try {
+        const ok = await engineRef.current.setOutputDevice(deviceId);
+        if (!ok && !engineRef.current.isOutputSelectionSupported()) {
+          setErrorMessage('Browser ini tidak mendukung pemilihan perangkat output (AudioContext.setSinkId).');
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Gagal beralih ke output audio yang dipilih';
         setErrorMessage(msg);
       }
     }
@@ -518,6 +574,12 @@ export function App() {
 
           {/* 5. Master Output Stage & Safety Limiter */}
           <MasterOutputPanel
+            outputDevices={outputDevices}
+            selectedOutputDeviceId={selectedOutputDeviceId}
+            onSelectOutputDevice={handleOutputDeviceChange}
+            onRefreshDevices={handleRefreshDevices}
+            isRefreshingDevices={isRefreshingDevices}
+            isOutputSelectionSupported={isOutputSelectionSupported}
             masterVolume={masterVolume}
             onMasterVolumeChange={handleMasterVolumeChange}
             isMuted={isMuted}

@@ -25,6 +25,9 @@ import { FuzzFactoryPedal } from './fuzz/FuzzFactoryPedal';
 import { FlatironFuzzPedal } from './fuzz/FlatironFuzzPedal';
 import { EqdHoofPedal } from './fuzz/EqdHoofPedal';
 
+// Distortion Components
+import { BossDs1Pedal } from './distortion/BossDs1Pedal';
+
 interface StompboxProps {
   instance: PedalInstance;
   metadata: PedalMetadata;
@@ -88,6 +91,10 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <NobelsOdr1Pedal {...props} />;
     case 'od-archer':
       return <RockettArcherPedal {...props} />;
+
+    // Category 3: Distortion
+    case 'dist-ds1':
+      return <BossDs1Pedal {...props} />;
 
     // Category 4: Fuzz
     case 'fuzz-bigmuff':

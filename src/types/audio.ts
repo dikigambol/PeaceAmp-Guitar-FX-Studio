@@ -38,6 +38,7 @@ export interface AudioEngineMetrics {
 export interface AudioEngineState {
   status: EngineStatus;
   selectedInputId: string | null;
+  selectedOutputId?: string | null;
   inputGain: number;       // Linear gain (e.g., 0.0 to 3.0, default 1.0)
   masterVolume: number;    // Linear gain (0.0 to 1.5, default 0.8)
   isMuted: boolean;

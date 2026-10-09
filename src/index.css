@@ -2573,6 +2573,12 @@ body {
   border: 1px solid rgba(200, 166, 101, 0.4);
 }
 
+.dist-tag {
+  background: rgba(200, 166, 101, 0.18);
+  color: #d4b476;
+  border: 1px solid rgba(200, 166, 101, 0.4);
+}
+
 .fuzz-tag {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
@@ -2676,6 +2682,12 @@ body {
 }
 
 .item-pill-badge.od {
+  background: rgba(200, 166, 101, 0.18);
+  color: #d4b476;
+  border: 1px solid rgba(200, 166, 101, 0.4);
+}
+
+.item-pill-badge.dist {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
@@ -4557,6 +4569,12 @@ body {
   border: 1px solid #063054;
 }
 
+.boss-deck-ds1 {
+  background: linear-gradient(180deg, #ea4200 0%, #d83800 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4), 0 1px 1px rgba(255, 255, 255, 0.25);
+  border: 1px solid #b83000;
+}
+
 .boss-check-led-wrap {
   display: flex;
   flex-direction: column;
@@ -4700,6 +4718,57 @@ body {
 .pedal-boss-bd2 {
   background: linear-gradient(180deg, #1d69a6 0%, #104c82 50%, #0a365c 100%) !important;
   border: 2px solid #052440 !important;
+}
+
+/* Boss DS-1 Distortion Enclosure */
+.pedal-boss-ds1 {
+  background: linear-gradient(180deg, #ff5714 0%, #fa4c08 50%, #ea3b00 100%) !important;
+  border: 2px solid #b32c00 !important;
+}
+
+.boss-ds1-knob-sub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5px;
+  margin-top: 1px;
+}
+
+.boss-knob-dot {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #111827;
+}
+
+.boss-ds1-typography {
+  text-align: center;
+  margin: 4px 0 8px;
+  line-height: 1.1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boss-ds1-title {
+  font-family: 'Michroma', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: 0.8px;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.2);
+}
+
+.boss-ds1-model {
+  font-family: 'Michroma', sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: 1.2px;
+  margin-left: 44px;
+  margin-top: 1px;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.2);
 }
 
 .boss-bd2-typography {
