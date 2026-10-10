@@ -277,21 +277,6 @@ export const NobelsOdr1Pedal: React.FC<PedalProps> = ({
               <span className="nobels-odr1">ODR-1</span>
               <span className="nobels-x">X</span>
             </div>
-            {/* Red Starburst True Bypass Badge */}
-            <div className="nobels-starburst-wrap" title="True Bypass Switch Inside">
-              <svg viewBox="0 0 46 46" className="nobels-starburst-svg" aria-hidden="true">
-                {/* 16-point serrated starburst */}
-                <polygon
-                  points="23,1 27,8 35,5 36,13 44,14 42,22 46,27 41,33 42,41 34,40 31,46 23,43 15,46 12,40 4,41 5,33 0,27 4,22 2,14 10,13 11,5 19,8"
-                  fill="#dc2626"
-                  stroke="#b91c1c"
-                  strokeWidth="0.8"
-                />
-                <text x="23" y="16" fill="#ffffff" fontSize="4" fontWeight="800" textAnchor="middle">TRUE BYPASS</text>
-                <text x="23" y="23" fill="#ffffff" fontSize="4.2" fontWeight="900" textAnchor="middle">SWITCH</text>
-                <text x="23" y="30" fill="#ffffff" fontSize="4" fontWeight="800" textAnchor="middle">INSIDE</text>
-              </svg>
-            </div>
           </div>
           <div className="nobels-desc">Natural OVERDRIVE</div>
         </div>

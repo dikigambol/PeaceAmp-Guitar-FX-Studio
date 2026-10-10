@@ -170,66 +170,8 @@ export const RockettArcherPedal: React.FC<PedalProps> = ({
         </div>
       </div>
 
-      {/* Iconic Centaur Archer Silhouette & Wordmark */}
+      {/* Archer Wordmark */}
       <div className="archer-graphics-row">
-        {/* Centaur Archer Vector Graphic */}
-        <svg viewBox="0 0 100 100" className="archer-centaur-svg" aria-label="Centaur Archer Graphic">
-          {/* Taut Recurve Bow & Bowstring */}
-          <path
-            d="M 18 16 C 14 36, 17 62, 34 82 M 18 16 L 43 45 L 34 82 M 15 22 L 44 47"
-            fill="none"
-            stroke="#11161d"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {/* Centaur Archer Silhouette */}
-          <path
-            d="M 34 46 
-               C 36 39, 34 33, 36 27 
-               C 38 23, 42 20, 46 22 
-               C 49 24, 49 28, 47 32 
-               C 45 35, 43 38, 42 42 
-               C 46 41, 52 39, 58 40 
-               C 61 41, 62 45, 59 47 
-               C 54 49, 49 48, 43 48 
-               C 43 52, 45 56, 50 58 
-               C 58 57, 66 59, 73 66 
-               C 76 69, 79 74, 80 80 
-               C 80 85, 77 88, 73 87 
-               C 69 86, 68 81, 67 77 
-               C 65 73, 60 71, 55 71 
-               C 51 75, 46 82, 42 88 
-               C 40 91, 36 89, 36 85 
-               C 38 79, 42 72, 44 67 
-               C 38 65, 34 59, 32 53 
-               C 31 49, 33 47, 34 46 Z"
-            fill="#11161d"
-          />
-          {/* Drawn Left Bow Arm */}
-          <path
-            d="M 39 34 L 20 44 L 27 41"
-            fill="none"
-            stroke="#11161d"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-          />
-          {/* Rear Flank & Leg */}
-          <path
-            d="M 61 72 C 65 79, 70 86, 74 93"
-            fill="none"
-            stroke="#11161d"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-          {/* Swishing Tail */}
-          <path
-            d="M 77 74 C 85 75, 90 81, 88 88 C 86 91, 82 90, 81 86 C 82 81, 79 77, 76 75"
-            fill="#11161d"
-          />
-        </svg>
-
-        {/* Classical Roman Serif Title */}
         <span className="archer-title">ARCHER</span>
       </div>
 

@@ -4864,46 +4864,73 @@ body {
   border-bottom-right-radius: 3px;
 }
 
-/* Horizontal Knob Row */
+/* Horizontal Knob Row: 3 Equal Grid Columns so Treble is perfectly centered */
 .klon-top-knobs-row {
   width: 100%;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: center;
-  justify-content: space-around;
+  justify-items: center;
   margin-top: 4px;
   position: relative;
-  padding-left: 20px;
   box-sizing: border-box;
 }
 
-.klon-led-mount {
+.klon-gain-label-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.klon-gain-label-wrap .klon-led-mount {
   position: absolute;
-  left: 6px;
-  top: 14px;
+  right: calc(100% + 5px);
+  top: calc(50% - 1.3px);
+  transform: translateY(-50%);
   cursor: pointer;
-  padding: 4px;
-  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
 }
 
 .klon-red-led {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: #6b0c0c;
   border: 1.5px solid #280505;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  transition: all 0.15s ease;
 }
 
 .klon-red-led.lit {
   background: #ef4444;
-  box-shadow: 0 0 12px #ef4444, 0 0 20px rgba(239, 68, 68, 0.9);
+  box-shadow: 0 0 8px #ef4444, 0 0 14px rgba(239, 68, 68, 0.9);
 }
 
 .klon-knob-unit {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 3px;
+}
+
+.klon-knob-gain {
+  grid-column: 1;
+  justify-self: center;
+}
+
+.klon-knob-treble {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.klon-knob-output {
+  grid-column: 3;
+  justify-self: center;
 }
 
 .klon-knob-lbl {
@@ -4914,36 +4941,24 @@ body {
   letter-spacing: 1.5px;
 }
 
-/* Bottom Deck: Centaur on Left, Switch on Right */
+/* Bottom Deck: 3 Equal Grid Columns so Footswitch in Column 2 is laser-aligned with Treble in Column 2 */
 .klon-bottom-deck {
   width: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
   margin-top: auto;
-  padding: 0 4px 4px 6px;
+  padding-bottom: 10px;
   box-sizing: border-box;
 }
 
-.klon-horsie-graphic {
-  width: 120px;
-  height: 84px;
+.klon-footswitch-block {
+  grid-column: 2;
+  justify-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.klon-centaur-svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.2));
-}
-
-.klon-footswitch-block {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
+  position: relative;
 }
 
 .klon-stomp-switch {
@@ -4983,18 +4998,23 @@ body {
 }
 
 .klon-centaur-wordmark {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
   font-family: 'Times New Roman', Times, serif;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 9.5px;
+  font-weight: 700;
   color: #3b1406;
-  letter-spacing: 1.5px;
-  position: relative;
+  letter-spacing: 1.4px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .klon-tm {
-  font-size: 7px;
+  font-size: 5.5px;
   vertical-align: super;
-  margin-left: 2px;
+  margin-left: 1.5px;
 }
 
 /* 7. FULLTONE OCD (AUTHENTIC VINTAGE CREAM POWDER-COAT ENCLOSURE) */
@@ -5980,6 +6000,7 @@ body {
   letter-spacing: 0.6px;
   margin-top: 1px;
   margin-bottom: 2px;
+  position: relative;
 }
 
 .archer-port-txt {
@@ -5989,6 +6010,9 @@ body {
 }
 
 .archer-mid-banner {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
   line-height: 1.15;
   font-family: system-ui, -apple-system, sans-serif;
@@ -6002,7 +6026,7 @@ body {
 .archer-knobs-section {
   position: relative;
   width: 100%;
-  min-height: 122px;
+  min-height: 126px;
   margin-top: 2px;
 }
 
@@ -6035,11 +6059,11 @@ body {
   letter-spacing: 0.8px;
 }
 
-/* Central GAIN Column: positioned symmetrically between Output & Treble */
+/* Central GAIN Column: positioned lower in inverted V-formation */
 .archer-center-gain-col {
   position: absolute;
   left: 50%;
-  top: 10px;
+  top: 30px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -6102,15 +6126,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin: 4px 0 2px;
+  margin: 6px 0 2px;
   width: 100%;
-}
-
-.archer-centaur-svg {
-  width: 48px;
-  height: 48px;
-  filter: drop-shadow(0 0.5px 0.5px rgba(255, 255, 255, 0.5));
 }
 
 .archer-title {
@@ -6700,12 +6717,13 @@ body {
 }
 
 /* ==========================================================================
-   3. TONE BENDER (SOLA SOUND MKII VINTAGE SMOOTH CURVED CHASSIS)
+   3. TONE BENDER (SOLA SOUND MKII VINTAGE TAPERED COFFIN CHASSIS)
    ========================================================================== */
 .pedal-tonebender {
   width: 186px !important;
   max-width: 186px !important;
-  min-height: 300px !important;
+  min-height: 326px !important;
+  height: 326px !important;
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -6717,41 +6735,89 @@ body {
   position: relative !important;
 }
 
-/* Close button mounted cleanly on top-right in Big Muff style */
+/* Close button mounted cleanly on top-right */
 .pedal-tonebender .tb-top-bar {
   position: absolute;
-  top: 4px;
-  right: 12px;
+  top: 2px;
+  right: 6px;
   width: auto;
   z-index: 35;
   padding: 0;
 }
 
-/* 1/4" Side Patch Jacks hugging the curved chassis sides */
+/* 1/4" Side Patch Jacks precisely aligned with cable routing (curJackY=68, pos.x-2 / pos.x+188) */
 .pedal-tonebender .stompbox-side-jack {
   top: 57px !important;
   z-index: 25 !important;
 }
 
 .pedal-tonebender .stompbox-side-jack.jack-left {
-  left: -4px !important;
+  left: -8px !important;
 }
 
 .pedal-tonebender .stompbox-side-jack.jack-right {
-  right: -4px !important;
+  right: -8px !important;
 }
 
-/* Main Chassis Container with Rounded Curves */
+/* Main Chassis Container with Authentic Tapered Geometry */
 .tonebender-chassis {
   width: 186px;
-  height: 300px;
+  height: 326px;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* Vector Artwork for Smooth Cast-Metal Rim with Curvature */
+/* Pure CSS Procedural Noise Hammertone Texture (0 images, 0 svg filters) */
+.tb-enclosure-texture {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 186px;
+  height: 326px;
+  clip-path: url(#tb-body-clip);
+  -webkit-clip-path: path('M 28 14 L 158 14 C 174 14, 184 22, 184 38 L 183 140 C 182 150, 178 160, 172 172 L 150 300 C 148 310, 140 320, 126 320 L 60 320 C 46 320, 38 310, 36 300 L 14 172 C 8 160, 4 150, 3 140 L 2 38 C 2 22, 12 14, 28 14 Z');
+  clip-path: path('M 28 14 L 158 14 C 174 14, 184 22, 184 38 L 183 140 C 182 150, 178 160, 172 172 L 150 300 C 148 310, 140 320, 126 320 L 60 320 C 46 320, 38 310, 36 300 L 14 172 C 8 160, 4 150, 3 140 L 2 38 C 2 22, 12 14, 28 14 Z');
+  background-color: #a2aca4;
+  background-image:
+    /* Specular directional highlight sheen from top-left */
+    radial-gradient(ellipse 75% 55% at 35% 25%, rgba(255, 255, 255, 0.35) 0%, transparent 65%),
+    /* Noise layer 1: white micro-dots */
+    repeating-radial-gradient(circle at 17% 23%, rgba(255, 255, 255, 0.28) 0px, transparent 1px, transparent 3px),
+    /* Noise layer 2: dark micro-specks */
+    repeating-radial-gradient(circle at 83% 67%, rgba(0, 0, 0, 0.2) 0px, transparent 1px, transparent 4px),
+    /* Noise layer 3: medium mottled flecks */
+    repeating-radial-gradient(circle at 45% 82%, rgba(255, 255, 255, 0.22) 0px, transparent 1.5px, transparent 5px),
+    /* Noise layer 4: dark stipples */
+    repeating-radial-gradient(circle at 62% 31%, rgba(0, 0, 0, 0.18) 0px, transparent 1px, transparent 3.5px),
+    repeating-radial-gradient(circle at 29% 73%, rgba(255, 255, 255, 0.2) 0px, transparent 1px, transparent 4.5px),
+    /* Noise cross-hatch stippling */
+    repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.05) 0px, transparent 1px, transparent 2.5px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.07) 0px, transparent 1px, transparent 3px),
+    /* Base metallic vintage Hammertone gradient */
+    linear-gradient(145deg, #d8e0da 0%, #b8c2ba 28%, #9ea8a0 60%, #768078 100%);
+  filter: drop-shadow(0 16px 16px rgba(0, 0, 0, 0.75));
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Secondary procedural micro-grain overlay for dense CSS noise */
+.tb-enclosure-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.25) 0.5px, transparent 1px),
+    radial-gradient(circle at 75% 75%, rgba(0, 0, 0, 0.22) 0.5px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2) 0.5px, transparent 1px),
+    radial-gradient(circle at 85% 15%, rgba(0, 0, 0, 0.18) 0.5px, transparent 1px);
+  background-size: 5px 5px, 7px 7px, 9px 9px, 6px 6px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Vector Artwork for Smooth Cast-Metal Rim and Highlights */
 .tb-chassis-svg {
   position: absolute;
   top: 0;
@@ -6759,79 +6825,106 @@ body {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
 }
 
 /* Chassis Content Container */
 .tb-chassis-content {
   position: relative;
-  z-index: 2;
+  z-index: 5;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 22px 10px 14px;
   box-sizing: border-box;
+}
+
+/* Top Jack Silkscreen Labels (OUTPUT / INPUT) */
+.tb-top-labels {
+  position: absolute;
+  top: 27px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 46px;
+  box-sizing: border-box;
+  pointer-events: none;
+  user-select: none;
+}
+
+.tb-jack-label {
+  font-family: 'Century Gothic', 'Gill Sans', 'Trebuchet MS', sans-serif;
+  font-size: 7.5px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  color: #161b18;
+  text-transform: uppercase;
 }
 
 /* Vintage British Sola Sound Grotesque Typography: Tone Bender */
 .tb-brand-area {
-  margin-top: 14px;
-  margin-bottom: 10px;
+  position: absolute;
+  top: 38px;
+  left: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  line-height: 0.9;
+  line-height: 0.95;
   user-select: none;
+  pointer-events: none;
 }
 
 .tb-title-tone {
-  font-family: 'Gill Sans', 'Century Gothic', 'Trebuchet MS', sans-serif;
+  font-family: 'Century Gothic', 'Gill Sans', 'Trebuchet MS', sans-serif;
   font-size: 26px;
   font-weight: 700;
-  color: #111827;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.3);
-  margin-right: 18px;
+  color: #131715;
+  letter-spacing: 0.6px;
+  margin-left: 38px;
+  line-height: 1;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.4);
 }
 
 .tb-title-bender {
-  font-family: 'Gill Sans', 'Century Gothic', 'Trebuchet MS', sans-serif;
+  font-family: 'Century Gothic', 'Gill Sans', 'Trebuchet MS', sans-serif;
   font-size: 27px;
   font-weight: 700;
-  color: #111827;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.3);
-  margin-left: 20px;
+  color: #131715;
+  letter-spacing: 0.6px;
+  margin-left: 64px;
+  margin-top: -2px;
+  line-height: 1;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.4);
 }
 
 /* 2 Knobs: LEVEL and ATTACK */
-.tb-knobs-row {
+.tb-knobs-area {
+  position: absolute;
+  top: 88px;
+  left: 0;
   width: 100%;
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin-top: 4px;
-  padding: 0 4px;
+  justify-content: space-between;
+  padding: 0 28px;
   box-sizing: border-box;
 }
 
-.tb-knob-col {
+.tb-knob-unit {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
 }
 
-.tb-knob-title {
-  font-family: 'Century Gothic', 'Trebuchet MS', 'Gill Sans', sans-serif;
+.tb-knob-label {
+  font-family: 'Century Gothic', 'Gill Sans', 'Trebuchet MS', sans-serif;
   font-size: 10px;
   font-weight: 800;
-  color: #111827;
-  letter-spacing: 2px;
+  color: #131715;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 /* Knob variant for Tone Bender Chicken-Head */
@@ -6846,13 +6939,45 @@ body {
   cursor: ns-resize;
 }
 
-/* Classic 3PDT Footswitch Section */
+/* Vintage British Round Chrome Footswitch Assembly */
 .tb-stomp-section {
-  margin-top: auto;
-  margin-bottom: 8px;
+  position: absolute;
+  top: 226px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 10;
+}
+
+.tb-stomp-switch {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  outline: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s ease;
+}
+
+.tb-stomp-switch:hover {
+  filter: brightness(1.05);
+}
+
+.tb-stomp-switch:active .tb-plunger-group {
+  transform: scale(0.96) translate(0.5px, 0.5px);
+  transform-origin: 23px 23px;
+}
+
+.tb-stomp-svg {
+  width: 46px;
+  height: 46px;
+  display: block;
 }
 
 /* ==========================================================================
