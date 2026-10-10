@@ -26,6 +26,7 @@ import { EqdHoofNode } from './fuzz/EqdHoofNode';
 import { BossDs1Node } from './distortion/BossDs1Node';
 import { BossHm2Node } from './distortion/BossHm2Node';
 import { BossMt2Node } from './distortion/BossMt2Node';
+import { IbanezSm7Node } from './distortion/IbanezSm7Node';
 
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
@@ -276,6 +277,22 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       { id: 'dist', name: 'DIST', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
     ],
   },
+  'dist-sm7': {
+    type: 'dist-sm7',
+    name: 'Ibanez SM7 Smash Box',
+    subtitle: 'Tone-Lok Nu-Metal Distortion with VOID Gate',
+    category: 'distortion',
+    chassisColor: '#8a9497',
+    accentColor: '#00e676',
+    parameters: [
+      { id: 'drive', name: 'DRIVE', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+      { id: 'lo', name: 'LO', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => `${(-14 + (v / 10) * 28) > 0 ? '+' : ''}${(-14 + (v / 10) * 28).toFixed(0)} dB` },
+      { id: 'hi', name: 'HI', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => `${(-14 + (v / 10) * 28) > 0 ? '+' : ''}${(-14 + (v / 10) * 28).toFixed(0)} dB` },
+      { id: 'level', name: 'LEVEL', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'void', name: 'VOID', min: 0, max: 2, step: 1, defaultValue: 1, formatValue: (v) => (v === 0 ? 'OFF' : v === 1 ? '1' : '2') },
+      { id: 'edge', name: 'EDGE', min: 0, max: 1, step: 1, defaultValue: 0, formatValue: (v) => (v === 0 ? 'SHARP' : 'SMOOTH') },
+    ],
+  },
 
   // Category 4: Fuzz
   'fuzz-bigmuff': {
@@ -406,6 +423,8 @@ export function createPedalAudioNode(
       return new BossHm2Node(ctx, id, initialParams, enabled);
     case 'dist-mt2':
       return new BossMt2Node(ctx, id, initialParams, enabled);
+    case 'dist-sm7':
+      return new IbanezSm7Node(ctx, id, initialParams, enabled);
 
     // Fuzz
     case 'fuzz-bigmuff':

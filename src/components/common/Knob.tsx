@@ -36,7 +36,8 @@ export interface KnobProps {
     | 'fuzzfactory'
     | 'flatiron'
     | 'tsmini-small'
-    | 'tsmini-large';
+    | 'tsmini-large'
+    | 'ibanez-tonelok';
   showLabel?: boolean;
   showValue?: boolean;
   subLabel?: string;
@@ -447,6 +448,57 @@ const BossBlackKnobDial: React.FC = () => (
       strokeWidth="3.4"
       strokeLinecap="round"
       filter="drop-shadow(0 0.5px 1.5px rgba(0,0,0,0.85))"
+    />
+  </svg>
+);
+
+const IbanezToneLokKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="tonelok-skirt" cx="42%" cy="40%" r="60%">
+        <stop offset="0%" stopColor="#94a3b8" />
+        <stop offset="45%" stopColor="#64748b" />
+        <stop offset="85%" stopColor="#475569" />
+        <stop offset="100%" stopColor="#334155" />
+      </radialGradient>
+      <radialGradient id="tonelok-dome" cx="40%" cy="36%" r="64%">
+        <stop offset="0%" stopColor="#ffffff" />
+        <stop offset="25%" stopColor="#e2e8f0" />
+        <stop offset="60%" stopColor="#94a3b8" />
+        <stop offset="90%" stopColor="#64748b" />
+        <stop offset="100%" stopColor="#475569" />
+      </radialGradient>
+      <filter id="tonelok-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2.2" floodColor="#000000" floodOpacity="0.75" />
+      </filter>
+    </defs>
+    {/* Base rim */}
+    <circle cx="50" cy="50" r="48" fill="url(#tonelok-skirt)" filter="url(#tonelok-shadow)" stroke="#334155" strokeWidth="1.2" />
+    {/* 24 knurled outer notches */}
+    {Array.from({ length: 24 }).map((_, i) => {
+      const a = (i * 15 * Math.PI) / 180;
+      const x1 = 50 + 43 * Math.sin(a);
+      const y1 = 50 - 43 * Math.cos(a);
+      const x2 = 50 + 48 * Math.sin(a);
+      const y2 = 50 - 48 * Math.cos(a);
+      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#334155" strokeWidth="2.2" />;
+    })}
+    {/* Raised Spun Aluminum Dome */}
+    <circle cx="50" cy="50" r="38" fill="url(#tonelok-dome)" stroke="#475569" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="37" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="0.8" />
+    {/* Fine concentric lathe groove rings */}
+    <circle cx="50" cy="50" r="26" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="0.6" />
+    <circle cx="50" cy="50" r="14" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="0.6" />
+    {/* Dark Recessed Indicator Slot down center (guaranteed x=50, perpendicular) */}
+    <line
+      x1="50"
+      y1="14"
+      x2="50"
+      y2="44"
+      stroke="#1e293b"
+      strokeWidth="3.2"
+      strokeLinecap="round"
+      filter="drop-shadow(0 0.5px 0.5px rgba(255,255,255,0.4))"
     />
   </svg>
 );
@@ -1184,6 +1236,7 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'flatiron' && <FlatironKnobDial />}
           {variant === 'tsmini-small' && <TsMiniSmallDial />}
           {variant === 'tsmini-large' && <TsMiniLargeDial />}
+          {variant === 'ibanez-tonelok' && <IbanezToneLokKnobDial />}
           {variant === 'default' && <DefaultKnobDial color={color} />}
         </div>
       </div>
