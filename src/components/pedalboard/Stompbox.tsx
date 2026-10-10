@@ -27,6 +27,8 @@ import { EqdHoofPedal } from './fuzz/EqdHoofPedal';
 
 // Distortion Components
 import { BossDs1Pedal } from './distortion/BossDs1Pedal';
+import { BossHm2Pedal } from './distortion/BossHm2Pedal';
+import { BossMt2Pedal } from './distortion/BossMt2Pedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -95,6 +97,10 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
     // Category 3: Distortion
     case 'dist-ds1':
       return <BossDs1Pedal {...props} />;
+    case 'dist-hm2':
+      return <BossHm2Pedal {...props} />;
+    case 'dist-mt2':
+      return <BossMt2Pedal {...props} />;
 
     // Category 4: Fuzz
     case 'fuzz-bigmuff':

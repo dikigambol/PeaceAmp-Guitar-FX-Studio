@@ -4805,6 +4805,502 @@ body {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 
+/* Boss HM-2 Heavy Metal Distortion Enclosure */
+.pedal-boss-hm2 {
+  background: linear-gradient(180deg, #24252a 0%, #18191d 45%, #0f1013 100%) !important;
+  border: 2px solid #32343c !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.22),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.9) !important;
+}
+
+.boss-deck-hm2 {
+  background: linear-gradient(180deg, #18191c 0%, #111215 100%);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.85), 0 1px 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid #282a30;
+  padding: 6px 4px 6px;
+}
+
+.hm2-orange-text {
+  color: #f97316 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.boss-hm2-knobs-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0 3px;
+  box-sizing: border-box;
+}
+
+.boss-hm2-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.boss-hm2-knob-dot {
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #f97316;
+  box-shadow: 0 0 3px rgba(249, 115, 22, 0.4);
+  margin-bottom: 1px;
+}
+
+.boss-hm2-knob-dial-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boss-hm2-knob-lbl {
+  font-family: 'Michroma', sans-serif;
+  font-size: 7px;
+  font-weight: 800;
+  color: #f97316;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  margin-top: 2px;
+}
+
+.boss-hm2-bracket-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: -1px;
+}
+
+.boss-hm2-bracket-line {
+  width: 78px;
+  height: 4px;
+  border-bottom: 1.2px solid #f97316;
+  border-left: 1.2px solid #f97316;
+  border-right: 1.2px solid #f97316;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 1px;
+}
+
+.boss-hm2-bracket-text {
+  font-family: 'Michroma', sans-serif;
+  font-size: 5.5px;
+  font-weight: 800;
+  color: #f97316;
+  letter-spacing: 0.4px;
+  background: #111215;
+  padding: 0 3px;
+  position: absolute;
+  top: -3.5px;
+  white-space: nowrap;
+}
+
+.boss-hm2-mid-graphics {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 6px 6px;
+  box-sizing: border-box;
+}
+
+.boss-hm2-io-arrows {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.boss-hm2-io-arrows span {
+  font-family: 'Michroma', sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  color: #f97316;
+  letter-spacing: 0.8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.boss-hm2-typography {
+  margin-top: 4px;
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.boss-hm2-title {
+  font-family: 'Michroma', sans-serif;
+  font-size: 14.5px;
+  font-weight: 900;
+  color: #f97316;
+  letter-spacing: 1.1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.boss-hm2-model {
+  font-family: 'Michroma', sans-serif;
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #f97316;
+  letter-spacing: 1.2px;
+  margin-left: 48px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.boss-hm2-treadle {
+  position: relative;
+}
+
+.boss-hm2-rubber-pad {
+  background: #101114 !important;
+  border: 1.5px solid #23252a !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px !important;
+}
+
+.boss-hm2-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.boss-hm2-embossed-text {
+  font-family: 'Michroma', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: #1e2025;
+  letter-spacing: 2px;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08),
+    0 -1px 0 rgba(0, 0, 0, 0.85);
+}
+
+.boss-hm2-waza-badge {
+  display: flex;
+  align-items: center;
+  background: #090a0d;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 2.5px;
+  padding: 1.5px 6px;
+  gap: 5px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+}
+
+.waza-kanji-box {
+  border-right: 1.2px solid #cbd5e1;
+  padding-right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.waza-kanji-char {
+  font-family: 'Yu Gothic', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  color: #f8fafc;
+  line-height: 1;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.waza-text-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.waza-title-text {
+  font-family: 'Arial Black', Impact, sans-serif;
+  font-size: 7px;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: 0.6px;
+  line-height: 1;
+}
+
+.waza-underline {
+  width: 100%;
+  height: 1.2px;
+  background: #cbd5e1;
+  margin-top: 1.5px;
+}
+
+/* ==========================================================================
+   Boss MT-2 Metal Zone Distortion Enclosure
+   ========================================================================== */
+.pedal-boss-mt2 {
+  background: linear-gradient(180deg, #373b42 0%, #292d34 35%, #1e2025 80%, #16171b 100%) !important;
+  border: 2px solid #434852 !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.9),
+    inset 0 1px 2px rgba(255, 255, 255, 0.25),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.9) !important;
+}
+
+.boss-deck-mt2 {
+  background: linear-gradient(180deg, #18191c 0%, #111214 100%);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.85), 0 1px 1px rgba(255, 255, 255, 0.1);
+  border: 1px solid #292b31;
+  padding: 5px 3px 6px;
+  position: relative;
+}
+
+.boss-mt2-check-wrap {
+  margin-bottom: 2px;
+}
+
+.boss-mt2-white-text {
+  color: #f8fafc !important;
+  font-family: 'Michroma', sans-serif;
+  font-size: 6.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.boss-mt2-top-labels-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 6px;
+  box-sizing: border-box;
+  margin-bottom: 3px;
+}
+
+.boss-mt2-top-label-col {
+  font-family: 'Michroma', sans-serif;
+  font-size: 7px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.6px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.boss-mt2-top-label-center {
+  font-family: 'Michroma', sans-serif;
+  font-size: 6.8px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.7px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+  text-align: center;
+}
+
+.boss-mt2-knobs-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+
+.boss-mt2-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 44px;
+}
+
+.boss-mt2-dial-wrap {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.boss-mt2-dots-pair {
+  width: 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.boss-mt2-white-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.7);
+}
+
+.boss-mt2-minmax-row,
+.boss-mt2-scale-row {
+  width: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1px;
+}
+
+.boss-mt2-minmax-row span,
+.boss-mt2-scale-row span {
+  font-family: 'Michroma', sans-serif;
+  font-size: 5px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.2px;
+  line-height: 1;
+}
+
+.boss-mt2-diagram-col {
+  margin-top: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.boss-mt2-diagram-svg {
+  display: block;
+}
+
+/* Dual Concentric Knob Interactive States */
+.boss-dual-knob-container {
+  touch-action: none;
+  user-select: none;
+}
+
+.boss-dual-outer-ring:hover svg {
+  filter: drop-shadow(0 0 3px rgba(255, 109, 31, 0.5));
+}
+
+.boss-dual-inner-knob:hover svg {
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.8));
+}
+
+/* MT-2 Mid Graphics & Typography */
+.boss-mt2-mid-graphics {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 6px 6px;
+  box-sizing: border-box;
+}
+
+.boss-mt2-io-arrows {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2px;
+  box-sizing: border-box;
+}
+
+.boss-mt2-arrow-tag {
+  font-family: 'Michroma', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  color: #ff6d1f;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.boss-mt2-arrow {
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.boss-mt2-typography {
+  margin-top: 4px;
+  margin-bottom: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.05;
+}
+
+.boss-mt2-title {
+  font-family: 'Michroma', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: #ff6d1f;
+  letter-spacing: 1px;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 1px rgba(255, 109, 31, 0.3);
+}
+
+.boss-mt2-model {
+  font-family: 'Michroma', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: #ff6d1f;
+  letter-spacing: 1.2px;
+  margin-left: 54px;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 1px rgba(255, 109, 31, 0.3);
+}
+
+/* MT-2 Rubber Treadle & Black Thumbscrew */
+.boss-mt2-treadle {
+  position: relative;
+}
+
+.boss-mt2-rubber-pad {
+  background: #111215 !important;
+  border: 1.5px solid #23252a !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px !important;
+}
+
+.boss-mt2-logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.boss-mt2-emblem-svg {
+  display: block;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.08));
+}
+
+.boss-mt2-embossed-text {
+  font-family: 'Michroma', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: #1c1d22;
+  letter-spacing: 2.5px;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.09),
+    0 -1px 0 rgba(0, 0, 0, 0.95);
+}
+
+.boss-mt2-thumbscrew {
+  background: radial-gradient(circle at 45% 40%, #2a2c32 0%, #15171a 65%, #0b0c0e 100%) !important;
+  border: 1px solid #363940 !important;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.9),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+}
+
 /* 6. KLON CENTAUR (LANDSCAPE ORIENTED ENCLOSURE) */
 .pedal-klon-centaur {
   width: 260px !important;

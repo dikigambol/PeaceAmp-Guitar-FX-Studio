@@ -24,6 +24,8 @@ import { EqdHoofNode } from './fuzz/EqdHoofNode';
 
 // Distortion Nodes
 import { BossDs1Node } from './distortion/BossDs1Node';
+import { BossHm2Node } from './distortion/BossHm2Node';
+import { BossMt2Node } from './distortion/BossMt2Node';
 
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
@@ -233,6 +235,47 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       { id: 'dist', name: 'DIST', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
     ],
   },
+  'dist-hm2': {
+    type: 'dist-hm2',
+    name: 'Boss HM-2 Heavy Metal',
+    subtitle: 'Swedish Chainsaw Distortion',
+    category: 'distortion',
+    chassisColor: '#18191c',
+    accentColor: '#f97316',
+    parameters: [
+      { id: 'level', name: 'LEVEL', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'colorMixL', name: 'COLOR MIX L', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'colorMixH', name: 'COLOR MIX H', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'dist', name: 'DIST', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
+  'dist-mt2': {
+    type: 'dist-mt2',
+    name: 'Boss MT-2 Metal Zone',
+    subtitle: 'Dual-Stage Distortion with 3-Band Parametric EQ',
+    category: 'distortion',
+    chassisColor: '#2b2d32',
+    accentColor: '#ff6b21',
+    parameters: [
+      { id: 'level', name: 'LEVEL', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'high', name: 'HIGH', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => `${(-15 + (v / 10) * 30) > 0 ? '+' : ''}${(-15 + (v / 10) * 30).toFixed(0)} dB` },
+      { id: 'low', name: 'LOW', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => `${(-15 + (v / 10) * 30) > 0 ? '+' : ''}${(-15 + (v / 10) * 30).toFixed(0)} dB` },
+      { id: 'middle', name: 'MIDDLE', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => `${(-15 + (v / 10) * 30) > 0 ? '+' : ''}${(-15 + (v / 10) * 30).toFixed(0)} dB` },
+      {
+        id: 'midFreq',
+        name: 'MID FREQ',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => {
+          const freq = 200 * Math.pow(25.0, v / 10);
+          return freq >= 1000 ? `${(freq / 1000).toFixed(1)}k Hz` : `${Math.round(freq)} Hz`;
+        },
+      },
+      { id: 'dist', name: 'DIST', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
 
   // Category 4: Fuzz
   'fuzz-bigmuff': {
@@ -359,6 +402,10 @@ export function createPedalAudioNode(
     // Distortion
     case 'dist-ds1':
       return new BossDs1Node(ctx, id, initialParams, enabled);
+    case 'dist-hm2':
+      return new BossHm2Node(ctx, id, initialParams, enabled);
+    case 'dist-mt2':
+      return new BossMt2Node(ctx, id, initialParams, enabled);
 
     // Fuzz
     case 'fuzz-bigmuff':

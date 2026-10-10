@@ -23,6 +23,8 @@ export interface KnobProps {
     | 'ts9'
     | 'boss-silver'
     | 'boss-gold'
+    | 'boss-orange'
+    | 'boss-black'
     | 'klon-oxblood'
     | 'ocd'
     | 'davies'
@@ -368,6 +370,83 @@ const BossGoldKnobDial: React.FC = () => (
       strokeWidth="3.5"
       strokeLinecap="round"
       filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.5))"
+    />
+  </svg>
+);
+
+const BossOrangeKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="boss-org-skirt" cx="40%" cy="40%" r="60%">
+        <stop offset="0%" stopColor="#2d333f" />
+        <stop offset="100%" stopColor="#0b0d12" />
+      </radialGradient>
+      <radialGradient id="boss-org-cap" cx="45%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#ff9a3c" />
+        <stop offset="50%" stopColor="#f97316" />
+        <stop offset="85%" stopColor="#ea580c" />
+        <stop offset="100%" stopColor="#c2410c" />
+      </radialGradient>
+    </defs>
+    <circle cx="50" cy="50" r="48" fill="url(#boss-org-skirt)" stroke="#05070a" strokeWidth="1.5" />
+    {Array.from({ length: 18 }).map((_, i) => {
+      const a = (i * 20 * Math.PI) / 180;
+      const x1 = 50 + 43 * Math.sin(a);
+      const y1 = 50 - 43 * Math.cos(a);
+      const x2 = 50 + 48 * Math.sin(a);
+      const y2 = 50 - 48 * Math.cos(a);
+      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#11141a" strokeWidth="2.2" />;
+    })}
+    <circle cx="50" cy="50" r="35" fill="url(#boss-org-cap)" stroke="#9a3412" strokeWidth="1.5" />
+    <circle cx="50" cy="50" r="34" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" />
+    <line
+      x1="50"
+      y1="15"
+      x2="50"
+      y2="42"
+      stroke="#0f172a"
+      strokeWidth="3.5"
+      strokeLinecap="round"
+      filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.5))"
+    />
+  </svg>
+);
+
+const BossBlackKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="boss-blk-skirt" cx="40%" cy="40%" r="60%">
+        <stop offset="0%" stopColor="#2d333f" />
+        <stop offset="100%" stopColor="#0b0d12" />
+      </radialGradient>
+      <radialGradient id="boss-blk-cap" cx="45%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#30353d" />
+        <stop offset="45%" stopColor="#1e2229" />
+        <stop offset="85%" stopColor="#12151b" />
+        <stop offset="100%" stopColor="#0a0c10" />
+      </radialGradient>
+    </defs>
+    <circle cx="50" cy="50" r="48" fill="url(#boss-blk-skirt)" stroke="#05070a" strokeWidth="1.5" />
+    {Array.from({ length: 18 }).map((_, i) => {
+      const a = (i * 20 * Math.PI) / 180;
+      const x1 = 50 + 43 * Math.sin(a);
+      const y1 = 50 - 43 * Math.cos(a);
+      const x2 = 50 + 48 * Math.sin(a);
+      const y2 = 50 - 48 * Math.cos(a);
+      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#11141a" strokeWidth="2.2" />;
+    })}
+    <circle cx="50" cy="50" r="35" fill="url(#boss-blk-cap)" stroke="#3f4550" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="34" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="0.8" />
+    {/* Crisp White Indicator Line down center (guaranteed x=50, perpendicular) */}
+    <line
+      x1="50"
+      y1="14"
+      x2="50"
+      y2="42"
+      stroke="#ffffff"
+      strokeWidth="3.4"
+      strokeLinecap="round"
+      filter="drop-shadow(0 0.5px 1.5px rgba(0,0,0,0.85))"
     />
   </svg>
 );
@@ -1091,6 +1170,8 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'ts9' && <Ts9KnobDial />}
           {variant === 'boss-silver' && <BossSilverKnobDial />}
           {variant === 'boss-gold' && <BossGoldKnobDial />}
+          {variant === 'boss-orange' && <BossOrangeKnobDial />}
+          {variant === 'boss-black' && <BossBlackKnobDial />}
           {variant === 'klon-oxblood' && <KlonOxbloodKnobDial />}
           {variant === 'ocd' && <OcdKnobDial />}
           {variant === 'davies' && <DaviesKnobDial />}
