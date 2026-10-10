@@ -37,7 +37,8 @@ export interface KnobProps {
     | 'flatiron'
     | 'tsmini-small'
     | 'tsmini-large'
-    | 'ibanez-tonelok';
+    | 'ibanez-tonelok'
+    | 'marshall-black';
   showLabel?: boolean;
   showValue?: boolean;
   subLabel?: string;
@@ -499,6 +500,52 @@ const IbanezToneLokKnobDial: React.FC = () => (
       strokeWidth="3.2"
       strokeLinecap="round"
       filter="drop-shadow(0 0.5px 0.5px rgba(255,255,255,0.4))"
+    />
+  </svg>
+);
+
+const MarshallBlackKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="marshall-skirt" cx="42%" cy="40%" r="60%">
+        <stop offset="0%" stopColor="#2c323a" />
+        <stop offset="65%" stopColor="#14171d" />
+        <stop offset="100%" stopColor="#08090d" />
+      </radialGradient>
+      <radialGradient id="marshall-cap" cx="44%" cy="38%" r="62%">
+        <stop offset="0%" stopColor="#353c46" />
+        <stop offset="50%" stopColor="#20242c" />
+        <stop offset="85%" stopColor="#12151b" />
+        <stop offset="100%" stopColor="#090b0e" />
+      </radialGradient>
+      <filter id="marshall-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2.2" floodColor="#000000" floodOpacity="0.8" />
+      </filter>
+    </defs>
+    {/* Outer fluted skirt base */}
+    <circle cx="50" cy="50" r="48" fill="url(#marshall-skirt)" filter="url(#marshall-shadow)" stroke="#06070a" strokeWidth="1.2" />
+    {/* 16 ribbed flutes around skirt perimeter */}
+    {Array.from({ length: 16 }).map((_, i) => {
+      const a = (i * 22.5 * Math.PI) / 180;
+      const x1 = 50 + 41 * Math.sin(a);
+      const y1 = 50 - 41 * Math.cos(a);
+      const x2 = 50 + 48 * Math.sin(a);
+      const y2 = 50 - 48 * Math.cos(a);
+      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#08090d" strokeWidth="2.8" />;
+    })}
+    {/* Inner raised cap dome */}
+    <circle cx="50" cy="50" r="34" fill="url(#marshall-cap)" stroke="#333a44" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="32.5" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
+    {/* Crisp White Indicator Line down center (x=50, perpendicular) */}
+    <line
+      x1="50"
+      y1="12"
+      x2="50"
+      y2="42"
+      stroke="#ffffff"
+      strokeWidth="3.4"
+      strokeLinecap="round"
+      filter="drop-shadow(0 0.5px 1px rgba(0,0,0,0.9))"
     />
   </svg>
 );
@@ -1237,6 +1284,7 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'tsmini-small' && <TsMiniSmallDial />}
           {variant === 'tsmini-large' && <TsMiniLargeDial />}
           {variant === 'ibanez-tonelok' && <IbanezToneLokKnobDial />}
+          {variant === 'marshall-black' && <MarshallBlackKnobDial />}
           {variant === 'default' && <DefaultKnobDial color={color} />}
         </div>
       </div>

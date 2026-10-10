@@ -5772,6 +5772,244 @@ body {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9);
 }
 
+/* ==========================================================================
+   Marshall ShredMaster Distortion Enclosure (1991)
+   ========================================================================== */
+.pedal-marshall-shredmaster {
+  background: linear-gradient(180deg, #1e2024 0%, #16171a 45%, #0f1012 100%) !important;
+  border: 2px solid #2e3138 !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.92),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.15),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.9) !important;
+  padding: 4px 0 14px !important;
+}
+
+.shredmaster-top-bar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+  padding: 2px 8px 3px !important;
+  box-sizing: border-box;
+}
+
+.shredmaster-slanted-deck {
+  width: 100%;
+  background: linear-gradient(180deg, #22252a 0%, #18191d 100%);
+  border-top: 1px solid #32363e;
+  border-bottom: 2px solid #0d0e10;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.6),
+    0 1px 1px rgba(255, 255, 255, 0.1);
+  padding: 6px 8px 5px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.shredmaster-knobs-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.shredmaster-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 34px;
+}
+
+.shredmaster-dial-wrap {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Gold Silkscreen Branding Section - Spans Full Body Width */
+.shredmaster-branding-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 5px 8px 4px;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #17181c 0%, #131417 100%);
+  border-bottom: 2px solid #0d0e10;
+  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.shredmaster-labels-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.shredmaster-labels-row span {
+  font-family: 'Michroma', sans-serif;
+  font-size: 7px;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: 0.3px;
+  width: 34px;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+}
+
+.shredmaster-labels-line {
+  width: 100%;
+  height: 1.5px;
+  background: #c5a968;
+  margin: 3px 0 2px;
+  box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.8);
+}
+
+.shredmaster-title-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 1px 0 0;
+  box-sizing: border-box;
+}
+
+.shredmaster-title-line-left,
+.shredmaster-title-line-right {
+  height: 1.5px;
+  background: #c5a968;
+  flex: 1;
+  box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.8);
+}
+
+.shredmaster-title-text {
+  font-family: 'Copperplate', 'Rockwell', 'Arial Black', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  color: #c5a968;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  line-height: 1;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.95),
+    0 0 1px rgba(197, 169, 104, 0.4);
+}
+
+/* Lower Flat Foot Deck */
+.shredmaster-lower-deck {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 0 10px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.shredmaster-led-wrap {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-bottom: 3px;
+}
+
+.shredmaster-led {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  transition: all 0.15s ease;
+}
+
+.shredmaster-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ff5252, #dc2626);
+  box-shadow: 0 0 10px #ef4444, inset 0 1px 1px #ffffff;
+}
+
+.shredmaster-led.off {
+  background: #3e1212;
+  border: 1px solid #1a0808;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.shredmaster-footswitch-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.shredmaster-stomp-button {
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shredmaster-stomp-button:active .shredmaster-stomp-plunger {
+  transform: scale(0.92);
+}
+
+.shredmaster-hex-nut {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 50%, #64748b 100%);
+  clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.65);
+  position: relative;
+}
+
+.shredmaster-tooth-washer {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px dashed rgba(255, 255, 255, 0.4);
+}
+
+.shredmaster-stomp-plunger {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffffff 0%, #cbd5e1 45%, #64748b 90%, #334155 100%);
+  border: 1.5px solid #475569;
+  box-shadow:
+    inset 0 1px 1px #ffffff,
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  transition: transform 0.08s ease;
+}
+
+.shredmaster-logo-container {
+  width: 160px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.shredmaster-marshall-logo-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 /* 6. KLON CENTAUR (LANDSCAPE ORIENTED ENCLOSURE) */
 .pedal-klon-centaur {
   width: 260px !important;

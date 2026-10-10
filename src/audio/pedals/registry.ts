@@ -27,6 +27,7 @@ import { BossDs1Node } from './distortion/BossDs1Node';
 import { BossHm2Node } from './distortion/BossHm2Node';
 import { BossMt2Node } from './distortion/BossMt2Node';
 import { IbanezSm7Node } from './distortion/IbanezSm7Node';
+import { MarshallShredMasterNode } from './distortion/MarshallShredMasterNode';
 
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
@@ -293,6 +294,21 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       { id: 'edge', name: 'EDGE', min: 0, max: 1, step: 1, defaultValue: 0, formatValue: (v) => (v === 0 ? 'SHARP' : 'SMOOTH') },
     ],
   },
+  'dist-shredmaster': {
+    type: 'dist-shredmaster',
+    name: 'Marshall ShredMaster',
+    subtitle: 'Classic 1991 British High-Gain Distortion',
+    category: 'distortion',
+    chassisColor: '#1c1e22',
+    accentColor: '#d4af37',
+    parameters: [
+      { id: 'gain', name: 'Gain', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+      { id: 'bass', name: 'Bass', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => `${(-12 + (v / 10) * 24) > 0 ? '+' : ''}${(-12 + (v / 10) * 24).toFixed(0)} dB` },
+      { id: 'contour', name: 'Contour', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => (v < 4 ? 'British Mid-Boost' : v > 6 ? 'Shoegaze Scoop' : 'Flat Mid') },
+      { id: 'treble', name: 'Treble', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => `${(-12 + (v / 10) * 24) > 0 ? '+' : ''}${(-12 + (v / 10) * 24).toFixed(0)} dB` },
+      { id: 'volume', name: 'Volume', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
 
   // Category 4: Fuzz
   'fuzz-bigmuff': {
@@ -425,6 +441,8 @@ export function createPedalAudioNode(
       return new BossMt2Node(ctx, id, initialParams, enabled);
     case 'dist-sm7':
       return new IbanezSm7Node(ctx, id, initialParams, enabled);
+    case 'dist-shredmaster':
+      return new MarshallShredMasterNode(ctx, id, initialParams, enabled);
 
     // Fuzz
     case 'fuzz-bigmuff':

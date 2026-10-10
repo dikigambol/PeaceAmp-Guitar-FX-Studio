@@ -49,10 +49,10 @@ export const IbanezSm7Pedal: React.FC<PedalProps> = ({
   const voidVal = instance.parameters['void'] ?? 1; // 0 = OFF, 1 = VOID 1, 2 = VOID 2
   const edgeVal = instance.parameters['edge'] ?? 0; // 0 = SHARP, 1 = SMOOTH
 
-  const isLeftPending = isJackPending?.(instance.id, 'out') ?? false;
-  const isRightPending = isJackPending?.(instance.id, 'in') ?? false;
-  const hasLeftCable = hasJackCable?.(instance.id, 'out') ?? false;
-  const hasRightCable = hasJackCable?.(instance.id, 'in') ?? false;
+  const isLeftPending = isJackPending?.(instance.id, 'in') ?? false;
+  const isRightPending = isJackPending?.(instance.id, 'out') ?? false;
+  const hasLeftCable = hasJackCable?.(instance.id, 'in') ?? false;
+  const hasRightCable = hasJackCable?.(instance.id, 'out') ?? false;
 
   return (
     <div
@@ -61,28 +61,22 @@ export const IbanezSm7Pedal: React.FC<PedalProps> = ({
     >
       {/* 1/4" Side Patch Jacks */}
       <div
-        className={`stompbox-side-jack jack-left ${isLeftPending ? 'jack-pending-target' : ''} ${hasLeftCable ? 'jack-has-cable' : ''}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          onJackClick?.(instance.id, 'out', e);
-        }}
-        title="OUTPUT Jack (Left)"
-      >
-        <div className="side-jack-hex-nut" />
-        <div className="side-jack-hole" />
-      </div>
-
-      <div
-        className={`stompbox-side-jack jack-right ${isRightPending ? 'jack-pending-target' : ''} ${hasRightCable ? 'jack-has-cable' : ''}`}
+        className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
         }}
-        title="INPUT Jack (Right)"
-      >
-        <div className="side-jack-hex-nut" />
-        <div className="side-jack-hole" />
-      </div>
+        title="Audio Input Jack (Left) - Click to patch cable"
+      />
+
+      <div
+        className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onJackClick?.(instance.id, 'out', e);
+        }}
+        title="Audio Output Jack (Right) - Click to patch cable"
+      />
 
       {/* Top Header with Close Button and DC Spec Print */}
       <div className="pedal-top-bar sm7-top-bar">
