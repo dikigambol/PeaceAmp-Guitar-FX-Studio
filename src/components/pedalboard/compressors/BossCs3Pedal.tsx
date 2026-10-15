@@ -36,10 +36,10 @@ export const BossCs3Pedal: React.FC<PedalProps> = ({
   const attackVal = instance.parameters['attack'] ?? 5;
   const sustainVal = instance.parameters['sustain'] ?? 5;
 
-  const isLeftPending = isJackPending?.(instance.id, 'in') ?? false;
-  const isRightPending = isJackPending?.(instance.id, 'out') ?? false;
-  const hasLeftCable = hasJackCable?.(instance.id, 'in') ?? false;
-  const hasRightCable = hasJackCable?.(instance.id, 'out') ?? false;
+  const isLeftPending = isJackPending?.(instance.id, 'out') ?? false;
+  const isRightPending = isJackPending?.(instance.id, 'in') ?? false;
+  const hasLeftCable = hasJackCable?.(instance.id, 'out') ?? false;
+  const hasRightCable = hasJackCable?.(instance.id, 'in') ?? false;
 
   return (
     <div
@@ -50,18 +50,18 @@ export const BossCs3Pedal: React.FC<PedalProps> = ({
       {/* 1/4" Side Phone Jacks */}
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
-        title="Audio Input Jack - Click to patch cable"
-        onClick={(e) => {
-          e.stopPropagation();
-          onJackClick?.(instance.id, 'in', e);
-        }}
-      />
-      <div
-        className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         title="Audio Output Jack - Click to patch cable"
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
+        }}
+      />
+      <div
+        className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
+        title="Audio Input Jack - Click to patch cable"
+        onClick={(e) => {
+          e.stopPropagation();
+          onJackClick?.(instance.id, 'in', e);
         }}
       />
 

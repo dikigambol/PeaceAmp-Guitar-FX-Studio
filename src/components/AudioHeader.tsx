@@ -10,7 +10,9 @@ import {
   Upload, 
   Trash2, 
   Check, 
-  X 
+  X,
+  Save,
+  Pencil
 } from 'lucide-react';
 
 interface AudioHeaderProps {
@@ -21,7 +23,9 @@ interface AudioHeaderProps {
   presets: PresetSchema[];
   currentPresetId: string | null;
   onSelectPreset: (preset: PresetSchema) => void;
-  onSaveCurrentAsPreset: (name: string) => void;
+  onSaveCurrentPreset: () => boolean;
+  onSaveNewPreset: (name: string) => void;
+  onRenamePreset: (presetId: string, newName: string) => void;
   onDeletePreset: (presetId: string) => void;
   onExportPresets: () => void;
   onImportPresets: (imported: PresetSchema[]) => void;
@@ -35,7 +39,9 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
   presets,
   currentPresetId,
   onSelectPreset,
-  onSaveCurrentAsPreset,
+  onSaveCurrentPreset,
+  onSaveNewPreset,
+  onRenamePreset,
   onDeletePreset,
   onExportPresets,
   onImportPresets,
@@ -43,16 +49,40 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
   const isRunning = status === 'running';
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [renamePresetName, setRenamePresetName] = useState('');
+  const [isSavedFeedback, setIsSavedFeedback] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentPreset = presets.find((p) => p.id === currentPresetId);
+  const isUserPresetActive = Boolean(currentPreset);
 
-  const handleSaveSubmit = (e: React.FormEvent) => {
+  const handleSaveClick = () => {
+    if (isUserPresetActive) {
+      const ok = onSaveCurrentPreset();
+      if (ok) {
+        setIsSavedFeedback(true);
+        setTimeout(() => setIsSavedFeedback(false), 1600);
+      }
+    } else {
+      setNewPresetName('');
+      setShowSaveModal(true);
+    }
+  };
+
+  const handleSaveNewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPresetName.trim()) return;
-    onSaveCurrentAsPreset(newPresetName.trim());
+    onSaveNewPreset(newPresetName.trim());
     setNewPresetName('');
     setShowSaveModal(false);
+  };
+
+  const handleRenameSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!renamePresetName.trim() || !currentPreset) return;
+    onRenamePreset(currentPreset.id, renamePresetName.trim());
+    setShowRenameModal(false);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -108,11 +138,11 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
         >
           {presets.length === 0 ? (
             <option value="" disabled>
-              CLEAN BOARD (RECONSTRUCTION MODE)
+              CLEAN BOARD (NO PRESETS)
             </option>
           ) : (
             <>
-              {!currentPresetId && (
+              {(!currentPresetId || !presets.some((p) => p.id === currentPresetId)) && (
                 <option value="" disabled>
                   SELECT PRESET RIG...
                 </option>
@@ -148,14 +178,60 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
 
         {/* Preset Action Buttons */}
         <div className="preset-action-group">
+          {/* Main SAVE button: Overwrites active preset if user preset, or opens modal if none */}
           <button
-            className="preset-btn-save"
-            onClick={() => setShowSaveModal(true)}
-            title="Save current pedalboard as a new preset"
+            className={`preset-btn-save ${isSavedFeedback ? 'is-saved' : ''}`}
+            onClick={handleSaveClick}
+            title={
+              isUserPresetActive && currentPreset
+                ? `Save & overwrite current preset "${currentPreset.name}"`
+                : 'Save current pedalboard as a new preset'
+            }
           >
-            <Plus size={12} strokeWidth={2.2} />
-            <span>SAVE</span>
+            {isSavedFeedback ? (
+              <>
+                <Check size={12} strokeWidth={2.5} />
+                <span>SAVED!</span>
+              </>
+            ) : isUserPresetActive ? (
+              <>
+                <Save size={12} strokeWidth={2.2} />
+                <span>SAVE</span>
+              </>
+            ) : (
+              <>
+                <Plus size={12} strokeWidth={2.2} />
+                <span>SAVE</span>
+              </>
+            )}
           </button>
+
+          {/* If a user preset is active: provide Rename & Save As New buttons */}
+          {isUserPresetActive && currentPreset && (
+            <>
+              <button
+                className="preset-btn-icon"
+                onClick={() => {
+                  setRenamePresetName(currentPreset.name);
+                  setShowRenameModal(true);
+                }}
+                title={`Rename preset "${currentPreset.name}"`}
+              >
+                <Pencil size={12} strokeWidth={2} />
+              </button>
+
+              <button
+                className="preset-btn-icon"
+                onClick={() => {
+                  setNewPresetName(`${currentPreset.name} (Copy)`);
+                  setShowSaveModal(true);
+                }}
+                title="Save current rig as a new preset (Save As)"
+              >
+                <Plus size={13} strokeWidth={2.2} />
+              </button>
+            </>
+          )}
 
           <button
             className="preset-btn-icon"
@@ -180,7 +256,7 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
             style={{ display: 'none' }}
           />
 
-          {currentPreset && currentPreset.category === 'user' && (
+          {isUserPresetActive && currentPreset && (
             <button
               className="preset-btn-icon is-danger"
               onClick={() => onDeletePreset(currentPreset.id)}
@@ -219,12 +295,12 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
         </button>
       </div>
 
-      {/* Modal: Save User Preset */}
+      {/* Modal: Save User Preset (Save As New) */}
       {showSaveModal && (
         <div className="header-modal-backdrop" onClick={() => setShowSaveModal(false)}>
           <div className="header-modal-dialog" onClick={(e) => e.stopPropagation()}>
             <div className="dialog-title-bar">
-              <h5>SAVE CURRENT RIG PRESET</h5>
+              <h5>SAVE NEW RIG PRESET</h5>
               <button 
                 type="button" 
                 className="dialog-close-btn" 
@@ -233,9 +309,9 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
                 <X size={14} />
               </button>
             </div>
-            <form onSubmit={handleSaveSubmit} className="dialog-form-body">
+            <form onSubmit={handleSaveNewSubmit} className="dialog-form-body">
               <p className="dialog-info-text">
-                Enter a custom name for your current chain of pedals and parameter settings:
+                Enter a name to save your current complete rig (amp, cabinet, pedals, and positions):
               </p>
               <input
                 type="text"
@@ -254,9 +330,54 @@ export const AudioHeader: React.FC<AudioHeaderProps> = ({
                 >
                   CANCEL
                 </button>
-                <button type="submit" className="dialog-btn-submit">
+                <button type="submit" className="dialog-btn-submit" disabled={!newPresetName.trim()}>
                   <Check size={13} strokeWidth={2.2} />
                   <span>SAVE PRESET</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Rename User Preset */}
+      {showRenameModal && currentPreset && (
+        <div className="header-modal-backdrop" onClick={() => setShowRenameModal(false)}>
+          <div className="header-modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="dialog-title-bar">
+              <h5>RENAME RIG PRESET</h5>
+              <button 
+                type="button" 
+                className="dialog-close-btn" 
+                onClick={() => setShowRenameModal(false)}
+              >
+                <X size={14} />
+              </button>
+            </div>
+            <form onSubmit={handleRenameSubmit} className="dialog-form-body">
+              <p className="dialog-info-text">
+                Enter a new name for preset <strong>"{currentPreset.name}"</strong>:
+              </p>
+              <input
+                type="text"
+                className="dialog-text-input"
+                placeholder="Preset Name"
+                value={renamePresetName}
+                onChange={(e) => setRenamePresetName(e.target.value)}
+                autoFocus
+                maxLength={32}
+              />
+              <div className="dialog-button-row">
+                <button
+                  type="button"
+                  className="dialog-btn-cancel"
+                  onClick={() => setShowRenameModal(false)}
+                >
+                  CANCEL
+                </button>
+                <button type="submit" className="dialog-btn-submit" disabled={!renamePresetName.trim()}>
+                  <Check size={13} strokeWidth={2.2} />
+                  <span>RENAME</span>
                 </button>
               </div>
             </form>

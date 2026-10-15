@@ -50,10 +50,10 @@ export const MarshallShredMasterPedal: React.FC<PedalProps> = ({
   const trebleVal = instance.parameters['treble'] ?? 5;
   const volumeVal = instance.parameters['volume'] ?? 5;
 
-  const isLeftPending = isJackPending?.(instance.id, 'in') ?? false;
-  const isRightPending = isJackPending?.(instance.id, 'out') ?? false;
-  const hasLeftCable = hasJackCable?.(instance.id, 'in') ?? false;
-  const hasRightCable = hasJackCable?.(instance.id, 'out') ?? false;
+  const isLeftPending = isJackPending?.(instance.id, 'out') ?? false;
+  const isRightPending = isJackPending?.(instance.id, 'in') ?? false;
+  const hasLeftCable = hasJackCable?.(instance.id, 'out') ?? false;
+  const hasRightCable = hasJackCable?.(instance.id, 'in') ?? false;
 
   return (
     <div
@@ -65,18 +65,18 @@ export const MarshallShredMasterPedal: React.FC<PedalProps> = ({
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
-          onJackClick?.(instance.id, 'in', e);
+          onJackClick?.(instance.id, 'out', e);
         }}
-        title="Audio Input Jack (Left) - Click to patch cable"
+        title="Audio Output Jack (Left) - Click to patch cable"
       />
 
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         onClick={(e) => {
           e.stopPropagation();
-          onJackClick?.(instance.id, 'out', e);
+          onJackClick?.(instance.id, 'in', e);
         }}
-        title="Audio Output Jack (Right) - Click to patch cable"
+        title="Audio Input Jack (Right) - Click to patch cable"
       />
 
       {/* Top Header with Close Button */}

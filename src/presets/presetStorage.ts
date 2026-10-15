@@ -29,14 +29,36 @@ export function saveUserPreset(preset: Omit<PresetSchema, 'category' | 'version'
   try {
     const existingRaw = localStorage.getItem(STORAGE_KEY);
     const existing: PresetSchema[] = existingRaw ? JSON.parse(existingRaw) : [];
-    const filtered = existing.filter((p) => p.id !== newPreset.id);
-    filtered.push(newPreset);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    const idx = existing.findIndex((p) => p.id === newPreset.id);
+    let updated: PresetSchema[];
+    if (idx !== -1) {
+      // Overwrite existing preset in place
+      updated = [...existing];
+      updated[idx] = newPreset;
+    } else {
+      // Append new preset
+      updated = [...existing, newPreset];
+    }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   } catch (e) {
     console.error('Failed to save preset to localStorage', e);
   }
 
   return newPreset;
+}
+
+export function renameUserPreset(presetId: string, newName: string): PresetSchema[] {
+  try {
+    const existingRaw = localStorage.getItem(STORAGE_KEY);
+    if (!existingRaw) return loadAllPresets();
+    const existing: PresetSchema[] = JSON.parse(existingRaw);
+    const updated = existing.map((p) => (p.id === presetId ? { ...p, name: newName.trim() } : p));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    return [...FACTORY_PRESETS, ...updated];
+  } catch (e) {
+    console.error('Failed to rename preset in localStorage', e);
+    return loadAllPresets();
+  }
 }
 
 export function deleteUserPreset(presetId: string): void {

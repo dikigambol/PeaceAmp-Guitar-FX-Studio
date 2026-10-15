@@ -81,10 +81,6 @@
 -Boss PS-6 Harmonist
 
 14. Delay
--Boss DD-3
--Boss DD-5
--Boss DD-7
--Boss DD-8
 -Boss DM-2
 -MXR Carbon Copy
 -EHX Memory Man
@@ -93,7 +89,6 @@
 -Tape Echo
 
 15. Reverb
--Boss RV-5
 -Boss RV-6
 -EHX Holy Grail
 -Strymon BlueSky

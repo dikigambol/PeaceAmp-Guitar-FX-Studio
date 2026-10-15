@@ -28,6 +28,8 @@ import { BossHm2Node } from './distortion/BossHm2Node';
 import { BossMt2Node } from './distortion/BossMt2Node';
 import { IbanezSm7Node } from './distortion/IbanezSm7Node';
 import { MarshallShredMasterNode } from './distortion/MarshallShredMasterNode';
+import { MxrDistortionPlusNode } from './distortion/MxrDistortionPlusNode';
+import { ProCoRatNode } from './distortion/ProCoRatNode';
 
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
@@ -309,6 +311,31 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       { id: 'volume', name: 'Volume', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
     ],
   },
+  'dist-mxrdistplus': {
+    type: 'dist-mxrdistplus',
+    name: 'MXR Distortion+',
+    subtitle: 'Classic 1970s Germanium Hard Clipper',
+    category: 'distortion',
+    chassisColor: '#d9a726',
+    accentColor: '#1a1a1a',
+    parameters: [
+      { id: 'output', name: 'OUTPUT', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+      { id: 'distortion', name: 'DISTORTION', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
+  'dist-procorat': {
+    type: 'dist-procorat',
+    name: 'ProCo RAT 2',
+    subtitle: 'Classic 1988 LM308 Rodent Distortion',
+    category: 'distortion',
+    chassisColor: '#121316',
+    accentColor: '#ffffff',
+    parameters: [
+      { id: 'distortion', name: 'DISTORTION', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
+      { id: 'filter', name: 'FILTER', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => (v < 3 ? 'Bright Cut' : v > 7 ? 'Woolly Warm' : 'Balanced Lead') },
+      { id: 'volume', name: 'VOLUME', min: 0, max: 10, step: 0.1, defaultValue: 5, formatValue: (v) => v.toFixed(1) },
+    ],
+  },
 
   // Category 4: Fuzz
   'fuzz-bigmuff': {
@@ -443,6 +470,10 @@ export function createPedalAudioNode(
       return new IbanezSm7Node(ctx, id, initialParams, enabled);
     case 'dist-shredmaster':
       return new MarshallShredMasterNode(ctx, id, initialParams, enabled);
+    case 'dist-mxrdistplus':
+      return new MxrDistortionPlusNode(ctx, id, initialParams, enabled);
+    case 'dist-procorat':
+      return new ProCoRatNode(ctx, id, initialParams, enabled);
 
     // Fuzz
     case 'fuzz-bigmuff':

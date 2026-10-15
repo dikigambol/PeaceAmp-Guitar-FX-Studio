@@ -38,7 +38,8 @@ export interface KnobProps {
     | 'tsmini-small'
     | 'tsmini-large'
     | 'ibanez-tonelok'
-    | 'marshall-black';
+    | 'marshall-black'
+    | 'proco-rat';
   showLabel?: boolean;
   showValue?: boolean;
   subLabel?: string;
@@ -1166,6 +1167,55 @@ const FlatironKnobDial: React.FC = () => (
   </svg>
 );
 
+const ProCoRatKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="rat-skirt-grad" cx="42%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#3a3e47" />
+        <stop offset="50%" stopColor="#1e2126" />
+        <stop offset="85%" stopColor="#101216" />
+        <stop offset="100%" stopColor="#08090b" />
+      </radialGradient>
+      <radialGradient id="rat-cap-grad" cx="44%" cy="36%" r="58%">
+        <stop offset="0%" stopColor="#444a54" />
+        <stop offset="40%" stopColor="#22262d" />
+        <stop offset="80%" stopColor="#131518" />
+        <stop offset="100%" stopColor="#08090a" />
+      </radialGradient>
+      <filter id="rat-knob-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.85" />
+      </filter>
+    </defs>
+    {/* Outer fluted skirt */}
+    <circle cx="50" cy="50" r="48" fill="url(#rat-skirt-grad)" filter="url(#rat-knob-shadow)" stroke="#050608" strokeWidth="1" />
+    {/* Outer Fluted Serrations (24 radial ribs around skirt) */}
+    {Array.from({ length: 24 }).map((_, i) => {
+      const a = (i * 15 * Math.PI) / 180;
+      const x1 = 50 + 38 * Math.sin(a);
+      const y1 = 50 - 38 * Math.cos(a);
+      const x2 = 50 + 47 * Math.sin(a);
+      const y2 = 50 - 47 * Math.cos(a);
+      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#090a0d" strokeWidth="2.4" strokeLinecap="round" />;
+    })}
+    {/* Highlight ring on skirt inner boundary */}
+    <circle cx="50" cy="50" r="37" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" />
+    {/* Inner raised textured cap */}
+    <circle cx="50" cy="50" r="35" fill="url(#rat-cap-grad)" stroke="#0c0e12" strokeWidth="1.4" />
+    <circle cx="50" cy="50" r="33.5" fill="none" stroke="rgba(255, 255, 255, 0.16)" strokeWidth="0.8" />
+    {/* Crisp White Radial Pointer Stripe */}
+    <line
+      x1="50"
+      y1="6"
+      x2="50"
+      y2="42"
+      stroke="#ffffff"
+      strokeWidth="3.4"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 2px rgba(0,0,0,0.95))"
+    />
+  </svg>
+);
+
 export const Knob: React.FC<KnobProps> = ({
   label,
   value,
@@ -1285,6 +1335,7 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'tsmini-large' && <TsMiniLargeDial />}
           {variant === 'ibanez-tonelok' && <IbanezToneLokKnobDial />}
           {variant === 'marshall-black' && <MarshallBlackKnobDial />}
+          {variant === 'proco-rat' && <ProCoRatKnobDial />}
           {variant === 'default' && <DefaultKnobDial color={color} />}
         </div>
       </div>

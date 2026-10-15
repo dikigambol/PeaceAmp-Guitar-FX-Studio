@@ -15,6 +15,7 @@ import { PEDAL_DEFINITIONS } from './audio/pedals/registry';
 import {
   loadAllPresets,
   saveUserPreset,
+  renameUserPreset,
   deleteUserPreset,
   exportPresetsToJson,
 } from './presets/presetStorage';
@@ -24,7 +25,7 @@ import { ChromaticTuner } from './components/tuner/ChromaticTuner';
 import { CabinetSimulatorPanel } from './components/sidebar/CabinetSimulatorPanel';
 import { AmpHeadPanel } from './components/sidebar/AmpHeadPanel';
 import { MasterOutputPanel } from './components/sidebar/MasterOutputPanel';
-import { Pedalboard } from './components/pedalboard/Pedalboard';
+import { Pedalboard, type PatchConnection } from './components/pedalboard/Pedalboard';
 import { HeadphoneWarning } from './components/HeadphoneWarning';
 import { ManualModal } from './components/manual/ManualModal';
 import { DesktopOnlyBlocker } from './components/common/DesktopOnlyBlocker';
@@ -81,6 +82,10 @@ export function App() {
   const [pedals, setPedals] = useState<PedalInstance[]>([]);
   const pedalsRef = useRef<PedalInstance[]>(pedals);
   pedalsRef.current = pedals;
+
+  // Pedalboard Canvas Layout & Routing State (Clean board by default on fresh page load)
+  const [pedalPositions, setPedalPositions] = useState<Record<string, { x: number; y: number }>>({});
+  const [patchConnections, setPatchConnections] = useState<PatchConnection[]>([]);
 
   // Dedicated Cabinet IR Simulator State
   const [cabinetSettings, setCabinetSettings] = useState<CabinetSettings>({
@@ -390,10 +395,104 @@ export function App() {
       parameters: defaultParams,
     };
 
-    setPedals((prev) => {
-      const next = [...prev, newInstance];
-      engineRef.current?.setPedalInstances(next);
-      return next;
+    const currentPedals = pedalsRef.current;
+    const nextPedals = [...currentPedals, newInstance];
+    setPedals(nextPedals);
+    engineRef.current?.setPedalInstances(nextPedals);
+
+    // Auto-place pedal position in pedalPositions state & localStorage
+    setPedalPositions((prevPos) => {
+      const idx = currentPedals.length;
+      const col = idx % 4;
+      const row = Math.floor(idx / 4);
+      const nextPos = {
+        ...prevPos,
+        [newInstance.id]: {
+          x: Math.max(120, 1200 - 140 - 204 - col * 270),
+          y: 40 + row * 410,
+        },
+      };
+      try {
+        localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(nextPos));
+      } catch {}
+      return nextPos;
+    });
+
+    // Auto-wire: automatically wire the new pedal into the signal chain
+    setPatchConnections((prevConns) => {
+      // Case 1: First pedal added to empty board
+      if (currentPedals.length === 0 || prevConns.length === 0 || (prevConns.length === 1 && prevConns[0].id === 'conn-direct-bypass')) {
+        const fresh: PatchConnection[] = [
+          {
+            id: `conn-in-${newInstance.id}`,
+            fromNodeId: 'BOARD_INPUT',
+            toNodeId: newInstance.id,
+            cableColor: 'bone-ivory',
+          },
+          {
+            id: `conn-${newInstance.id}-out`,
+            fromNodeId: newInstance.id,
+            toNodeId: 'BOARD_OUTPUT',
+            cableColor: 'bone-ivory',
+          },
+        ];
+        try {
+          localStorage.setItem('web_guitar_patch_cables', JSON.stringify(fresh));
+        } catch {}
+        return fresh;
+      }
+
+      // Case 2: Additional pedal added to board with existing pedals
+      const toOutputConn = prevConns.find((c) => c.toNodeId === 'BOARD_OUTPUT');
+      const filtered = prevConns.filter(
+        (c) => c.toNodeId !== 'BOARD_OUTPUT' && c.id !== 'conn-direct-bypass'
+      );
+      const nextConns: PatchConnection[] = [...filtered];
+
+      if (toOutputConn) {
+        // Splice newInstance between previous output pedal and BOARD_OUTPUT
+        nextConns.push({
+          id: `conn-${toOutputConn.fromNodeId}-${newInstance.id}`,
+          fromNodeId: toOutputConn.fromNodeId,
+          toNodeId: newInstance.id,
+          cableColor: 'bone-ivory',
+        });
+      } else {
+        const prevLastPedal = currentPedals[currentPedals.length - 1];
+        if (prevLastPedal) {
+          nextConns.push({
+            id: `conn-${prevLastPedal.id}-${newInstance.id}`,
+            fromNodeId: prevLastPedal.id,
+            toNodeId: newInstance.id,
+            cableColor: 'bone-ivory',
+          });
+        }
+      }
+
+      // Connect newInstance out to BOARD_OUTPUT
+      nextConns.push({
+        id: `conn-${newInstance.id}-out`,
+        fromNodeId: newInstance.id,
+        toNodeId: 'BOARD_OUTPUT',
+        cableColor: 'bone-ivory',
+      });
+
+      // Ensure BOARD_INPUT is connected to the first pedal if missing
+      if (!nextConns.some((c) => c.fromNodeId === 'BOARD_INPUT')) {
+        const firstPedalId = currentPedals[0]?.id || newInstance.id;
+        nextConns.unshift({
+          id: `conn-in-${firstPedalId}`,
+          fromNodeId: 'BOARD_INPUT',
+          toNodeId: firstPedalId,
+          cableColor: 'bone-ivory',
+        });
+      }
+
+      try {
+        localStorage.setItem('web_guitar_patch_cables', JSON.stringify(nextConns));
+      } catch {}
+
+      return nextConns;
     });
   }, []);
 
@@ -402,6 +501,43 @@ export function App() {
       const next = prev.filter((p) => p.id !== pedalId);
       engineRef.current?.setPedalInstances(next);
       return next;
+    });
+
+    setPatchConnections((prev) => {
+      const inConn = prev.find((c) => c.toNodeId === pedalId);
+      const outConn = prev.find((c) => c.fromNodeId === pedalId);
+      const filtered = prev.filter((c) => c.fromNodeId !== pedalId && c.toNodeId !== pedalId);
+
+      // If removed pedal had incoming and outgoing connections, bridge them
+      if (inConn && outConn) {
+        filtered.push({
+          id: `conn-${inConn.fromNodeId}-${outConn.toNodeId}`,
+          fromNodeId: inConn.fromNodeId,
+          toNodeId: outConn.toNodeId,
+          cableColor: 'bone-ivory',
+        });
+      }
+
+      // If board is now empty, set direct bypass
+      if (pedals.length <= 1) {
+        const directBypass: PatchConnection[] = [
+          {
+            id: 'conn-direct-bypass',
+            fromNodeId: 'BOARD_INPUT',
+            toNodeId: 'BOARD_OUTPUT',
+            cableColor: 'bone-ivory',
+          },
+        ];
+        try {
+          localStorage.setItem('web_guitar_patch_cables', JSON.stringify(directBypass));
+        } catch {}
+        return directBypass;
+      }
+
+      try {
+        localStorage.setItem('web_guitar_patch_cables', JSON.stringify(filtered));
+      } catch {}
+      return filtered;
     });
   };
 
@@ -453,6 +589,69 @@ export function App() {
     }));
     setPedals(activePedals);
     engineRef.current?.setPedalInstances(activePedals);
+
+    // Restore custom canvas pedal positions if present in preset
+    if (preset.pedalPositions && Object.keys(preset.pedalPositions).length > 0) {
+      setPedalPositions(preset.pedalPositions);
+      try {
+        localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(preset.pedalPositions));
+      } catch {}
+    } else if (activePedals.length > 0) {
+      const autoPos: Record<string, { x: number; y: number }> = {};
+      activePedals.forEach((p, idx) => {
+        const col = idx % 4;
+        const row = Math.floor(idx / 4);
+        autoPos[p.id] = {
+          x: Math.max(120, 1200 - 140 - 204 - col * 270),
+          y: 40 + row * 410,
+        };
+      });
+      setPedalPositions(autoPos);
+      try {
+        localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(autoPos));
+      } catch {}
+    }
+
+    // Restore custom patch cables if present in preset
+    if (preset.connections && preset.connections.length > 0) {
+      setPatchConnections(preset.connections);
+      try {
+        localStorage.setItem('web_guitar_patch_cables', JSON.stringify(preset.connections));
+      } catch {}
+    } else if (activePedals.length > 0) {
+      // Auto-wire sequentially if preset has pedals but connections were not explicitly saved
+      const autoConns: PatchConnection[] = [];
+      autoConns.push({
+        id: `conn-in-${activePedals[0].id}`,
+        fromNodeId: 'BOARD_INPUT',
+        toNodeId: activePedals[0].id,
+        cableColor: 'bone-ivory',
+      });
+      for (let i = 0; i < activePedals.length - 1; i++) {
+        autoConns.push({
+          id: `conn-${activePedals[i].id}-${activePedals[i + 1].id}`,
+          fromNodeId: activePedals[i].id,
+          toNodeId: activePedals[i + 1].id,
+          cableColor: 'bone-ivory',
+        });
+      }
+      autoConns.push({
+        id: `conn-${activePedals[activePedals.length - 1].id}-out`,
+        fromNodeId: activePedals[activePedals.length - 1].id,
+        toNodeId: 'BOARD_OUTPUT',
+        cableColor: 'bone-ivory',
+      });
+      setPatchConnections(autoConns);
+      try {
+        localStorage.setItem('web_guitar_patch_cables', JSON.stringify(autoConns));
+      } catch {}
+    } else {
+      setPatchConnections([]);
+      try {
+        localStorage.removeItem('web_guitar_patch_cables');
+      } catch {}
+    }
+
     if (preset.inputGain !== undefined) handleInputGainChange(preset.inputGain);
     if (preset.masterVolume !== undefined) handleMasterVolumeChange(preset.masterVolume);
     if (preset.cabinet) {
@@ -463,11 +662,69 @@ export function App() {
     }
   }, [handleInputGainChange, handleMasterVolumeChange, handleUpdateCabinetSettings, handleUpdateAmpHeadSettings]);
 
-  const handleSaveCurrentAsPreset = (name: string) => {
+  // Overwrite the currently active user preset with current rig settings
+  const handleSaveCurrentPreset = useCallback((): boolean => {
+    if (!currentPresetId) return false;
+    const currentPreset = presets.find((p) => p.id === currentPresetId);
+    if (!currentPreset) return false;
+
+    let currentPositions = pedalPositions;
+    if (!currentPositions || Object.keys(currentPositions).length === 0) {
+      try {
+        const saved = localStorage.getItem('web_guitar_pedal_coords');
+        if (saved) currentPositions = JSON.parse(saved);
+      } catch {}
+    }
+
+    let currentConns = patchConnections;
+    if (!currentConns || currentConns.length === 0) {
+      try {
+        const saved = localStorage.getItem('web_guitar_patch_cables');
+        if (saved) currentConns = JSON.parse(saved);
+      } catch {}
+    }
+
+    saveUserPreset({
+      id: currentPreset.id,
+      name: currentPreset.name,
+      pedals: JSON.parse(JSON.stringify(pedals)),
+      pedalPositions: currentPositions,
+      connections: currentConns,
+      inputGain,
+      masterVolume,
+      cabinet: cabinetSettings,
+      ampHead: ampHeadSettings,
+    });
+
+    const updated = loadAllPresets();
+    setPresets(updated);
+    return true;
+  }, [currentPresetId, presets, pedalPositions, patchConnections, pedals, inputGain, masterVolume, cabinetSettings, ampHeadSettings]);
+
+  // Save current rig settings as a brand new preset
+  const handleSaveNewPreset = (name: string) => {
+    let currentPositions = pedalPositions;
+    if (!currentPositions || Object.keys(currentPositions).length === 0) {
+      try {
+        const saved = localStorage.getItem('web_guitar_pedal_coords');
+        if (saved) currentPositions = JSON.parse(saved);
+      } catch {}
+    }
+
+    let currentConns = patchConnections;
+    if (!currentConns || currentConns.length === 0) {
+      try {
+        const saved = localStorage.getItem('web_guitar_patch_cables');
+        if (saved) currentConns = JSON.parse(saved);
+      } catch {}
+    }
+
     const newPreset = saveUserPreset({
       id: `user-preset-${Date.now().toString(36)}`,
       name,
       pedals: JSON.parse(JSON.stringify(pedals)),
+      pedalPositions: currentPositions,
+      connections: currentConns,
       inputGain,
       masterVolume,
       cabinet: cabinetSettings,
@@ -478,12 +735,22 @@ export function App() {
     setCurrentPresetId(newPreset.id);
   };
 
+  // Rename an existing user preset
+  const handleRenamePreset = (presetId: string, newName: string) => {
+    const updated = renameUserPreset(presetId, newName);
+    setPresets(updated);
+  };
+
   const handleDeletePreset = (presetId: string) => {
     deleteUserPreset(presetId);
     const updated = loadAllPresets();
     setPresets(updated);
     if (currentPresetId === presetId) {
-      handleSelectPreset(updated[0]);
+      if (updated.length > 0) {
+        handleSelectPreset(updated[0]);
+      } else {
+        setCurrentPresetId(null);
+      }
     }
   };
 
@@ -499,6 +766,12 @@ export function App() {
           name: p.name,
           description: p.description,
           pedals: p.pedals,
+          pedalPositions: p.pedalPositions,
+          connections: p.connections,
+          inputGain: p.inputGain,
+          masterVolume: p.masterVolume,
+          cabinet: p.cabinet,
+          ampHead: p.ampHead,
         });
       }
     }
@@ -522,7 +795,9 @@ export function App() {
         presets={presets}
         currentPresetId={currentPresetId}
         onSelectPreset={handleSelectPreset}
-        onSaveCurrentAsPreset={handleSaveCurrentAsPreset}
+        onSaveCurrentPreset={handleSaveCurrentPreset}
+        onSaveNewPreset={handleSaveNewPreset}
+        onRenamePreset={handleRenamePreset}
         onDeletePreset={handleDeletePreset}
         onExportPresets={handleExportPresets}
         onImportPresets={handleImportPresets}
@@ -593,6 +868,10 @@ export function App() {
         <section className="dashboard-canvas-stage">
           <Pedalboard
             pedals={pedals}
+            positions={pedalPositions}
+            onPositionsChange={setPedalPositions}
+            connections={patchConnections}
+            onConnectionsChange={setPatchConnections}
             onToggleEnabled={handleTogglePedalEnabled}
             onChangeParam={handleChangePedalParam}
             onRemovePedal={handleRemovePedal}

@@ -1190,6 +1190,13 @@ body {
   box-shadow: 0 0 12px rgba(200, 166, 101, 0.45);
 }
 
+.preset-btn-save.is-saved {
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+  border-color: #34d399 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6) !important;
+}
+
 .preset-btn-icon {
   display: flex;
   align-items: center;
@@ -2828,12 +2835,12 @@ body {
 }
 
 .canvas-io-box.io-input-box {
-  left: 20px;
+  right: 20px;
   top: 40px;
 }
 
 .canvas-io-box.io-output-box {
-  right: 20px;
+  left: 20px;
   top: 40px;
 }
 
@@ -2991,6 +2998,13 @@ body {
   cursor: grabbing;
   filter: drop-shadow(0 20px 36px rgba(0, 0, 0, 0.9));
   transform: scale(1.02);
+  transition: none !important;
+  will-change: left, top;
+}
+
+.canvas-cables-svg.is-dragging-active,
+.canvas-cables-svg.is-dragging-active * {
+  pointer-events: none !important;
 }
 
 /* 1/4" Side Phone Jacks on Stompbox */
@@ -3605,6 +3619,280 @@ body {
   width: 100%;
   display: flex;
   justify-content: center;
+}
+
+/* MXR DISTORTION+ (M-104) ENCLOSURE */
+.pedal-mxr-distplus {
+  background: radial-gradient(circle at 45% 20%, #f6ce3b 0%, #dfa51d 55%, #b47a08 100%) !important;
+  border: 1px solid rgba(255, 240, 160, 0.45) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(255, 255, 220, 0.45),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.75) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 8px 12px 14px !important;
+  position: relative !important;
+}
+
+.mxr-distplus-logo-box {
+  margin: 10px auto 4px;
+  border: 2px solid #141414;
+  border-radius: 6px;
+  padding: 1px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.mxr-distplus-logo-text {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #141414;
+  text-align: center;
+}
+
+.mxr-distplus-led-mount {
+  margin: 3px auto 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.mxr-distplus-led {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #4a3e20 0%, #292010 60%, #151006 100%);
+  border: 1.5px solid #141414;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.mxr-distplus-led.lit {
+  background: radial-gradient(circle at 35% 35%, #fff 0%, #ff3b30 40%, #c41e24 70%, #680509 100%);
+  box-shadow: 0 0 10px #ff3b30, 0 0 20px rgba(255, 59, 48, 0.75);
+}
+
+.mxr-distplus-led-core {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.mxr-distplus-switch-wrap {
+  margin: 2px auto 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mxr-distplus-bottom-title {
+  margin-top: 4px;
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: #141414;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  text-transform: lowercase;
+}
+
+/* ==========================================================================
+   PROCO RAT 2 DISTORTION ENCLOSURE
+   ========================================================================== */
+.pedal-proco-rat {
+  background: radial-gradient(circle at 50% 25%, #22252c 0%, #16181d 55%, #0d0e12 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.9),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.22),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.85) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 6px 12px 14px !important;
+  position: relative !important;
+}
+
+/* Simulated Top Deck 1/4" Jacks */
+.proco-rat-top-jacks {
+  position: absolute;
+  top: -6px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 46px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.proco-rat-top-jack-plug {
+  width: 20px;
+  height: 7px;
+  background: linear-gradient(180deg, #adb5bd 0%, #495057 50%, #212529 100%);
+  border-radius: 3px 3px 0 0;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border: 1px solid #1a1e24;
+  border-bottom: none;
+}
+
+/* Iconic Heavy Steel Folded Side Flanges */
+.proco-rat-side-flange {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.7) 100%);
+  pointer-events: none;
+}
+
+.proco-rat-side-flange.left {
+  left: 3px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.proco-rat-side-flange.right {
+  right: 3px;
+  transform: scaleX(-1);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* 1. Header Triple Box Strip */
+.proco-rat-header-strip {
+  width: 172px;
+  margin: 8px auto 6px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  background: #0d0f13;
+  box-sizing: border-box;
+}
+
+.proco-rat-header-cell {
+  padding: 3px 2px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.proco-rat-header-cell:not(:last-child) {
+  border-right: 2px solid #ffffff;
+}
+
+/* 2. Knobs Row & Dial Scales */
+.proco-rat-knobs-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 2px 0 6px;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.proco-rat-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.proco-rat-knob-wrapper {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proco-rat-dial-scale {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 3. Center RAT Boxed Logo */
+.proco-rat-logo-box {
+  width: 168px;
+  margin: 6px auto 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.1s ease, filter 0.2s ease;
+}
+
+.proco-rat-logo-box:hover {
+  transform: scale(1.02);
+  filter: drop-shadow(0 0 6px rgba(255, 69, 58, 0.45));
+}
+
+.proco-rat-logo-box:active {
+  transform: scale(0.98);
+}
+
+.proco-rat-logo-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 4. Chrome Stomp Footswitch Area */
+.proco-rat-switch-area {
+  margin: 2px auto 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.proco-rat-footswitch-base {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.proco-rat-hex-nut {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  background: radial-gradient(circle, #ced4da 0%, #adb5bd 60%, #6c757d 100%);
+  clip-path: polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+  border: 1px solid #495057;
 }
 
 /* 2. ROSS COMPRESSOR ENCLOSURE */

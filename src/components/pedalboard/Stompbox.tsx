@@ -31,6 +31,8 @@ import { BossHm2Pedal } from './distortion/BossHm2Pedal';
 import { BossMt2Pedal } from './distortion/BossMt2Pedal';
 import { IbanezSm7Pedal } from './distortion/IbanezSm7Pedal';
 import { MarshallShredMasterPedal } from './distortion/MarshallShredMasterPedal';
+import { MxrDistortionPlusPedal } from './distortion/MxrDistortionPlusPedal';
+import { ProCoRatPedal } from './distortion/ProCoRatPedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -107,6 +109,10 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <IbanezSm7Pedal {...props} />;
     case 'dist-shredmaster':
       return <MarshallShredMasterPedal {...props} />;
+    case 'dist-mxrdistplus':
+      return <MxrDistortionPlusPedal {...props} />;
+    case 'dist-procorat':
+      return <ProCoRatPedal {...props} />;
 
     // Category 4: Fuzz
     case 'fuzz-bigmuff':
@@ -125,10 +131,10 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
 
   // Fallback for standard analog enclosure
   const isEnabled = instance.enabled;
-  const isLeftPending = isJackPending?.(instance.id, 'in') ?? false;
-  const isRightPending = isJackPending?.(instance.id, 'out') ?? false;
-  const hasLeftCable = hasJackCable?.(instance.id, 'in') ?? false;
-  const hasRightCable = hasJackCable?.(instance.id, 'out') ?? false;
+  const isLeftPending = isJackPending?.(instance.id, 'out') ?? false;
+  const isRightPending = isJackPending?.(instance.id, 'in') ?? false;
+  const hasLeftCable = hasJackCable?.(instance.id, 'out') ?? false;
+  const hasRightCable = hasJackCable?.(instance.id, 'in') ?? false;
 
   return (
     <div 
@@ -143,18 +149,18 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       {/* 1/4" Phone Jacks on sides */}
       <div 
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
-        title="Audio Input Jack (1/4 in) - Click to connect or unplug cable"
-        onClick={(e) => {
-          e.stopPropagation();
-          onJackClick?.(instance.id, 'in', e);
-        }}
-      />
-      <div 
-        className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         title="Audio Output Jack (1/4 in) - Click to connect or unplug cable"
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
+        }}
+      />
+      <div 
+        className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
+        title="Audio Input Jack (1/4 in) - Click to connect or unplug cable"
+        onClick={(e) => {
+          e.stopPropagation();
+          onJackClick?.(instance.id, 'in', e);
         }}
       />
 

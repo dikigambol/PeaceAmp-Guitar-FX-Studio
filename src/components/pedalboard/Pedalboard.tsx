@@ -13,6 +13,10 @@ export interface PatchConnection {
 
 interface PedalboardProps {
   pedals: PedalInstance[];
+  positions?: Record<string, Position>;
+  onPositionsChange?: (positions: Record<string, Position>) => void;
+  connections?: PatchConnection[];
+  onConnectionsChange?: (connections: PatchConnection[]) => void;
   onToggleEnabled: (id: string) => void;
   onChangeParam: (id: string, paramId: string, val: number) => void;
   onRemovePedal: (id: string) => void;
@@ -33,6 +37,10 @@ const JACK_Y_OFFSET = 57;
 
 export const Pedalboard: React.FC<PedalboardProps> = ({
   pedals,
+  positions: positionsProp,
+  onPositionsChange,
+  connections: connectionsProp,
+  onConnectionsChange,
   onToggleEnabled,
   onChangeParam,
   onRemovePedal,
@@ -105,6 +113,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
   // Pedal free positions (keyed by pedal id)
   const [positions, setPositions] = useState<Record<string, Position>>(() => {
+    if (positionsProp && Object.keys(positionsProp).length > 0) {
+      return positionsProp;
+    }
     try {
       const saved = localStorage.getItem('web_guitar_pedal_coords');
       return saved ? JSON.parse(saved) : {};
@@ -112,6 +123,18 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       return {};
     }
   });
+
+  // Sync positions when updated from external preset load
+  useEffect(() => {
+    if (positionsProp && Object.keys(positionsProp).length > 0) {
+      setPositions((prev) => {
+        const prevJson = JSON.stringify(prev);
+        const nextJson = JSON.stringify(positionsProp);
+        return prevJson !== nextJson ? positionsProp : prev;
+      });
+    }
+  }, [positionsProp]);
+
 
   // Drag tracking ref
   const dragRef = useRef<{
@@ -122,22 +145,22 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
     origY: number;
   } | null>(null);
 
-  // Calculate default position for a newly added pedal that fits within available width
+  // Calculate default position for a newly added pedal (flowing right-to-left towards amplifier)
   const getDefaultPos = useCallback(
     (index: number): Position => {
       const availableW = Math.max(480, surfaceWidth - 240);
-      const maxCols = Math.max(1, Math.min(4, Math.floor(availableW / 235)));
+      const maxCols = Math.max(1, Math.min(4, Math.floor(availableW / 260)));
       const col = index % maxCols;
       const row = Math.floor(index / maxCols);
       return {
-        x: 120 + col * 230,
+        x: Math.max(120, surfaceWidth - 140 - PEDAL_WIDTH - col * 260),
         y: 40 + row * 410,
       };
     },
     [surfaceWidth]
   );
 
-  // Auto-arrange all pedals into neat rows and columns
+  // Auto-arrange all pedals into neat rows and columns (flowing right-to-left following guitar signal flow)
   const autoArrangePedals = useCallback(
     (pedalList: PedalInstance[]) => {
       if (pedalList.length === 0) {
@@ -145,18 +168,34 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
         try {
           localStorage.removeItem('web_guitar_pedal_coords');
         } catch { }
+        onPositionsChange?.({});
+        return;
+      }
+
+      if (pedalList.length === 1) {
+        const nextPos: Record<string, Position> = {
+          [pedalList[0].id]: {
+            x: Math.round(Math.max(120, (surfaceWidth - PEDAL_WIDTH) / 2)),
+            y: 40,
+          },
+        };
+        setPositions(nextPos);
+        try {
+          localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(nextPos));
+        } catch { }
+        onPositionsChange?.(nextPos);
         return;
       }
 
       const availableW = Math.max(480, surfaceWidth - 240);
-      const maxCols = Math.max(1, Math.min(4, Math.floor(availableW / 285)));
+      const maxCols = Math.max(1, Math.min(4, Math.floor(availableW / 270)));
 
       const nextPos: Record<string, Position> = {};
       pedalList.forEach((p, idx) => {
         const col = idx % maxCols;
         const row = Math.floor(idx / maxCols);
         nextPos[p.id] = {
-          x: 120 + col * 280,
+          x: Math.max(120, surfaceWidth - 140 - PEDAL_WIDTH - col * 270),
           y: 40 + row * 410,
         };
       });
@@ -165,8 +204,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       try {
         localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(nextPos));
       } catch { }
+      onPositionsChange?.(nextPos);
     },
-    [surfaceWidth]
+    [surfaceWidth, onPositionsChange]
   );
 
   // Ensure all existing pedals have a valid position
@@ -184,8 +224,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       try {
         localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(next));
       } catch { }
+      onPositionsChange?.(next);
     }
-  }, [pedals, getDefaultPos, positions]);
+  }, [pedals, getDefaultPos, positions, onPositionsChange]);
 
   // Patch Connections State (Uniform Vintage Bone-White Ivory)
   const generateDefaultConnections = useCallback((pedalList: PedalInstance[]): PatchConnection[] => {
@@ -231,54 +272,31 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
     return list;
   }, []);
 
-  const [connections, setConnections] = useState<PatchConnection[]>(() => {
-    try {
-      const saved = localStorage.getItem('web_guitar_patch_cables');
-      if (saved) return JSON.parse(saved);
-    } catch { }
-    return generateDefaultConnections(pedals);
-  });
-
-  // Track previous pedal IDs to automatically rewire cables and auto-arrange layout when presets change
-  const prevPedalIdsKeyRef = useRef<string>(pedals.map((p) => p.id).join(','));
-
-  // Auto-connect patch cables and auto-arrange layout whenever preset changes or cables become orphaned
-  useEffect(() => {
-    const currentKey = pedals.map((p) => p.id).join(',');
-    const pedalSetChanged = prevPedalIdsKeyRef.current !== currentKey;
-    prevPedalIdsKeyRef.current = currentKey;
-
-    if (pedals.length === 0) {
-      if (connections.length !== 1 || connections[0].id !== 'conn-direct-bypass') {
-        setConnections(generateDefaultConnections([]));
-      }
-      return;
+  // Controlled patch connections (App.tsx is the single source of truth for rig presets)
+  // Only display cables when pedals are present and endpoints exist on the board
+  const connections = useMemo(() => {
+    if (!connectionsProp || connectionsProp.length === 0 || pedals.length === 0) {
+      return [];
     }
-
     const currentPedalIdSet = new Set(pedals.map((p) => p.id));
-    const hasOrphanedConnection = connections.some(
-      (c) =>
-        (c.fromNodeId !== 'BOARD_INPUT' && !currentPedalIdSet.has(c.fromNodeId)) ||
-        (c.toNodeId !== 'BOARD_OUTPUT' && !currentPedalIdSet.has(c.toNodeId))
-    );
+    return connectionsProp.filter((c) => {
+      const fromValid = c.fromNodeId === 'BOARD_INPUT' || currentPedalIdSet.has(c.fromNodeId);
+      const toValid = c.toNodeId === 'BOARD_OUTPUT' || currentPedalIdSet.has(c.toNodeId);
+      return fromValid && toValid;
+    });
+  }, [connectionsProp, pedals]);
 
-    // If preset or pedal set changed, or if existing cables are broken/orphaned:
-    if (pedalSetChanged || hasOrphanedConnection) {
-      autoArrangePedals(pedals);
-      const fresh = generateDefaultConnections(pedals);
-      setConnections(fresh);
+  // Dispatch connection updates to parent and persist to localStorage
+  const updateConnections = useCallback(
+    (updater: PatchConnection[] | ((prev: PatchConnection[]) => PatchConnection[])) => {
+      const next = typeof updater === 'function' ? updater(connections) : updater;
       try {
-        localStorage.setItem('web_guitar_patch_cables', JSON.stringify(fresh));
-      } catch { }
-    }
-  }, [pedals, connections, generateDefaultConnections, autoArrangePedals]);
-
-  // Save connections on change
-  useEffect(() => {
-    try {
-      localStorage.setItem('web_guitar_patch_cables', JSON.stringify(connections));
-    } catch { }
-  }, [connections]);
+        localStorage.setItem('web_guitar_patch_cables', JSON.stringify(next));
+      } catch {}
+      onConnectionsChange?.(next);
+    },
+    [connections, onConnectionsChange]
+  );
 
   // Calculate dynamic vertical height based on lowest pedal
   const surfaceHeight = useMemo(() => {
@@ -293,12 +311,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   const getJackCoords = useCallback(
     (nodeId: string, port: 'in' | 'out'): { x: number; y: number } => {
       if (nodeId === 'BOARD_INPUT') {
-        // Fixed at left: 20px, top: 40px -> nut center is (20 + 36, 40 + 47)
-        return { x: 56, y: 87 };
-      }
-      if (nodeId === 'BOARD_OUTPUT') {
         // Fixed at right: 20px, top: 40px -> nut center is (surfaceWidth - 20 - 36, 40 + 47)
         return { x: surfaceWidth - 56, y: 87 };
+      }
+      if (nodeId === 'BOARD_OUTPUT') {
+        // Fixed at left: 20px, top: 40px -> nut center is (20 + 36, 40 + 47)
+        return { x: 56, y: 87 };
       }
 
       const pos = positions[nodeId] || { x: 120, y: 40 };
@@ -313,11 +331,11 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       const curWidth = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : PEDAL_WIDTH;
       const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isFlatiron ? 114 : isHoof ? 104 : JACK_Y_OFFSET;
       if (port === 'in') {
-        // Left side jack
-        return { x: pos.x - 2, y: pos.y + curJackY };
-      } else {
-        // Right side jack
+        // Right side jack (pedal input is on the right)
         return { x: pos.x + curWidth + 2, y: pos.y + curJackY };
+      } else {
+        // Left side jack (pedal output is on the left)
+        return { x: pos.x - 2, y: pos.y + curJackY };
       }
     },
     [surfaceWidth, positions, pedals]
@@ -426,7 +444,6 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
     e.preventDefault();
     const curr = positions[id] || getDefaultPos(pedals.findIndex((p) => p.id === id));
-    setDraggingId(id);
     dragRef.current = {
       id,
       startX: e.clientX,
@@ -434,56 +451,66 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       origX: curr.x,
       origY: curr.y,
     };
-
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    setDraggingId(id);
   };
 
-  // Handle Drag Pointer Move (Clamped horizontally to prevent any right-side scroll)
-  const handlePedalPointerMove = (e: React.PointerEvent) => {
-    if (!dragRef.current || dragRef.current.id !== draggingId) return;
+  // High-performance window-level pointer drag listener (prevents glitching/losing capture over wired cables)
+  useEffect(() => {
+    if (!draggingId) return;
 
-    const deltaX = e.clientX - dragRef.current.startX;
-    const deltaY = e.clientY - dragRef.current.startY;
+    const onPointerMove = (e: PointerEvent) => {
+      if (!dragRef.current || dragRef.current.id !== draggingId) return;
 
-    const rawX = dragRef.current.origX + deltaX;
-    const rawY = dragRef.current.origY + deltaY;
+      const deltaX = e.clientX - dragRef.current.startX;
+      const deltaY = e.clientY - dragRef.current.startY;
 
-    const targetX = snapToGrid ? Math.round(rawX / 20) * 20 : rawX;
-    const targetY = snapToGrid ? Math.round(rawY / 20) * 20 : rawY;
+      const rawX = dragRef.current.origX + deltaX;
+      const rawY = dragRef.current.origY + deltaY;
 
-    // Constrain X strictly between left input box and right output box so no horizontal scroll can ever occur
-    const minX = 110;
-    const pedal = pedals.find((p) => p.id === dragRef.current?.id);
-    const isWide = pedal?.type === 'od-klon' || pedal?.type === 'klon-centaur';
-    const isMini = pedal?.type === 'od-tsmini' || pedal?.type === 'ts-mini';
-    const curWidth = isWide ? 260 : isMini ? 140 : PEDAL_WIDTH;
-    const maxX = Math.max(minX, surfaceWidth - curWidth - 110);
-    const newX = Math.max(minX, Math.min(maxX, targetX));
-    const newY = Math.max(20, targetY);
+      const targetX = snapToGrid ? Math.round(rawX / 20) * 20 : rawX;
+      const targetY = snapToGrid ? Math.round(rawY / 20) * 20 : rawY;
 
-    const activeId = dragRef.current.id; // Safely captured
-    setPositions((prev) => ({
-      ...prev,
-      [activeId]: { x: newX, y: newY },
-    }));
-  };
+      const minX = 110;
+      const pedal = pedals.find((p) => p.id === dragRef.current?.id);
+      const isWide = pedal?.type === 'od-klon' || pedal?.type === 'klon-centaur';
+      const isMini = pedal?.type === 'od-tsmini' || pedal?.type === 'ts-mini';
+      const curWidth = isWide ? 260 : isMini ? 140 : PEDAL_WIDTH;
+      const maxX = Math.max(minX, surfaceWidth - curWidth - 110);
+      const newX = Math.max(minX, Math.min(maxX, targetX));
+      const newY = Math.max(20, targetY);
 
-  // Handle Drag Pointer Up
-  const handlePedalPointerUp = (e: React.PointerEvent) => {
-    if (dragRef.current) {
-      try {
-        (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
-      } catch { }
+      const activeId = dragRef.current.id;
+      setPositions((prev) => {
+        if (prev[activeId]?.x === newX && prev[activeId]?.y === newY) return prev;
+        return {
+          ...prev,
+          [activeId]: { x: newX, y: newY },
+        };
+      });
+    };
+
+    const onPointerUp = () => {
       dragRef.current = null;
       setDraggingId(null);
       setPositions((latest) => {
         try {
           localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(latest));
         } catch { }
+        onPositionsChange?.(latest);
         return latest;
       });
-    }
-  };
+    };
+
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+
+    return () => {
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+    };
+  }, [draggingId, snapToGrid, surfaceWidth, pedals, onPositionsChange]);
 
   // Track canvas mouse position for live dragging cable
   const handleSurfacePointerMove = (e: React.PointerEvent) => {
@@ -536,7 +563,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
     // All cables are uniform vintage bone-white ivory
     const assignedColor = 'bone-ivory';
 
-    setConnections((prev) => {
+    updateConnections((prev) => {
       // Remove any existing cable attached to the destination 'in' jack or source 'out' jack
       const filtered = prev.filter((c) => c.fromNodeId !== fromId && c.toNodeId !== toId);
       return [
@@ -555,19 +582,19 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
   // Remove a specific patch cable
   const handleRemoveConnection = (connId: string) => {
-    setConnections((prev) => prev.filter((c) => c.id !== connId));
+    updateConnections((prev) => prev.filter((c) => c.id !== connId));
   };
 
   // Restore default sequential wiring AND auto-arrange layout
   const handleResetDefaultWiring = () => {
     autoArrangePedals(pedals);
-    setConnections(generateDefaultConnections(pedals));
+    updateConnections(generateDefaultConnections(pedals));
     setPendingJack(null);
   };
 
   // Unplug all cables
   const handleUnplugAll = () => {
-    setConnections([]);
+    updateConnections([]);
     setPendingJack(null);
   };
 
@@ -590,21 +617,22 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
     const dx = endX - startX;
     const dy = endY - startY;
 
-    if (dx < 0) {
-      // Loop downward across rows or backward along the deck floor
-      const loopY = Math.max(endY + 20, startY + Math.max(380, dy + 20));
-      const cx1 = startX + 70;
+    if (Math.abs(dy) > 200) {
+      // Loop downward across rows
+      const loopY = Math.max(startY, endY) + 40;
+      const cx1 = startX - 40;
       const cy1 = loopY;
-      const cx2 = endX - 70;
+      const cx2 = endX + 40;
       const cy2 = loopY;
       return `M ${startX} ${startY} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${endX} ${endY}`;
     }
 
-    // Natural catenary sag between left and right
-    const sag = Math.max(24, Math.min(85, dx * 0.16 + Math.abs(dy) * 0.15));
-    const cx1 = startX + Math.max(30, dx * 0.42);
+    // Natural catenary sag between adjacent jacks (works seamlessly right-to-left or left-to-right)
+    const dist = Math.abs(dx);
+    const sag = Math.max(26, Math.min(85, dist * 0.16 + Math.abs(dy) * 0.15));
+    const cx1 = startX + (dx < 0 ? -Math.max(25, dist * 0.4) : Math.max(25, dist * 0.4));
     const cy1 = startY + sag;
-    const cx2 = endX - Math.max(30, dx * 0.42);
+    const cx2 = endX - (dx < 0 ? -Math.max(25, dist * 0.4) : Math.max(25, dist * 0.4));
     const cy2 = endY + sag;
     return `M ${startX} ${startY} C ${cx1} ${cy1}, ${cx2} ${cy2}, ${endX} ${endY}`;
   };
@@ -1044,7 +1072,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           {/* SVG Patch Cables Layer */}
           {showCables && (
             <svg
-              className="canvas-cables-svg"
+              className={`canvas-cables-svg ${draggingId ? 'is-dragging-active' : ''}`}
               style={{
                 width: '100%',
                 height: `${surfaceHeight}px`,
@@ -1096,11 +1124,11 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                     {/* Jack Plugs */}
                     {conn.fromNodeId === 'BOARD_INPUT'
                       ? renderBoardJackPlug(start.x, start.y, conn.id)
-                      : renderStompboxJackPlug(start.x, start.y, 'right')}
+                      : renderStompboxJackPlug(start.x, start.y, 'left')}
 
                     {conn.toNodeId === 'BOARD_OUTPUT'
                       ? renderBoardJackPlug(end.x, end.y, conn.id)
-                      : renderStompboxJackPlug(end.x, end.y, 'left')}
+                      : renderStompboxJackPlug(end.x, end.y, 'right')}
                   </g>
                 );
               })}
@@ -1153,8 +1181,6 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                   zIndex: isDragging ? 100 : 10 + idx,
                 }}
                 onPointerDown={(e) => handlePedalPointerDown(instance.id, e)}
-                onPointerMove={handlePedalPointerMove}
-                onPointerUp={handlePedalPointerUp}
               >
                 <Stompbox
                   instance={instance}
@@ -1163,8 +1189,6 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                   onToggleEnabled={onToggleEnabled}
                   onChangeParam={onChangeParam}
                   onRemove={(id) => {
-                    // Also clean up any connections with this pedal
-                    setConnections((prev) => prev.filter((c) => c.fromNodeId !== id && c.toNodeId !== id));
                     onRemovePedal(id);
                   }}
                   isDragging={isDragging}
