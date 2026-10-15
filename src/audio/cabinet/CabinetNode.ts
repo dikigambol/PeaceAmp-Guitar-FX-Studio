@@ -8,7 +8,7 @@ export class CabinetNode {
   private ctx: AudioContext;
   private convolver: ConvolverNode;
 
-  // Wet / Dry blend
+  // Wet / Dry blend & Output Trim Level
   private dryGain: GainNode;
   private wetGain: GainNode;
   private levelGain: GainNode;
@@ -22,6 +22,7 @@ export class CabinetNode {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.5,
+    distance: 0.15,
     mix: 1.0, // 100% WET by default (authentic guitar cabinet simulator standard)
     level: 0,
   };
@@ -90,7 +91,8 @@ export class CabinetNode {
         this.ctx,
         this.settings.model,
         this.settings.mic,
-        this.settings.position
+        this.settings.position,
+        this.settings.distance ?? 0.15
       );
     }
 
@@ -143,6 +145,7 @@ export class CabinetNode {
     const prevModel = this.settings.model;
     const prevMic = this.settings.mic;
     const prevPos = this.settings.position;
+    const prevDist = this.settings.distance;
     const prevMix = this.settings.mix;
     const prevLevel = this.settings.level;
     const prevEnabled = this.settings.enabled;
@@ -163,7 +166,8 @@ export class CabinetNode {
     if (
       (newSettings.model !== undefined && newSettings.model !== prevModel) ||
       (newSettings.mic !== undefined && newSettings.mic !== prevMic) ||
-      (newSettings.position !== undefined && newSettings.position !== prevPos)
+      (newSettings.position !== undefined && newSettings.position !== prevPos) ||
+      (newSettings.distance !== undefined && newSettings.distance !== prevDist)
     ) {
       this.updateImpulseResponse();
     }
@@ -177,6 +181,16 @@ export class CabinetNode {
     this.updateImpulseResponse();
   }
 
+  /**
+   * Helper to decode an uploaded .wav / .aiff audio file directly into AudioBuffer
+   */
+  public async loadCustomIRFromFile(file: File): Promise<string> {
+    const arrayBuffer = await file.arrayBuffer();
+    const decodedBuffer = await this.ctx.decodeAudioData(arrayBuffer);
+    this.setCustomIR(decodedBuffer, file.name);
+    return file.name;
+  }
+
   public setEnabled(enabled: boolean): void {
     this.settings.enabled = enabled;
     this.applyBypassState();
@@ -184,6 +198,10 @@ export class CabinetNode {
 
   public getSettings(): CabinetSettings {
     return { ...this.settings, customIrName: this.customIrName };
+  }
+
+  public getAudioContext(): AudioContext {
+    return this.ctx;
   }
 
   public dispose(): void {

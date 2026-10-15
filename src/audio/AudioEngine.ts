@@ -773,6 +773,16 @@ export class AudioEngine {
     this.cabinetNode?.setCustomIR(buffer, name);
   }
 
+  public async loadCustomCabinetIRFromFile(file: File): Promise<string> {
+    if (!this.ctx) {
+      throw new Error('AudioEngine context not initialized');
+    }
+    const arrayBuffer = await file.arrayBuffer();
+    const decoded = await this.ctx.decodeAudioData(arrayBuffer);
+    this.setCabinetCustomIR(decoded, file.name);
+    return file.name;
+  }
+
   public getCabinetSettings(): CabinetSettings {
     return this.cabinetNode ? this.cabinetNode.getSettings() : this.cabinetSettings;
   }

@@ -93,6 +93,7 @@ export function App() {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.5,
+    distance: 0.15,
     mix: 1.0,
     level: 0,
   });
@@ -586,6 +587,21 @@ export function App() {
     });
   }, []);
 
+  const handleLoadCustomCabinetIR = useCallback(async (file: File) => {
+    if (!engineRef.current) return;
+    try {
+      const fileName = await engineRef.current.loadCustomCabinetIRFromFile(file);
+      setCabinetSettings((prev) => ({
+        ...prev,
+        model: 'custom',
+        customIrName: fileName,
+      }));
+    } catch (err) {
+      console.error('Failed to load custom IR', err);
+      alert('Gagal memuat file IR. Pastikan file berformat audio WAV valid.');
+    }
+  }, []);
+
   // Amp Head Actions
   const handleUpdateAmpHeadSettings = useCallback((newSettings: Partial<AmpHeadSettings>) => {
     setAmpHeadSettings((prev) => {
@@ -861,6 +877,7 @@ export function App() {
           <CabinetSimulatorPanel
             settings={cabinetSettings}
             onUpdateSettings={handleUpdateCabinetSettings}
+            onLoadCustomIR={handleLoadCustomCabinetIR}
           />
 
           {/* 5. Master Output Stage & Safety Limiter */}

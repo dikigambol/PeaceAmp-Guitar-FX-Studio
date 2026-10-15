@@ -16,7 +16,6 @@ interface CabinetAcousticProfile {
 
 const CABINET_PROFILES: Record<Exclude<CabinetModelId, 'custom'>, CabinetAcousticProfile> = {
   // 1x8 Small Vintage Combo (Fender Champ style)
-  // Thin bass, boxy midrange focus, quick treble roll-off
   '1x8-open': {
     name: '1x8 Vintage Champ',
     resonanceFreq: 140,
@@ -32,7 +31,6 @@ const CABINET_PROFILES: Record<Exclude<CabinetModelId, 'custom'>, CabinetAcousti
   },
 
   // 1x10 Vintage Punchy Combo (Fender Princeton style)
-  // Tight punchy bass, bell-like midrange, chimey highs
   '1x10-open': {
     name: '1x10 Princeton Chime',
     resonanceFreq: 112,
@@ -48,7 +46,6 @@ const CABINET_PROFILES: Record<Exclude<CabinetModelId, 'custom'>, CabinetAcousti
   },
 
   // 1x12 Open Back Classic Combo (Fender Deluxe Reverb style)
-  // Warm woody dynamic bloom, airy highs, open back rear phase cancellation
   '1x12-open': {
     name: '1x12 Deluxe Reverb',
     resonanceFreq: 94,
@@ -63,56 +60,37 @@ const CABINET_PROFILES: Record<Exclude<CabinetModelId, 'custom'>, CabinetAcousti
     reflectionStrength: 0.30,
   },
 
-  // 1x12 Closed Ported Cab (Mesa Thiele EVM12L style)
-  // Tight compact low-end punch, focused articulate midrange, no rear reflection
-  '1x12-closed': {
-    name: '1x12 Thiele Ported',
-    resonanceFreq: 84,
-    resonanceGainDb: 5.5,
-    resonanceQ: 1.4,
-    lowCutFreq: 78,
-    midScoopFreq: 800,
-    midScoopDb: -1.5,
-    speakerCutoff: 4600,
-    enclosureType: 'closed',
-    reflectionDelayMs: 0,
-    reflectionStrength: 0,
-  },
-
-  // 2x12 Open Back British/American Combo (Vox AC30 / Fender Twin style)
-  // Wide 3D acoustic spread, signature chime in upper mids, open dispersion
-  '2x12-open': {
-    name: '2x12 AC30 / Twin Reverb',
-    resonanceFreq: 86,
+  // 2x12 Fender Twin Reverb style (Huge pristine clean headroom)
+  '2x12-fender': {
+    name: '2x12 Twin Reverb',
+    resonanceFreq: 82,
     resonanceGainDb: 4.8,
-    resonanceQ: 1.2,
-    lowCutFreq: 80,
-    midScoopFreq: 380,
+    resonanceQ: 1.25,
+    lowCutFreq: 76,
+    midScoopFreq: 320,
     midScoopDb: -3.5,
-    speakerCutoff: 5500,
+    speakerCutoff: 5600,
     enclosureType: 'open',
-    reflectionDelayMs: 6.2,
+    reflectionDelayMs: 6.0,
     reflectionStrength: 0.28,
   },
 
-  // 2x12 Closed Heavy Rock Cab (Orange / Rectifier 2x12 style)
-  // Massive low-mid punch, thick rock crunch, tight bottom end
-  '2x12-closed': {
-    name: '2x12 Recto Vertical',
-    resonanceFreq: 76,
-    resonanceGainDb: 6.8,
-    resonanceQ: 1.5,
-    lowCutFreq: 70,
-    midScoopFreq: 420,
-    midScoopDb: -2.8,
-    speakerCutoff: 4400,
-    enclosureType: 'closed',
-    reflectionDelayMs: 0,
-    reflectionStrength: 0,
+  // 4x10 Open Back Tweed (Fender '59 Bassman 4x10 style)
+  '4x10-open': {
+    name: '4x10 Bassman Tweed',
+    resonanceFreq: 72,
+    resonanceGainDb: 5.6,
+    resonanceQ: 1.3,
+    lowCutFreq: 65,
+    midScoopFreq: 460,
+    midScoopDb: -3.0,
+    speakerCutoff: 5200,
+    enclosureType: 'open',
+    reflectionDelayMs: 4.8,
+    reflectionStrength: 0.26,
   },
 
-  // 4x10 Closed Back Stack (Fender Super Reverb / Bassman 4x10 style)
-  // Ultra-fast transient response, percussive punch, articulate cut
+  // 4x10 Closed Back Stack
   '4x10-closed': {
     name: '4x10 Super Bassman',
     resonanceFreq: 74,
@@ -127,9 +105,37 @@ const CABINET_PROFILES: Record<Exclude<CabinetModelId, 'custom'>, CabinetAcousti
     reflectionStrength: 0,
   },
 
-  // 4x12 Closed Back Stadium Stack (Marshall 1960A / Mesa Recto 4x12 V30 style)
-  // Iconic "Wall of Sound" roar: massive 68 Hz low-end thump, multi-cone phase scoop at 450 Hz,
-  // steep 4.1 kHz roll-off that tames harsh fizz into heavy rock authority.
+  // 2x12 Open Back British Combo (Vox AC30 Top Boost style)
+  '2x12-open': {
+    name: '2x12 AC30 Top Boost',
+    resonanceFreq: 86,
+    resonanceGainDb: 4.8,
+    resonanceQ: 1.2,
+    lowCutFreq: 80,
+    midScoopFreq: 380,
+    midScoopDb: -3.5,
+    speakerCutoff: 5500,
+    enclosureType: 'open',
+    reflectionDelayMs: 6.2,
+    reflectionStrength: 0.28,
+  },
+
+  // 4x12 Marshall Greenback Stack (Celestion G12M-25, woody classic rock crunch)
+  '4x12-greenback': {
+    name: '4x12 1960AX Greenback',
+    resonanceFreq: 72,
+    resonanceGainDb: 7.4,
+    resonanceQ: 1.45,
+    lowCutFreq: 65,
+    midScoopFreq: 500,
+    midScoopDb: -3.6,
+    speakerCutoff: 4600,
+    enclosureType: 'closed',
+    reflectionDelayMs: 0,
+    reflectionStrength: 0,
+  },
+
+  // 4x12 Marshall 1960A Vintage 30 Stack
   '4x12-closed': {
     name: '4x12 1960 V30 Stack',
     resonanceFreq: 68,
@@ -139,6 +145,111 @@ const CABINET_PROFILES: Record<Exclude<CabinetModelId, 'custom'>, CabinetAcousti
     midScoopFreq: 450,
     midScoopDb: -4.5,
     speakerCutoff: 4200,
+    enclosureType: 'closed',
+    reflectionDelayMs: 0,
+    reflectionStrength: 0,
+  },
+
+  // 1x12 Closed Ported Cab (Mesa Thiele EVM12L style)
+  '1x12-closed': {
+    name: '1x12 Thiele Ported',
+    resonanceFreq: 84,
+    resonanceGainDb: 5.5,
+    resonanceQ: 1.4,
+    lowCutFreq: 78,
+    midScoopFreq: 800,
+    midScoopDb: -1.5,
+    speakerCutoff: 4600,
+    enclosureType: 'closed',
+    reflectionDelayMs: 0,
+    reflectionStrength: 0,
+  },
+
+  // 2x12 Closed Heavy Rock Cab (Mesa Rectifier Vertical 2x12)
+  '2x12-closed': {
+    name: '2x12 Recto Vertical',
+    resonanceFreq: 76,
+    resonanceGainDb: 6.8,
+    resonanceQ: 1.5,
+    lowCutFreq: 70,
+    midScoopFreq: 420,
+    midScoopDb: -2.8,
+    speakerCutoff: 4400,
+    enclosureType: 'closed',
+    reflectionDelayMs: 0,
+    reflectionStrength: 0,
+  },
+
+  // 4x12 Mesa Oversized Rectifier Standard (Massive sub-bass resonance)
+  '4x12-recto-os': {
+    name: '4x12 Rectifier Oversized',
+    resonanceFreq: 55,
+    resonanceGainDb: 9.8,
+    resonanceQ: 1.7,
+    lowCutFreq: 48,
+    midScoopFreq: 400,
+    midScoopDb: -5.0,
+    speakerCutoff: 4100,
+    enclosureType: 'closed',
+    reflectionDelayMs: 0,
+    reflectionStrength: 0,
+  },
+
+  // 4x12 Orange PPC412 (18mm Baltic Birch, dense dark midrange roar)
+  '4x12-orange': {
+    name: '4x12 Orange PPC412',
+    resonanceFreq: 64,
+    resonanceGainDb: 8.2,
+    resonanceQ: 1.55,
+    lowCutFreq: 58,
+    midScoopFreq: 360,
+    midScoopDb: -2.2,
+    speakerCutoff: 3950,
+    enclosureType: 'closed',
+    reflectionDelayMs: 0,
+    reflectionStrength: 0,
+  },
+
+  // 1x12 Dumble Style Oval Ported (EVM-12L / G12-65 boutique touch bloom)
+  '1x12-dumble': {
+    name: '1x12 Dumble Oval Ported',
+    resonanceFreq: 88,
+    resonanceGainDb: 4.6,
+    resonanceQ: 1.3,
+    lowCutFreq: 82,
+    midScoopFreq: 280,
+    midScoopDb: -2.0,
+    speakerCutoff: 5100,
+    enclosureType: 'open',
+    reflectionDelayMs: 4.2,
+    reflectionStrength: 0.22,
+  },
+
+  // 2x12 Roland JC-120 Stereo Flat (Pure uncolored pedal platform)
+  '2x12-jc120': {
+    name: '2x12 JC-120 Stereo Flat',
+    resonanceFreq: 70,
+    resonanceGainDb: 2.2,
+    resonanceQ: 0.9,
+    lowCutFreq: 55,
+    midScoopFreq: 0,
+    midScoopDb: 0,
+    speakerCutoff: 6500,
+    enclosureType: 'open',
+    reflectionDelayMs: 5.5,
+    reflectionStrength: 0.20,
+  },
+
+  // 4x12 EVH 5150 III (Celestion G12-EVH modern high-gain speed)
+  '4x12-5150': {
+    name: '4x12 5150 III Stealth',
+    resonanceFreq: 66,
+    resonanceGainDb: 8.4,
+    resonanceQ: 1.65,
+    lowCutFreq: 62,
+    midScoopFreq: 460,
+    midScoopDb: -4.2,
+    speakerCutoff: 4350,
     enclosureType: 'closed',
     reflectionDelayMs: 0,
     reflectionStrength: 0,
@@ -176,7 +287,8 @@ function biquad(
       a0 = 1 + alpha / A; a1 = -2 * cos; a2 = 1 - alpha / A;
       break;
     case 'highshelf': {
-      const s = 2 * Math.sqrt(A) * alpha;
+      const shelfQ = Math.max(0.1, q);
+      const s = sin * Math.sqrt(Math.max(0.001, (A + 1 / A) * (1 / shelfQ - 1) + 2));
       b0 = A * ((A + 1) + (A - 1) * cos + s);
       b1 = -2 * A * ((A - 1) + (A + 1) * cos);
       b2 = A * ((A + 1) + (A - 1) * cos - s);
@@ -186,7 +298,8 @@ function biquad(
       break;
     }
     case 'lowshelf': {
-      const s = 2 * Math.sqrt(A) * alpha;
+      const shelfQ = Math.max(0.1, q);
+      const s = sin * Math.sqrt(Math.max(0.001, (A + 1 / A) * (1 / shelfQ - 1) + 2));
       b0 = A * ((A + 1) - (A - 1) * cos + s);
       b1 = 2 * A * ((A - 1) - (A + 1) * cos);
       b2 = A * ((A + 1) - (A - 1) * cos - s);
@@ -213,15 +326,17 @@ function applyBiquad(x: Float32Array, c: Biquad): void {
  * Generates an authentic, highly distinct guitar cabinet + microphone impulse response (IR).
  *
  * Distinct acoustic characteristics are modeled for:
- * 1. Enclosure dimensions & low-end thump resonance (1x8 up to 4x12)
- * 2. Transducer sonic signature (SM57 biting punch vs MD421 girth vs Ribbon warmth vs Condenser air)
- * 3. Mic Placement Position (Edge = dark, warm, rolled-off vs Center = biting, bright, in-your-face)
+ * 1. Enclosure dimensions & low-end thump resonance (1x8 up to 4x12 Oversized)
+ * 2. Transducer sonic signature (SM57, SM7B, MD421, R-121, M160, C414)
+ * 3. Mic Placement Position (Edge = dark, warm vs Center = biting, bright)
+ * 4. Mic Distance (Close = proximity punch vs Far = open studio room air)
  */
 export function generateCabinetImpulseResponse(
   ctx: AudioContext,
   cabinet: CabinetModelId,
   mic: MicModelId,
-  position: number = 0.5
+  position: number = 0.5,
+  distance: number = 0.15
 ): AudioBuffer {
   const fs = ctx.sampleRate;
   // 60ms impulse length captures full speaker attack, low-end tail and enclosure reflection
@@ -230,20 +345,27 @@ export function generateCabinetImpulseResponse(
 
   const profile = CABINET_PROFILES[cabinet === 'custom' ? '4x12-closed' : cabinet] || CABINET_PROFILES['4x12-closed'];
   const posNorm = Math.max(0, Math.min(1, position)); // 0.0 = Edge, 1.0 = Center
+  const distNorm = Math.max(0, Math.min(1, distance)); // 0.0 = Close (0.5"), 1.0 = Far (6")
 
   // -------------------------------------------------------------
   // 1. Microphone Placement (Edge vs Center) Dynamics
   // Center (1.0): Direct dustcap radiation -> full aggressive presence, extended highs
-  // Edge (0.0): Cone surround -> heavy high roll-off (-9 dB), rich warm dark low-mids
+  // Edge (0.0): Cone surround -> heavy high roll-off (-7 dB), rich warm dark low-mids
   // -------------------------------------------------------------
   const posCutoffShift = (posNorm - 0.5) * 2200; // -1100 Hz at Edge to +1100 Hz at Center
   const effectiveCutoff = Math.max(2600, Math.min(6800, profile.speakerCutoff + posCutoffShift));
-
-  // High-shelf presence shift depending on cone placement
-  const posBrightnessDb = -7.0 + posNorm * 14.0; // -7 dB at Edge, +7 dB at Center!
+  const posBrightnessDb = -7.0 + posNorm * 14.0; // -7 dB at Edge, +7 dB at Center
 
   // -------------------------------------------------------------
-  // 2. Microphone Acoustic Transducer Profile
+  // 2. Microphone Distance & Proximity Effect Dynamics
+  // Close (0.0): Strong proximity effect (+3.5 dB around 130 Hz), punchy direct transients
+  // Far (1.0): Proximity effect recedes (-3 dB), slight room air dissipation
+  // -------------------------------------------------------------
+  const proximityDb = 3.5 - distNorm * 7.0; // +3.5 dB (close) down to -3.5 dB (far)
+  const roomAirDampeningDb = -distNorm * 2.5; // Natural high air damping at distance
+
+  // -------------------------------------------------------------
+  // 3. Microphone Acoustic Transducer Profile
   // -------------------------------------------------------------
   let micPresenceFreq = 4800;
   let micPresenceDb = 5.0;
@@ -259,6 +381,15 @@ export function generateCabinetImpulseResponse(
       micPresenceQ = 1.4;
       micLowShelfDb = -2.5; // Tighter bottom end, cuts through dense mixes
       micAirDb = -2.0;      // Natural dynamic roll-off above 7 kHz
+      break;
+
+    case 'sm7b':
+      // Shure SM7B: Muscular, thick midrange body, smooth rolled-off top end (tames high-gain fizz)
+      micPresenceFreq = 3600;
+      micPresenceDb = 3.8;
+      micPresenceQ = 1.1;
+      micLowShelfDb = 1.5;  // Warm punchy body
+      micAirDb = -4.0;      // Silky soft high-end roll-off
       break;
 
     case 'md421':
@@ -279,8 +410,17 @@ export function generateCabinetImpulseResponse(
       micAirDb = -7.5;      // Smooth vintage high-end roll-off
       break;
 
+    case 'm160':
+      // Beyerdynamic M160: Dual-ribbon classic rock authority, focused hypercardioid mids
+      micPresenceFreq = 3200;
+      micPresenceDb = 3.6;
+      micPresenceQ = 1.05;
+      micLowShelfDb = 3.2;
+      micAirDb = -4.5;
+      break;
+
     case 'condenser':
-      // Studio Large Diaphragm Condenser (C414 / U87 style):
+      // Studio Large Diaphragm Condenser (C414 style):
       // Full extended frequency bandwidth, airy hi-fi sparkle, flat accurate lows
       micPresenceFreq = 6500;
       micPresenceDb = 4.0;
@@ -291,7 +431,7 @@ export function generateCabinetImpulseResponse(
   }
 
   // -------------------------------------------------------------
-  // 3. Synthesize Raw Impulse Response
+  // 4. Synthesize Raw Impulse Response
   // -------------------------------------------------------------
   const ir = new Float32Array(length);
   ir[0] = 1.0;
@@ -302,9 +442,10 @@ export function generateCabinetImpulseResponse(
   // B. Cabinet Low-End Resonant Thump (speaker cone + cabinet volume box resonance)
   applyBiquad(ir, biquad('peaking', fs, profile.resonanceFreq, profile.resonanceQ, profile.resonanceGainDb));
 
-  // C. Microphone Low-End Characteristic (Proximity effect & bass voicing)
-  if (micLowShelfDb !== 0) {
-    applyBiquad(ir, biquad('lowshelf', fs, 180, 0.75, micLowShelfDb));
+  // C. Proximity & Mic Low-End Characteristic
+  const combinedLowDb = micLowShelfDb + proximityDb;
+  if (combinedLowDb !== 0) {
+    applyBiquad(ir, biquad('lowshelf', fs, 150, 0.75, combinedLowDb));
   }
 
   // D. Cabinet Enclosure Mid-Dip / Multi-cone Phase Cancellation
@@ -319,18 +460,16 @@ export function generateCabinetImpulseResponse(
   applyBiquad(ir, biquad('peaking', fs, micPresenceFreq, micPresenceQ, micPresenceDb));
 
   // G. Speaker High-Frequency Ceiling (4-Pole Butterworth Acoustic Roll-off)
-  // Real guitar speakers sharply roll off above 4 - 5 kHz, cutting all synthetic buzz
   applyBiquad(ir, biquad('lowpass', fs, effectiveCutoff, 0.5412));
   applyBiquad(ir, biquad('lowpass', fs, effectiveCutoff, 1.3066));
 
-  // H. Top-End Air / Roll-off
-  if (micAirDb !== 0) {
-    applyBiquad(ir, biquad('highshelf', fs, 7800, 0.707, micAirDb));
+  // H. Top-End Air / Distance Absorption
+  const combinedAirDb = micAirDb + roomAirDampeningDb;
+  if (combinedAirDb !== 0) {
+    applyBiquad(ir, biquad('highshelf', fs, 7800, 0.707, combinedAirDb));
   }
 
   // I. Open-Back Rear Reflection Phase Wave
-  // Sound radiating from the rear of an open cabinet travels slightly longer, arriving
-  // with inverted phase, creating the authentic airy 3D bloom of vintage combos.
   if (profile.enclosureType === 'open' && profile.reflectionDelayMs > 0) {
     const delaySamples = Math.floor((profile.reflectionDelayMs / 1000) * fs);
     const dry = Float32Array.from(ir);
@@ -339,7 +478,17 @@ export function generateCabinetImpulseResponse(
     }
   }
 
-  // J. Natural Smooth Window Fade-out to prevent boundary truncation clicks
+  // J. Distance Early Studio Room Reflection (adds subtle physical 3D space)
+  if (distNorm > 0.25) {
+    const roomDelay = Math.floor(0.0025 * fs * distNorm); // 0.6ms to 2.5ms room bounce
+    const reflectionAmt = 0.12 * distNorm;
+    const dry = Float32Array.from(ir);
+    for (let i = roomDelay; i < length; i++) {
+      ir[i] += reflectionAmt * dry[i - roomDelay];
+    }
+  }
+
+  // K. Natural Smooth Window Fade-out to prevent boundary clicks
   const fadeStart = Math.floor(length * 0.75);
   for (let i = fadeStart; i < length; i++) {
     const progress = (i - fadeStart) / (length - fadeStart);
@@ -347,9 +496,7 @@ export function generateCabinetImpulseResponse(
   }
 
   // -------------------------------------------------------------
-  // 4. Perceptual Loudness Calibration
-  // Normalize based on core mid-band energy (500 Hz - 2.5 kHz) so overall loudness
-  // stays stable while bass weight, mid-scoop, and presence bite remain 100% audible!
+  // 5. Perceptual Loudness Calibration
   // -------------------------------------------------------------
   const refFreqs = [500, 800, 1000, 1400, 2000, 2500];
   let refEnergy = 0;

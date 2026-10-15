@@ -910,6 +910,58 @@ body {
   transition: width 0.08s ease;
 }
 
+.cab-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.cab-upload-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #121620;
+  border: 1px dashed rgba(200, 166, 101, 0.4);
+  color: #dfc185;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cab-upload-btn:hover:not(:disabled) {
+  background: rgba(200, 166, 101, 0.15);
+  border-color: #c8a665;
+  border-style: solid;
+  color: #fff1b8;
+  box-shadow: 0 0 8px rgba(200, 166, 101, 0.3);
+}
+
+.cab-upload-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cab-custom-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9.5px;
+  font-family: var(--font-mono);
+  color: #a4b3c6;
+  background: #080a0e;
+  border: 1px solid rgba(200, 166, 101, 0.25);
+  padding: 3px 6px;
+  border-radius: 3px;
+}
+
 /* ==========================================================================
    GUITAR AMP HEAD MODULE (SIDEBAR 3x2 KNOB MATRIX)
    ========================================================================== */

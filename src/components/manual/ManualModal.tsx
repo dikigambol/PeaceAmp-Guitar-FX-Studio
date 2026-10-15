@@ -197,31 +197,31 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
 
                 <div className="manual-doc-grid">
                   <div className="manual-doc-card">
-                    <h4>Speaker Enclosures</h4>
+                    <h4>Iconic Analog Enclosures</h4>
                     <p>
-                      Choose between <strong>1×8, 1×10, 1×12, 2×12, 4×10, and 4×12</strong> configurations, tailored with authentic <strong>Open Back</strong> (airy 3D chime & room reflections) or <strong>Closed Back</strong> (tight acoustic suspension & heavy low-end thump).
+                      Authentic physical acoustic profiles from Fender, Marshall (Greenback & V30), Mesa/Boogie (Oversized 4x12 & Thiele), Orange PPC412, Vox AC30 Blue, Dumble Oval Ported, and Roland JC-120 Flat.
                     </p>
                   </div>
                   <div className="manual-doc-card">
                     <h4>Studio Microphones</h4>
                     <p>
-                      Tailor your guitar tone with modeled studio transducers:
-                      <br />• <strong>SM57</strong>: Classic dynamic with mid-presence punch (~5 kHz).
-                      <br />• <strong>Sennheiser-style (MD421)</strong>: Aggressive upper mids and deep cut.
-                      <br />• <strong>Ribbon (R-121)</strong>: Warm body, smooth rolled-off treble without fizz.
-                      <br />• <strong>Condenser (C414)</strong>: Flat wide-spectrum response with airy top-end.
+                      • <strong>SM57</strong>: Classic cutting mid-presence bite (~5 kHz).
+                      <br />• <strong>SM7B</strong>: Thick muscular body, smooth silk highs.
+                      <br />• <strong>MD421</strong>: Tight punchy bass and articulate cut.
+                      <br />• <strong>Ribbon (R-121 / M160)</strong>: Warm analog body, zero harshness.
+                      <br />• <strong>Condenser (C414)</strong>: Full-spectrum airy top-end.
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>Microphone Placement</h4>
+                    <h4>Mic Position & Distance</h4>
                     <p>
-                      Sweep the <strong>Position</strong> slider from <strong>Edge</strong> (cone boundary for warm, mellow, darker response) to <strong>Center</strong> (on-axis dust cap for maximum bright bite and immediate attack).
+                      Dual-axis control: sweep <strong>Position</strong> (Edge for warmth ↔ Center for direct bite) and <strong>Distance</strong> (0.5" close proximity punch ↔ 6.0" ambient studio room air).
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>Convolution Mix</h4>
+                    <h4>Mix, Level & Custom IR</h4>
                     <p>
-                      Blend between direct preamp sound and convolved speaker cabinet using the <strong>Mix</strong> slider (0% to 100%, default 80% for natural studio punch).
+                      Balance your sound with <strong>Convolution Mix</strong> (0% to 100%) and <strong>Level Trim</strong> (-12 to +6 dB), or click <strong>Load Custom IR (.wav)</strong> to import third-party impulse responses.
                     </p>
                   </div>
                 </div>
