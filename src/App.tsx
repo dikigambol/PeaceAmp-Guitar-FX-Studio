@@ -25,7 +25,7 @@ import { ChromaticTuner } from './components/tuner/ChromaticTuner';
 import { CabinetSimulatorPanel } from './components/sidebar/CabinetSimulatorPanel';
 import { AmpHeadPanel } from './components/sidebar/AmpHeadPanel';
 import { MasterOutputPanel } from './components/sidebar/MasterOutputPanel';
-import { Pedalboard, type PatchConnection } from './components/pedalboard/Pedalboard';
+import { Pedalboard, calculateNextPedalPosition, type PatchConnection } from './components/pedalboard/Pedalboard';
 import { HeadphoneWarning } from './components/HeadphoneWarning';
 import { ManualModal } from './components/manual/ManualModal';
 import { DesktopOnlyBlocker } from './components/common/DesktopOnlyBlocker';
@@ -400,21 +400,20 @@ export function App() {
     setPedals(nextPedals);
     engineRef.current?.setPedalInstances(nextPedals);
 
-    // Auto-place pedal position in pedalPositions state & localStorage
+    // Auto-place pedal position: always after the last pedal, filling empty slots, non-overlapping
     setPedalPositions((prevPos) => {
-      const idx = currentPedals.length;
-      const col = idx % 4;
-      const row = Math.floor(idx / 4);
-      const nextPos = {
-        ...prevPos,
-        [newInstance.id]: {
-          x: Math.max(120, 1200 - 140 - 204 - col * 270),
-          y: 40 + row * 410,
-        },
-      };
-      try {
-        localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(nextPos));
-      } catch {}
+      const nextPos = { ...prevPos };
+      if (!nextPos[newInstance.id]) {
+        nextPos[newInstance.id] = calculateNextPedalPosition(
+          newInstance,
+          currentPedals,
+          prevPos,
+          1200
+        );
+        try {
+          localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(nextPos));
+        } catch {}
+      }
       return nextPos;
     });
 
