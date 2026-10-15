@@ -109,7 +109,10 @@ export function App() {
     master: 6.0,
   });
 
-  // Tuner & Telemetry
+  // Tuner & Telemetry (Default: Non-aktif/Bypass; saat AKTIF output otomatis di-mute untuk silent tuning)
+  const [tunerEnabled, setTunerEnabled] = useState(false);
+  const tunerEnabledRef = useRef(tunerEnabled);
+  tunerEnabledRef.current = tunerEnabled;
   const [tunerResult, setTunerResult] = useState<TunerResult | null>(null);
   const [metrics, setMetrics] = useState<AudioEngineMetrics>(defaultMetrics);
   const [inputMeter, setInputMeter] = useState<MeterData>(defaultMeter);
@@ -173,8 +176,12 @@ export function App() {
         // Run chromatic pitch detection every 2 frames (~30Hz refresh) for responsive needle tracking
         frameCount++;
         if (frameCount % 2 === 0) {
-          const pitch = engineRef.current.detectTunerPitch();
-          setTunerResult(pitch);
+          if (tunerEnabledRef.current) {
+            const pitch = engineRef.current.detectTunerPitch();
+            setTunerResult(pitch);
+          } else {
+            setTunerResult(null);
+          }
         }
       } else if (status !== 'running') {
         setInputMeter(defaultMeter);
@@ -347,6 +354,16 @@ export function App() {
     engineRef.current?.setMute(nextMute);
   };
 
+  // Toggle Chromatic Tuner: saat Aktif output di-mute (Silent Tuning), saat Bypass suara kembali keluar
+  const handleToggleTuner = useCallback(() => {
+    setTunerEnabled((prev) => {
+      const next = !prev;
+      setIsMuted(next);
+      engineRef.current?.setMute(next);
+      return next;
+    });
+  }, []);
+
   // Pedalboard Actions
   const handleTogglePedalEnabled = useCallback((pedalId: string) => {
     const target = pedalsRef.current.find((p) => p.id === pedalId);
@@ -412,7 +429,7 @@ export function App() {
         );
         try {
           localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(nextPos));
-        } catch {}
+        } catch { }
       }
       return nextPos;
     });
@@ -437,7 +454,7 @@ export function App() {
         ];
         try {
           localStorage.setItem('web_guitar_patch_cables', JSON.stringify(fresh));
-        } catch {}
+        } catch { }
         return fresh;
       }
 
@@ -489,7 +506,7 @@ export function App() {
 
       try {
         localStorage.setItem('web_guitar_patch_cables', JSON.stringify(nextConns));
-      } catch {}
+      } catch { }
 
       return nextConns;
     });
@@ -529,13 +546,13 @@ export function App() {
         ];
         try {
           localStorage.setItem('web_guitar_patch_cables', JSON.stringify(directBypass));
-        } catch {}
+        } catch { }
         return directBypass;
       }
 
       try {
         localStorage.setItem('web_guitar_patch_cables', JSON.stringify(filtered));
-      } catch {}
+      } catch { }
       return filtered;
     });
   };
@@ -594,7 +611,7 @@ export function App() {
       setPedalPositions(preset.pedalPositions);
       try {
         localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(preset.pedalPositions));
-      } catch {}
+      } catch { }
     } else if (activePedals.length > 0) {
       const autoPos: Record<string, { x: number; y: number }> = {};
       activePedals.forEach((p, idx) => {
@@ -608,7 +625,7 @@ export function App() {
       setPedalPositions(autoPos);
       try {
         localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(autoPos));
-      } catch {}
+      } catch { }
     }
 
     // Restore custom patch cables if present in preset
@@ -616,7 +633,7 @@ export function App() {
       setPatchConnections(preset.connections);
       try {
         localStorage.setItem('web_guitar_patch_cables', JSON.stringify(preset.connections));
-      } catch {}
+      } catch { }
     } else if (activePedals.length > 0) {
       // Auto-wire sequentially if preset has pedals but connections were not explicitly saved
       const autoConns: PatchConnection[] = [];
@@ -643,12 +660,12 @@ export function App() {
       setPatchConnections(autoConns);
       try {
         localStorage.setItem('web_guitar_patch_cables', JSON.stringify(autoConns));
-      } catch {}
+      } catch { }
     } else {
       setPatchConnections([]);
       try {
         localStorage.removeItem('web_guitar_patch_cables');
-      } catch {}
+      } catch { }
     }
 
     if (preset.inputGain !== undefined) handleInputGainChange(preset.inputGain);
@@ -672,7 +689,7 @@ export function App() {
       try {
         const saved = localStorage.getItem('web_guitar_pedal_coords');
         if (saved) currentPositions = JSON.parse(saved);
-      } catch {}
+      } catch { }
     }
 
     let currentConns = patchConnections;
@@ -680,7 +697,7 @@ export function App() {
       try {
         const saved = localStorage.getItem('web_guitar_patch_cables');
         if (saved) currentConns = JSON.parse(saved);
-      } catch {}
+      } catch { }
     }
 
     saveUserPreset({
@@ -707,7 +724,7 @@ export function App() {
       try {
         const saved = localStorage.getItem('web_guitar_pedal_coords');
         if (saved) currentPositions = JSON.parse(saved);
-      } catch {}
+      } catch { }
     }
 
     let currentConns = patchConnections;
@@ -715,7 +732,7 @@ export function App() {
       try {
         const saved = localStorage.getItem('web_guitar_patch_cables');
         if (saved) currentConns = JSON.parse(saved);
-      } catch {}
+      } catch { }
     }
 
     const newPreset = saveUserPreset({
@@ -830,8 +847,8 @@ export function App() {
           <ChromaticTuner
             tunerResult={tunerResult}
             isEngineRunning={status === 'running'}
-            isMuted={isMuted}
-            onToggleMute={handleToggleMute}
+            enabled={tunerEnabled}
+            onToggleEnabled={handleToggleTuner}
           />
 
           {/* 3. Guitar Amp Head (Positioned after pedalboard & before cabinet IR) */}
@@ -887,7 +904,7 @@ export function App() {
           <span><strong>PeaceAmp</strong> — Real-Time Analog Modeling Guitar Processor</span>
           <div className="footer-right-actions">
             <span className="footer-tech-note">Zero-Latency Web Audio DSP • Classic Studio Edition</span>
-            <button 
+            <button
               className="footer-manual-btn"
               onClick={() => setShowManualModal(true)}
               title="Open PeaceAmp Studio Manual & User Guide"

@@ -5843,13 +5843,11 @@ body {
 .sm7-slider-grooves {
   width: 5px;
   height: 5px;
-  background: repeating-linear-gradient(
-    90deg,
-    #141719,
-    #141719 1px,
-    #4a5156 1px,
-    #4a5156 2px
-  );
+  background: repeating-linear-gradient(90deg,
+      #141719,
+      #141719 1px,
+      #4a5156 1px,
+      #4a5156 2px);
 }
 
 .sm7-switch-label {
