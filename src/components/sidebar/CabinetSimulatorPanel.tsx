@@ -300,6 +300,72 @@ export const CabinetSimulatorPanel: React.FC<CabinetSimulatorPanelProps> = ({
               </button>
             )}
           </div>
+
+          {/* Quick Demo IRs */}
+          <div style={{ marginTop: '6px' }}>
+            <div style={{ fontSize: '9px', color: '#bfa168', marginBottom: '3px', fontWeight: 600 }}>
+              FREE DEMO IR SAMPLES:
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+              <button
+                type="button"
+                className="cab-upload-btn"
+                style={{ fontSize: '9px', padding: '3px 4px' }}
+                disabled={!settings.enabled}
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/sample-irs/Mesa_Rectifier_4x12_V30_SM57.wav');
+                    const blob = await res.blob();
+                    const file = new File([blob], 'Mesa_Rectifier_4x12_V30_SM57.wav', { type: 'audio/wav' });
+                    onLoadCustomIR?.(file);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+                title="Try 24-bit 48kHz Mesa 4x12 V30 Demo IR"
+              >
+                Mesa V30
+              </button>
+              <button
+                type="button"
+                className="cab-upload-btn"
+                style={{ fontSize: '9px', padding: '3px 4px' }}
+                disabled={!settings.enabled}
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/sample-irs/Marshall_1960AX_4x12_Greenback_MD421.wav');
+                    const blob = await res.blob();
+                    const file = new File([blob], 'Marshall_1960AX_4x12_Greenback_MD421.wav', { type: 'audio/wav' });
+                    onLoadCustomIR?.(file);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+                title="Try 24-bit 48kHz Marshall Greenback Demo IR"
+              >
+                Marshall 1960
+              </button>
+              <button
+                type="button"
+                className="cab-upload-btn"
+                style={{ fontSize: '9px', padding: '3px 4px' }}
+                disabled={!settings.enabled}
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/sample-irs/Fender_Twin_2x12_Ribbon_Warm.wav');
+                    const blob = await res.blob();
+                    const file = new File([blob], 'Fender_Twin_2x12_Ribbon_Warm.wav', { type: 'audio/wav' });
+                    onLoadCustomIR?.(file);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+                title="Try 24-bit 48kHz Fender Twin Ribbon Demo IR"
+              >
+                Twin Ribbon
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
