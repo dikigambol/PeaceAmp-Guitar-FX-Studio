@@ -31,6 +31,12 @@ import { MarshallShredMasterNode } from './distortion/MarshallShredMasterNode';
 import { MxrDistortionPlusNode } from './distortion/MxrDistortionPlusNode';
 import { ProCoRatNode } from './distortion/ProCoRatNode';
 
+// Boost Nodes
+import { MxrMicroAmpNode } from './boost/MxrMicroAmpNode';
+import { RangemasterNode } from './boost/RangemasterNode';
+import { TcSparkMiniNode } from './boost/TcSparkMiniNode';
+import { XoticEpBoosterNode } from './boost/XoticEpBoosterNode';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -417,6 +423,84 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       { id: 'fuzz', name: 'FUZZ', min: 0, max: 10, step: 0.1, defaultValue: 6, formatValue: (v) => v.toFixed(1) },
     ],
   },
+
+  // Category 5: Boost
+  'boost-mxr-microamp': {
+    type: 'boost-mxr-microamp',
+    name: 'MXR Micro Amp',
+    subtitle: 'Classic Transparent +26dB Clean Preamp Boost',
+    category: 'boost',
+    chassisColor: '#d7d0be',
+    accentColor: '#111827',
+    parameters: [
+      {
+        id: 'gain',
+        name: 'GAIN',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `+${(v * 2.6).toFixed(1)} dB`,
+      },
+    ],
+  },
+  'boost-rangemaster': {
+    type: 'boost-rangemaster',
+    name: 'Rangemaster Treble Booster',
+    subtitle: '1965 British Germanium OC44 Lead Booster',
+    category: 'boost',
+    chassisColor: '#d1d5db',
+    accentColor: '#18181b',
+    parameters: [
+      {
+        id: 'set',
+        name: 'SET',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `+${(v * 2.8).toFixed(1)} dB`,
+      },
+    ],
+  },
+  'boost-spark-mini': {
+    type: 'boost-spark-mini',
+    name: 'TC Electronic Spark Mini',
+    subtitle: 'Discrete Analog +20dB Clean Boost with PrimeTech',
+    category: 'boost',
+    chassisColor: '#f8f8fa',
+    accentColor: '#9c7b28',
+    parameters: [
+      {
+        id: 'level',
+        name: 'LEVEL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `+${(v * 2.0).toFixed(1)} dB`,
+      },
+    ],
+  },
+  'boost-xotic-ep': {
+    type: 'boost-xotic-ep',
+    name: 'Xotic EP Booster',
+    subtitle: 'Discrete JFET Preamp (+3dB to +20dB)',
+    category: 'boost',
+    chassisColor: '#17181c',
+    accentColor: '#3b82f6',
+    parameters: [
+      {
+        id: 'gain',
+        name: 'GAIN',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `+${(3.0 + (v / 10) * 17.0).toFixed(1)} dB`,
+      },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -427,6 +511,16 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Boost
+    case 'boost-mxr-microamp':
+      return new MxrMicroAmpNode(ctx, id, initialParams, enabled);
+    case 'boost-rangemaster':
+      return new RangemasterNode(ctx, id, initialParams, enabled);
+    case 'boost-spark-mini':
+      return new TcSparkMiniNode(ctx, id, initialParams, enabled);
+    case 'boost-xotic-ep':
+      return new XoticEpBoosterNode(ctx, id, initialParams, enabled);
+
     // Compressors
     case 'comp-dynacomp':
       return new MxrDynaCompNode(ctx, id, initialParams, enabled);

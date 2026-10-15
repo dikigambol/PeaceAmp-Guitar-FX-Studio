@@ -236,7 +236,7 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
 
                 <div className="manual-doc-list">
                   <div className="manual-doc-list-item">
-                    <strong>Adding Pedals:</strong> Click <code>+ ADD PEDAL</code> on the stage toolbar to select from our boutique analog modeling library, including <strong>Category 1: Compressors</strong> (MXR Dyna Comp, Ross, Boss CS-3, Keeley C4) and <strong>Category 2: Overdrives</strong> (Tube Screamer TS-808, TS9, Boss SD-1, OD-3, BD-2 Blues Driver, Klon Centaur, Fulltone OCD, TS Mini, Nobels ODR-1, J. Rockett Archer).
+                    <strong>Adding Pedals:</strong> Click <code>+ ADD PEDAL</code> on the stage toolbar to select from our boutique analog modeling library, spanning <strong>Compressors</strong>, <strong>Overdrives</strong>, <strong>Distortions</strong>, <strong>Fuzzes</strong>, and <strong>Category 5: Boost</strong> (MXR Micro Amp).
                   </div>
                   <div className="manual-doc-list-item">
                     <strong>Drag & Position:</strong> Drag pedals anywhere on the pedalboard grid. Enable <code>GRID SNAP</code> for structured rack alignment.

@@ -39,7 +39,9 @@ export interface KnobProps {
     | 'tsmini-large'
     | 'ibanez-tonelok'
     | 'marshall-black'
-    | 'proco-rat';
+    | 'proco-rat'
+    | 'tc-spark'
+    | 'xotic-clear';
   showLabel?: boolean;
   showValue?: boolean;
   subLabel?: string;
@@ -1216,6 +1218,95 @@ const ProCoRatKnobDial: React.FC = () => (
   </svg>
 );
 
+const TcSparkKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="spark-skirt-grad" cx="44%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#ffffff" />
+        <stop offset="45%" stopColor="#f4f1e8" />
+        <stop offset="80%" stopColor="#dfd9cc" />
+        <stop offset="100%" stopColor="#c5beaf" />
+      </radialGradient>
+      <radialGradient id="spark-cap-grad" cx="44%" cy="38%" r="58%">
+        <stop offset="0%" stopColor="#fbf9f5" />
+        <stop offset="65%" stopColor="#ede7dc" />
+        <stop offset="100%" stopColor="#dbd4c7" />
+      </radialGradient>
+      <filter id="spark-knob-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.45" />
+      </filter>
+    </defs>
+    {/* Outer cream rounded skirt */}
+    <circle cx="50" cy="50" r="47.5" fill="url(#spark-skirt-grad)" stroke="#b5ada0" strokeWidth="1" filter="url(#spark-knob-shadow)" />
+    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="0.8" />
+    {/* Inner recessed cup */}
+    <circle cx="50" cy="50" r="35" fill="url(#spark-cap-grad)" stroke="#b8b0a2" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="33.5" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="0.8" />
+    {/* Bold Black Pointer Indicator Stripe */}
+    <line
+      x1="50"
+      y1="8"
+      x2="50"
+      y2="38"
+      stroke="#18181b"
+      strokeWidth="4.2"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1px rgba(0,0,0,0.3))"
+    />
+  </svg>
+);
+
+const XoticClearKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="xotic-acrylic-skirt" cx="38%" cy="35%" r="65%">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
+        <stop offset="35%" stopColor="rgba(230,240,250,0.5)" />
+        <stop offset="70%" stopColor="rgba(160,180,205,0.4)" />
+        <stop offset="95%" stopColor="rgba(100,125,150,0.6)" />
+        <stop offset="100%" stopColor="rgba(60,80,105,0.75)" />
+      </radialGradient>
+      <radialGradient id="xotic-acrylic-cap" cx="42%" cy="38%" r="58%">
+        <stop offset="0%" stopColor="rgba(255,255,255,0.95)" />
+        <stop offset="40%" stopColor="rgba(220,235,245,0.6)" />
+        <stop offset="85%" stopColor="rgba(140,165,190,0.5)" />
+        <stop offset="100%" stopColor="rgba(80,105,130,0.7)" />
+      </radialGradient>
+      <filter id="xotic-knob-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.55" />
+      </filter>
+    </defs>
+    {/* Acrylic transparent outer skirt */}
+    <circle cx="50" cy="50" r="47" fill="url(#xotic-acrylic-skirt)" stroke="rgba(255,255,255,0.6)" strokeWidth="1" filter="url(#xotic-knob-shadow)" />
+    <circle cx="50" cy="50" r="45.5" fill="none" stroke="rgba(0,0,0,0.25)" strokeWidth="0.8" />
+    {/* Internal refractive fluting ribs */}
+    {Array.from({ length: 18 }).map((_, i) => {
+      const a = (i * 20 * Math.PI) / 180;
+      const x1 = 50 + 36 * Math.sin(a);
+      const y1 = 50 - 36 * Math.cos(a);
+      const x2 = 50 + 44 * Math.sin(a);
+      const y2 = 50 - 44 * Math.cos(a);
+      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="rgba(255,255,255,0.6)" strokeWidth="1.6" strokeLinecap="round" />;
+    })}
+    {/* Inner raised acrylic boss */}
+    <circle cx="50" cy="50" r="32" fill="url(#xotic-acrylic-cap)" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="18" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="0.8" />
+    {/* Center screw boss */}
+    <circle cx="50" cy="50" r="10" fill="rgba(180,200,220,0.4)" stroke="rgba(0,0,0,0.2)" strokeWidth="0.8" />
+    {/* Crisp Black Indicator Line */}
+    <line
+      x1="50"
+      y1="7"
+      x2="50"
+      y2="34"
+      stroke="#111827"
+      strokeWidth="3.6"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1px rgba(255,255,255,0.6))"
+    />
+  </svg>
+);
+
 export const Knob: React.FC<KnobProps> = ({
   label,
   value,
@@ -1336,6 +1427,8 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'ibanez-tonelok' && <IbanezToneLokKnobDial />}
           {variant === 'marshall-black' && <MarshallBlackKnobDial />}
           {variant === 'proco-rat' && <ProCoRatKnobDial />}
+          {variant === 'tc-spark' && <TcSparkKnobDial />}
+          {variant === 'xotic-clear' && <XoticClearKnobDial />}
           {variant === 'default' && <DefaultKnobDial color={color} />}
         </div>
       </div>

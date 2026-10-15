@@ -2644,6 +2644,12 @@ body {
   border: 1px solid rgba(200, 166, 101, 0.4);
 }
 
+.boost-tag {
+  background: rgba(200, 166, 101, 0.18);
+  color: #d4b476;
+  border: 1px solid rgba(200, 166, 101, 0.4);
+}
+
 .group-count {
   font-size: 9.5px;
   color: rgba(200, 166, 101, 0.65);
@@ -2753,6 +2759,12 @@ body {
 }
 
 .item-pill-badge.fuzz {
+  background: rgba(200, 166, 101, 0.18);
+  color: #d4b476;
+  border: 1px solid rgba(200, 166, 101, 0.4);
+}
+
+.item-pill-badge.boost {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
@@ -3765,6 +3777,910 @@ body {
   display: flex;
   justify-content: center;
   text-transform: lowercase;
+}
+
+/* ==========================================================================
+   MXR MICRO AMP (M-133) ENCLOSURE
+   ========================================================================== */
+.pedal-mxr-microamp {
+  background: radial-gradient(circle at 45% 20%, #e5dfd2 0%, #d8d0be 55%, #bcaf9a 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(255, 255, 240, 0.5),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.65) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 8px 12px 14px !important;
+  position: relative !important;
+}
+
+.mxr-microamp-knob-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin: 6px auto 2px;
+}
+
+.mxr-microamp-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mxr-microamp-knob-title {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  color: #141414;
+  text-align: center;
+}
+
+.mxr-microamp-logo-box {
+  margin: 10px auto 4px;
+  border: 2px solid #141414;
+  border-radius: 6px;
+  padding: 1px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  box-sizing: border-box;
+  background: transparent;
+}
+
+.mxr-microamp-logo-text {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #141414;
+  text-align: center;
+}
+
+.mxr-microamp-led-mount {
+  margin: 4px auto 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.mxr-microamp-led {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #4a3e20 0%, #292010 60%, #151006 100%);
+  border: 1.5px solid #141414;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.mxr-microamp-led.lit {
+  background: radial-gradient(circle at 35% 35%, #fff 0%, #ff3b30 40%, #c41e24 70%, #680509 100%);
+  box-shadow: 0 0 10px #ff3b30, 0 0 20px rgba(255, 59, 48, 0.75);
+}
+
+.mxr-microamp-led-core {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.mxr-microamp-switch-wrap {
+  margin: 4px auto 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mxr-microamp-bottom-title {
+  margin-top: 6px;
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #141414;
+  text-align: center;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  text-transform: lowercase;
+}
+
+.mxr-microamp-side-label-left {
+  position: absolute;
+  left: 8px;
+  top: 48%;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #141414;
+  transform: rotate(-90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.mxr-microamp-side-label-right {
+  position: absolute;
+  right: 8px;
+  top: 48%;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #141414;
+  transform: rotate(90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+/* ==========================================================================
+   DALLAS RANGEMASTER / BPC TREBLE BOOSTER ENCLOSURE
+   ========================================================================== */
+.pedal-rangemaster {
+  background: linear-gradient(155deg, #e2e4e8 0%, #d1d5db 35%, #bfc4cc 70%, #adb3bd 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(255, 255, 255, 0.8),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.55) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 8px 10px 10px !important;
+  position: relative !important;
+}
+
+.rangemaster-border-frame {
+  width: 100%;
+  height: 100%;
+  border: 1.5px solid #18181b;
+  border-radius: 4px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 6px 8px;
+  position: relative;
+}
+
+.rangemaster-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.rangemaster-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.rangemaster-bracket {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #18181b;
+  line-height: 1;
+}
+
+.rangemaster-title {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  color: #18181b;
+  line-height: 1;
+}
+
+.rangemaster-subtitle {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #18181b;
+  margin-top: 2px;
+}
+
+.rangemaster-knob-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.rangemaster-set-label {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  color: #18181b;
+}
+
+.rangemaster-knob-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.rangemaster-knob-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rangemaster-screw {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f1f5f9 0%, #cbd5e1 50%, #64748b 100%);
+  border: 1px solid #334155;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.rangemaster-screw .screw-groove {
+  width: 7px;
+  height: 1.5px;
+  background: #1e293b;
+  transform: rotate(25deg);
+}
+
+.rangemaster-screw.screw-right .screw-groove {
+  transform: rotate(-40deg);
+}
+
+.rangemaster-stave-art {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 3px 0 2px;
+}
+
+.rangemaster-stave-svg {
+  width: 115px;
+  height: 48px;
+  display: block;
+}
+
+.rangemaster-led-mount {
+  margin: 1px auto 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.rangemaster-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3d2212 0%, #201108 60%, #0d0703 100%);
+  border: 1.5px solid #18181b;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.rangemaster-led.lit {
+  background: radial-gradient(circle at 35% 35%, #fff 0%, #ff5722 40%, #e64a19 70%, #871c08 100%);
+  box-shadow: 0 0 10px #ff5722, 0 0 18px rgba(255, 87, 34, 0.8);
+}
+
+.rangemaster-led-reflection {
+  position: absolute;
+  top: 1.5px;
+  left: 1.5px;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.rangemaster-switch-wrap {
+  margin: 2px auto 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rangemaster-boost-label {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #18181b;
+  text-align: center;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.rangemaster-footer-script {
+  margin-top: 5px;
+  font-family: "Brush Script MT", "Caveat", "Brush Script Std", cursive, sans-serif;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: #18181b;
+  text-align: center;
+  width: 100%;
+}
+
+.rangemaster-side-label-left {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #18181b;
+  transform: rotate(-90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.rangemaster-side-label-right {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #18181b;
+  transform: rotate(90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   TC ELECTRONIC SPARK MINI BOOSTER ENCLOSURE
+   ========================================================================== */
+.pedal-tc-spark {
+  width: 140px !important;
+  min-height: 290px !important;
+  background: linear-gradient(175deg, #ffffff 0%, #f8f8fa 35%, #eef0f3 70%, #dfe2e8 100%) !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.8),
+    inset 0 2px 4px rgba(255, 255, 255, 0.95),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.25) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px 10px !important;
+  position: relative !important;
+}
+
+.spark-faceplate-art {
+  width: 100%;
+  border: 1.5px solid #a88836;
+  border-radius: 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 4px 6px;
+  position: relative;
+  background: radial-gradient(circle at 50% 25%, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 240, 0.6) 100%);
+  margin-top: 2px;
+}
+
+.spark-top-level-label {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 2.2px;
+  color: #9c7b28;
+  text-align: center;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.spark-knob-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2px auto 3px;
+}
+
+.spark-banner-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 1px;
+}
+
+.spark-banner-gold {
+  background: linear-gradient(180deg, #b89742 0%, #9c7b28 100%);
+  border-radius: 4px;
+  padding: 1px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.spark-banner-text {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #ffffff;
+  line-height: 1.1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.spark-sub-pill {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #9c7b28;
+  background: #ffffff;
+  border: 1px solid #b89742;
+  border-radius: 8px;
+  padding: 0.5px 7px;
+  margin-top: -3px;
+  z-index: 2;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.spark-led-mount {
+  margin: 3px auto 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spark-led-bezel {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #d1d5db 50%, #6b7280 100%);
+  border: 1px solid #4b5563;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spark-green-led {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1f4728 0%, #122818 70%, #061109 100%);
+  border: 1px solid #14532d;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.spark-green-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #4ade80 35%, #16a34a 70%, #14532d 100%);
+  box-shadow: 0 0 10px #22c55e, 0 0 18px rgba(34, 197, 94, 0.85);
+}
+
+.spark-badges-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  margin: 2px auto;
+}
+
+.spark-badge-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.spark-laurel-val {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  color: #9c7b28;
+  line-height: 1;
+}
+
+.spark-ribbon-tag {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  color: #9c7b28;
+  border-top: 1px solid #a88836;
+  border-bottom: 1px solid #a88836;
+  padding: 0.5px 2px;
+  margin-top: 1px;
+}
+
+.spark-analog-center {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #9c7b28;
+}
+
+.spark-true-bypass-ribbon {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  color: #9c7b28;
+  border-top: 1px solid #a88836;
+  border-bottom: 1px solid #a88836;
+  padding: 1px 6px;
+  margin: 2px auto;
+  text-align: center;
+}
+
+.spark-switch-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px auto 1px;
+}
+
+.spark-sunburst-halo {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px dashed #a88836;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spark-primetech-switch {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e2e8f0 40%, #94a3b8 80%, #475569 100%);
+  border: 1.5px solid #334155;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  padding: 0;
+  transition: transform 0.08s ease;
+}
+
+.spark-primetech-switch:active {
+  transform: scale(0.96);
+}
+
+.spark-switch-collar {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #64748b;
+  pointer-events: none;
+}
+
+.collar-prong {
+  position: absolute;
+  background: #475569;
+}
+
+.collar-prong.prong-top {
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 6px;
+}
+
+.collar-prong.prong-bottom {
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 6px;
+}
+
+.collar-prong.prong-left {
+  left: -3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 3px;
+}
+
+.collar-prong.prong-right {
+  right: -3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 3px;
+}
+
+.spark-switch-cap {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #64748b 0%, #334155 70%, #1e293b 100%);
+  border: 1px solid #1e293b;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.spark-bottom-brand {
+  margin-top: 3px;
+  display: flex;
+  justify-content: center;
+}
+
+.spark-brand-logo {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #9c7b28;
+  text-transform: lowercase;
+}
+
+.spark-side-label-out {
+  position: absolute;
+  left: 3px;
+  top: 48%;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #9c7b28;
+  transform: rotate(-90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.spark-side-label-in {
+  position: absolute;
+  right: 3px;
+  top: 48%;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #9c7b28;
+  transform: rotate(90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+/* ==========================================================================
+   XOTIC EP BOOSTER ENCLOSURE
+   ========================================================================== */
+.pedal-xotic-ep {
+  width: 140px !important;
+  min-height: 290px !important;
+  background: linear-gradient(155deg, #71767e 0%, #4b5059 35%, #383c44 70%, #25282e 100%) !important;
+  border-radius: 16px !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(255, 255, 255, 0.7),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.75) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px 10px !important;
+  position: relative !important;
+}
+
+.xotic-ep-faceplate {
+  width: 100%;
+  border: 1.5px solid #d1d5db;
+  border-radius: 11px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 5px 4px 6px;
+  position: relative;
+  background: radial-gradient(circle at 50% 30%, #1a1c22 0%, #0e0f13 65%, #07070a 100%);
+  margin-top: 2px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.xotic-ep-polarity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: #94a3b8;
+  font-weight: 700;
+  line-height: 1;
+  margin-top: 1px;
+  opacity: 0.85;
+}
+
+.polarity-symbol {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  border: 1px solid #94a3b8;
+  border-radius: 50%;
+  position: relative;
+}
+
+.polarity-center {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.polarity-outer {
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 1px;
+  background: #94a3b8;
+}
+
+.xotic-ep-knob-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 3px auto 2px;
+}
+
+.xotic-ep-led-mount {
+  margin: 2px auto 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xotic-blue-led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #172554 0%, #09122c 70%, #020617 100%);
+  border: 1px solid #1e3a8a;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.xotic-blue-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #93c5fd 30%, #3b82f6 65%, #1d4ed8 100%);
+  box-shadow: 0 0 12px #3b82f6, 0 0 22px rgba(59, 130, 246, 0.9);
+}
+
+.xotic-led-core {
+  position: absolute;
+  top: 1.5px;
+  left: 1.5px;
+  width: 2.5px;
+  height: 2.5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.xotic-ep-brand-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 1px 0 2px;
+}
+
+.xotic-ep-logo-text {
+  font-family: "Playfair Display", "Times New Roman", Georgia, serif;
+  font-style: italic;
+  font-size: 36px;
+  font-weight: 700;
+  color: #f1f5f9;
+  line-height: 0.85;
+  letter-spacing: -1.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+.xotic-ep-booster-sub {
+  font-family: "Brush Script MT", "Caveat", "Brush Script Std", cursive, sans-serif;
+  font-style: italic;
+  font-size: 17px;
+  letter-spacing: 0.5px;
+  color: #e2e8f0;
+  line-height: 1;
+  margin-top: 1px;
+}
+
+.xotic-ep-origin {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.xotic-ep-switch-wrap {
+  margin: 2px auto 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.xotic-ep-side-out {
+  position: absolute;
+  left: 3px;
+  top: 48%;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #cbd5e1;
+  transform: rotate(-90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.xotic-ep-side-in {
+  position: absolute;
+  right: 3px;
+  top: 48%;
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #cbd5e1;
+  transform: rotate(90deg);
+  transform-origin: center center;
+  pointer-events: none;
+  opacity: 0.85;
 }
 
 /* ==========================================================================

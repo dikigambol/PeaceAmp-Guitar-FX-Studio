@@ -34,6 +34,12 @@ import { MarshallShredMasterPedal } from './distortion/MarshallShredMasterPedal'
 import { MxrDistortionPlusPedal } from './distortion/MxrDistortionPlusPedal';
 import { ProCoRatPedal } from './distortion/ProCoRatPedal';
 
+// Boost Components
+import { MxrMicroAmpPedal } from './boost/MxrMicroAmpPedal';
+import { RangemasterPedal } from './boost/RangemasterPedal';
+import { TcSparkMiniPedal } from './boost/TcSparkMiniPedal';
+import { XoticEpBoosterPedal } from './boost/XoticEpBoosterPedal';
+
 interface StompboxProps {
   instance: PedalInstance;
   metadata: PedalMetadata;
@@ -127,6 +133,16 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <FlatironFuzzPedal {...props} />;
     case 'fuzz-hoof':
       return <EqdHoofPedal {...props} />;
+
+    // Category 5: Boost
+    case 'boost-mxr-microamp':
+      return <MxrMicroAmpPedal {...props} />;
+    case 'boost-rangemaster':
+      return <RangemasterPedal {...props} />;
+    case 'boost-spark-mini':
+      return <TcSparkMiniPedal {...props} />;
+    case 'boost-xotic-ep':
+      return <XoticEpBoosterPedal {...props} />;
   }
 
   // Fallback for standard analog enclosure

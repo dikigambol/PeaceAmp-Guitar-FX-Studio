@@ -37,7 +37,7 @@ export const JACK_Y_OFFSET = 57;
 
 export function getPedalDimensions(type: string): { w: number; h: number } {
   const isWide = type === 'od-klon' || type === 'klon-centaur';
-  const isMini = type === 'od-tsmini' || type === 'ts-mini';
+  const isMini = type === 'od-tsmini' || type === 'ts-mini' || type === 'boost-spark-mini' || type === 'boost-xotic-ep';
   const isToneBender = type === 'fuzz-tonebender';
   const isFuzzFactory = type === 'fuzz-fuzzfactory';
   const isFlatiron = type === 'fuzz-flatiron';
@@ -198,7 +198,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 }) => {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
-  const [activeCategoryTab, setActiveCategoryTab] = useState<'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz'>('all');
+  const [activeCategoryTab, setActiveCategoryTab] = useState<
+    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost'
+  >('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
   const [snapToGrid, setSnapToGrid] = useState<boolean>(() => {
@@ -468,14 +470,13 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
       const pos = positions[nodeId] || { x: 120, y: 40 };
       const pedal = pedals.find((p) => p.id === nodeId);
-      const isWide = pedal?.type === 'od-klon' || pedal?.type === 'klon-centaur';
-      const isMini = pedal?.type === 'od-tsmini' || pedal?.type === 'ts-mini';
+      const curDims = pedal ? getPedalDimensions(pedal.type) : { w: PEDAL_WIDTH, h: 360 };
       const isFuzzFace = pedal?.type === 'fuzz-fuzzface';
       const isToneBender = pedal?.type === 'fuzz-tonebender';
       const isFuzzFactory = pedal?.type === 'fuzz-fuzzfactory';
       const isFlatiron = pedal?.type === 'fuzz-flatiron';
       const isHoof = pedal?.type === 'fuzz-hoof';
-      const curWidth = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : PEDAL_WIDTH;
+      const curWidth = curDims.w;
       const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isFlatiron ? 114 : isHoof ? 104 : JACK_Y_OFFSET;
       if (port === 'in') {
         // Right side jack (pedal input is on the right)
@@ -867,10 +868,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
         def.category === 'dynamics'
           ? 'compressor dynamics'
           : def.category === 'drive'
-          ? 'overdrive drive boost'
+          ? 'overdrive drive'
           : def.category === 'distortion'
           ? 'distortion ds1 crunch heavy'
-          : 'fuzz sustainer big muff';
+          : def.category === 'fuzz'
+          ? 'fuzz sustainer big muff'
+          : 'boost clean treble rangemaster oc44 germanium bpc spark tc electronic mini xotic ep echoplex micro amp preamp volume';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -893,6 +896,10 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const fuzzes = useMemo(
     () => filteredPedals.filter((p) => p.category === 'fuzz'),
+    [filteredPedals]
+  );
+  const boosts = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'boost'),
     [filteredPedals]
   );
 
@@ -1044,6 +1051,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                   >
                     Fuzz ({availablePedals.filter((p) => p.category === 'fuzz').length})
                   </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'boost' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('boost')}
+                  >
+                    Boost ({availablePedals.filter((p) => p.category === 'boost').length})
+                  </button>
                 </div>
 
                 {/* Filtered Pedals List */}
@@ -1163,6 +1176,35 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                                 <div className="item-title-row">
                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge fuzz">FUZZ</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Boost */}
+                      {boosts.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag boost-tag">BOOST</span>
+                            <span className="group-count">{boosts.length} pedals</span>
+                          </div>
+                          {boosts.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge boost">BOOST</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>
