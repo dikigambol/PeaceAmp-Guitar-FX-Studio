@@ -2650,6 +2650,12 @@ body {
   border: 1px solid rgba(200, 166, 101, 0.4);
 }
 
+.wah-tag {
+  background: rgba(200, 166, 101, 0.18);
+  color: #d4b476;
+  border: 1px solid rgba(200, 166, 101, 0.4);
+}
+
 .group-count {
   font-size: 9.5px;
   color: rgba(200, 166, 101, 0.65);
@@ -2765,6 +2771,12 @@ body {
 }
 
 .item-pill-badge.boost {
+  background: rgba(200, 166, 101, 0.18);
+  color: #d4b476;
+  border: 1px solid rgba(200, 166, 101, 0.4);
+}
+
+.item-pill-badge.wah {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
@@ -3158,7 +3170,7 @@ body {
 }
 
 .stompbox-side-jack.jack-right {
-  right: -6px;
+  right: -8px;
 }
 
 /* ==========================================================================
@@ -4510,6 +4522,18 @@ body {
   position: relative !important;
 }
 
+.pedal-xotic-ep .stompbox-side-jack {
+  top: 46px !important;
+}
+
+.pedal-xotic-ep .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+
+.pedal-xotic-ep .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
 .xotic-ep-faceplate {
   width: 100%;
   border: 1.5px solid #d1d5db;
@@ -4997,6 +5021,239 @@ body {
     inset 0 1px 2px rgba(255, 255, 255, 0.4);
   padding-bottom: 8px;
 }
+
+/* BOSS AW-3 DYNAMIC WAH ENCLOSURE (Symmetrical & Spacious 4-Knob Layout) */
+.pedal-boss-aw3 {
+  width: 248px !important;
+  max-width: 248px !important;
+  min-height: 332px !important;
+  background: linear-gradient(180deg, #dfd3ac 0%, #cfbf92 40%, #baaa79 80%, #9e8e60 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+  padding: 10px 12px 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks */
+.pedal-boss-aw3 .stompbox-side-jack {
+  top: 46px !important;
+}
+
+.pedal-boss-aw3 .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+
+.pedal-boss-aw3 .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Control Cavity & Knobs Row */
+.pedal-boss-aw3 .boss-control-cavity {
+  width: 100% !important;
+  background: #0b0e13 !important;
+  border-radius: 5px !important;
+  border: 1.5px solid #232936 !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95), 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  padding: 6px 6px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.pedal-boss-aw3 .boss-check-led-wrap {
+  margin-bottom: 5px !important;
+}
+
+.pedal-boss-aw3 .boss-check-text {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  color: #94a3b8 !important;
+}
+
+.pedal-boss-aw3 .boss-knobs-row {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  width: 100% !important;
+  gap: 0 !important;
+  align-items: start !important;
+  justify-items: center !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+.pedal-boss-aw3 .boss-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 3px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  text-align: center !important;
+}
+
+.pedal-boss-aw3 .boss-knob-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.3px !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+}
+
+.pedal-boss-aw3 .boss-sub-ticks {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 5.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+  color: #cbd5e1 !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+}
+
+.pedal-boss-aw3 .mode-active-text {
+  background: rgba(200, 166, 101, 0.24) !important;
+  color: #f6d89b !important;
+  padding: 0.5px 3px !important;
+  border-radius: 3px !important;
+  border: 1px solid rgba(200, 166, 101, 0.45) !important;
+  font-weight: 800 !important;
+  font-size: 6px !important;
+  letter-spacing: 0.4px !important;
+}
+
+/* Humanizer Bracket between Knob 2 and 3 */
+.boss-aw3-vowel-bracket-wrap {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-top: 4px !important;
+}
+
+.boss-aw3-vowel-bracket {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  color: #94a3b8 !important;
+  border-top: 1px solid #334155 !important;
+  padding-top: 2px !important;
+  width: 48% !important;
+  text-align: center !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.boss-aw3-vowel-bracket .bracket-title {
+  color: #cbd5e1 !important;
+}
+
+/* Middle Stepped Section */
+.boss-aw3-mid {
+  width: 100% !important;
+  margin: 7px 0 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-aw3-mid .boss-io-arrows {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.boss-aw3-mid .boss-io-left,
+.boss-aw3-mid .boss-io-right {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.boss-aw3-mid .boss-sub-io {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  color: #111827 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.4px !important;
+}
+
+/* Middle Model Typography (Authentic Boss SD-1 / AW-3 Style) */
+.boss-aw3-typography {
+  text-align: center !important;
+  margin: 5px 0 8px !important;
+  line-height: 1.15 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-aw3-dynamic {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+
+.boss-aw3-wah {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  font-style: italic !important;
+  color: #111827 !important;
+  letter-spacing: 0.8px !important;
+}
+
+.boss-aw3-model {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 1px !important;
+  margin-left: 28px !important;
+}
+
+/* Treadle Plate Footswitch */
+.pedal-boss-aw3 .boss-treadle-plate {
+  width: 100% !important;
+  height: 96px !important;
+  margin-top: auto !important;
+}
+
+.pedal-boss-aw3 .vowel-active-text {
+  background: rgba(59, 130, 246, 0.25) !important;
+  color: #93c5fd !important;
+  padding: 0.5px 3px !important;
+  border-radius: 3px !important;
+  border: 1px solid rgba(59, 130, 246, 0.5) !important;
+  font-weight: 800 !important;
+  font-size: 6px !important;
+  letter-spacing: 0.5px !important;
+}
+
+
 
 .boss-top-bar {
   width: 100%;

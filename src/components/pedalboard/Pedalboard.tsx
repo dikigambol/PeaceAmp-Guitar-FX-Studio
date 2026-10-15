@@ -42,8 +42,9 @@ export function getPedalDimensions(type: string): { w: number; h: number } {
   const isFuzzFactory = type === 'fuzz-fuzzfactory';
   const isFlatiron = type === 'fuzz-flatiron';
   const isHoof = type === 'fuzz-hoof';
+  const isBossAw3 = type === 'wah-boss-aw3';
 
-  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : PEDAL_WIDTH;
+  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : isBossAw3 ? 248 : PEDAL_WIDTH;
   const h = isMini ? 290 : 360;
   return { w, h };
 }
@@ -199,7 +200,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState<
-    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost'
+    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah'
   >('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
@@ -620,9 +621,8 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
       const minX = 110;
       const pedal = pedals.find((p) => p.id === dragRef.current?.id);
-      const isWide = pedal?.type === 'od-klon' || pedal?.type === 'klon-centaur';
-      const isMini = pedal?.type === 'od-tsmini' || pedal?.type === 'ts-mini';
-      const curWidth = isWide ? 260 : isMini ? 140 : PEDAL_WIDTH;
+      const curDims = pedal ? getPedalDimensions(pedal.type) : { w: PEDAL_WIDTH, h: 360 };
+      const curWidth = curDims.w;
       const maxX = Math.max(minX, surfaceWidth - curWidth - 110);
       const newX = Math.max(minX, Math.min(maxX, targetX));
       const newY = Math.max(20, targetY);
@@ -873,7 +873,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           ? 'distortion ds1 crunch heavy'
           : def.category === 'fuzz'
           ? 'fuzz sustainer big muff'
-          : 'boost clean treble rangemaster oc44 germanium bpc spark tc electronic mini xotic ep echoplex micro amp preamp volume';
+          : def.category === 'boost'
+          ? 'boost clean treble rangemaster oc44 germanium bpc spark tc electronic mini xotic ep echoplex micro amp preamp volume'
+          : 'auto wah filter envelope dynamic humanizer boss aw3 vocal tempo touch wah';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -900,6 +902,10 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const boosts = useMemo(
     () => filteredPedals.filter((p) => p.category === 'boost'),
+    [filteredPedals]
+  );
+  const wahs = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'wah'),
     [filteredPedals]
   );
 
@@ -1057,6 +1063,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                   >
                     Boost ({availablePedals.filter((p) => p.category === 'boost').length})
                   </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'wah' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('wah')}
+                  >
+                    Auto Wah ({availablePedals.filter((p) => p.category === 'wah').length})
+                  </button>
                 </div>
 
                 {/* Filtered Pedals List */}
@@ -1205,6 +1217,35 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                                 <div className="item-title-row">
                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge boost">BOOST</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Auto Wah / Filter */}
+                      {wahs.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag wah-tag">AUTO WAH</span>
+                            <span className="group-count">{wahs.length} pedals</span>
+                          </div>
+                          {wahs.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge wah">AUTO WAH</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>

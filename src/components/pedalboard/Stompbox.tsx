@@ -40,6 +40,9 @@ import { RangemasterPedal } from './boost/RangemasterPedal';
 import { TcSparkMiniPedal } from './boost/TcSparkMiniPedal';
 import { XoticEpBoosterPedal } from './boost/XoticEpBoosterPedal';
 
+// Wah / Filter Components
+import { BossAw3Pedal } from './wah/BossAw3Pedal';
+
 interface StompboxProps {
   instance: PedalInstance;
   metadata: PedalMetadata;
@@ -143,6 +146,10 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <TcSparkMiniPedal {...props} />;
     case 'boost-xotic-ep':
       return <XoticEpBoosterPedal {...props} />;
+
+    // Category 6: Wah / Filter
+    case 'wah-boss-aw3':
+      return <BossAw3Pedal {...props} />;
   }
 
   // Fallback for standard analog enclosure

@@ -37,6 +37,9 @@ import { RangemasterNode } from './boost/RangemasterNode';
 import { TcSparkMiniNode } from './boost/TcSparkMiniNode';
 import { XoticEpBoosterNode } from './boost/XoticEpBoosterNode';
 
+// Wah / Filter Nodes
+import { BossAw3Node } from './wah/BossAw3Node';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -501,6 +504,53 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       },
     ],
   },
+  // Category 6: Wah / Filter
+  'wah-boss-aw3': {
+    type: 'wah-boss-aw3',
+    name: 'BOSS AW-3 Dynamic Wah',
+    subtitle: 'Dynamic Envelope & Humanizer Wah',
+    category: 'wah',
+    chassisColor: '#c5a059',
+    accentColor: '#1a1a1a',
+    parameters: [
+      {
+        id: 'decay',
+        name: 'DECAY',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => v.toFixed(1),
+      },
+      {
+        id: 'manual',
+        name: 'MANUAL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.0,
+        formatValue: (v) => v.toFixed(1),
+      },
+      {
+        id: 'sens',
+        name: 'SENS',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 6.0,
+        formatValue: (v) => v.toFixed(1),
+      },
+      {
+        id: 'mode',
+        name: 'MODE',
+        min: 0,
+        max: 4,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => ['UP', 'DOWN', 'SHARP', 'HUMAN', 'TEMPO'][Math.round(v)] || 'UP',
+      },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -511,6 +561,10 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Wah / Filter
+    case 'wah-boss-aw3':
+      return new BossAw3Node(ctx, id, initialParams, enabled);
+
     // Boost
     case 'boost-mxr-microamp':
       return new MxrMicroAmpNode(ctx, id, initialParams, enabled);
