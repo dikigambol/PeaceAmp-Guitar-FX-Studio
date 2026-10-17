@@ -43,8 +43,10 @@ export function getPedalDimensions(type: string): { w: number; h: number } {
   const isFlatiron = type === 'fuzz-flatiron';
   const isHoof = type === 'fuzz-hoof';
   const isBossAw3 = type === 'wah-boss-aw3';
+  const isBossGe7 = type === 'eq-boss-ge7';
+  const isBossCh1 = type === 'chorus-boss-ch1';
 
-  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : isBossAw3 ? 248 : PEDAL_WIDTH;
+  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : (isBossAw3 || isBossGe7 || isBossCh1) ? 248 : PEDAL_WIDTH;
   const h = isMini ? 290 : 360;
   return { w, h };
 }
@@ -200,7 +202,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState<
-    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah'
+    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus'
   >('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
@@ -875,7 +877,11 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           ? 'fuzz sustainer big muff'
           : def.category === 'boost'
           ? 'boost clean treble rangemaster oc44 germanium bpc spark tc electronic mini xotic ep echoplex micro amp preamp volume'
-          : 'auto wah filter envelope dynamic humanizer boss aw3 vocal tempo touch wah';
+          : def.category === 'wah'
+          ? 'auto wah filter envelope dynamic humanizer boss aw3 vocal tempo touch wah'
+          : def.category === 'eq'
+          ? 'equalizer eq graphic 7-band boss ge7 tone boost cut level frequency gyrator'
+          : 'chorus bbd analog boss ce2 ch1 super chorus rate depth e level eq swirl rotary modulation ensemble lush warmth chime';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -906,6 +912,14 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const wahs = useMemo(
     () => filteredPedals.filter((p) => p.category === 'wah'),
+    [filteredPedals]
+  );
+  const eqs = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'eq'),
+    [filteredPedals]
+  );
+  const choruses = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'chorus'),
     [filteredPedals]
   );
 
@@ -1068,6 +1082,18 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                     onClick={() => setActiveCategoryTab('wah')}
                   >
                     Auto Wah ({availablePedals.filter((p) => p.category === 'wah').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'eq' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('eq')}
+                  >
+                    Equalizer ({availablePedals.filter((p) => p.category === 'eq').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'chorus' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('chorus')}
+                  >
+                    Chorus ({availablePedals.filter((p) => p.category === 'chorus').length})
                   </button>
                 </div>
 
@@ -1246,6 +1272,64 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                                 <div className="item-title-row">
                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge wah">AUTO WAH</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Equalizer */}
+                      {eqs.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag eq-tag">EQUALIZER</span>
+                            <span className="group-count">{eqs.length} pedals</span>
+                          </div>
+                          {eqs.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge eq">EQUALIZER</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Chorus */}
+                      {choruses.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag chorus-tag">CHORUS</span>
+                            <span className="group-count">{choruses.length} pedals</span>
+                          </div>
+                          {choruses.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge chorus">CHORUS</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>

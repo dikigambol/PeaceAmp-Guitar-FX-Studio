@@ -13,7 +13,7 @@ export interface PedalMetadata {
   type: string;
   name: string;
   subtitle: string;
-  category: 'dynamics' | 'eq' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'modulation' | 'time' | 'utility' | 'wah';
+  category: 'dynamics' | 'eq' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'chorus' | 'modulation' | 'time' | 'utility' | 'wah';
   chassisColor: string;
   accentColor: string;
   parameters: PedalParameterDef[];

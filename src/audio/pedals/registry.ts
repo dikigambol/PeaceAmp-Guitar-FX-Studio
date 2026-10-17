@@ -40,6 +40,15 @@ import { XoticEpBoosterNode } from './boost/XoticEpBoosterNode';
 // Wah / Filter Nodes
 import { BossAw3Node } from './wah/BossAw3Node';
 
+// Equalizer Nodes
+import { BossGe7Node } from './eq/BossGe7Node';
+
+// Chorus Nodes
+import { BossCe2Node } from './chorus/BossCe2Node';
+import { BossCh1Node } from './chorus/BossCh1Node';
+import { EhxSmallCloneNode } from './chorus/EhxSmallCloneNode';
+import { MxrAnalogChorusNode } from './chorus/MxrAnalogChorusNode';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -551,6 +560,183 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       },
     ],
   },
+  // Category: Equalizer
+  'eq-boss-ge7': {
+    type: 'eq-boss-ge7',
+    name: 'Boss GE-7 Equalizer',
+    subtitle: '7-Band Graphic Equalizer',
+    category: 'eq',
+    chassisColor: '#dcd4c0',
+    accentColor: '#d32f2f',
+    parameters: [
+      { id: 'band100', name: '100', min: -15, max: 15, step: 0.5, defaultValue: 0, unit: 'dB', formatValue: (v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB` },
+      { id: 'band200', name: '200', min: -15, max: 15, step: 0.5, defaultValue: 0, unit: 'dB', formatValue: (v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB` },
+      { id: 'band400', name: '400', min: -15, max: 15, step: 0.5, defaultValue: 0, unit: 'dB', formatValue: (v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB` },
+      { id: 'band800', name: '800', min: -15, max: 15, step: 0.5, defaultValue: 0, unit: 'dB', formatValue: (v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB` },
+      { id: 'band1600', name: '1.6k', min: -15, max: 15, step: 0.5, defaultValue: 0, unit: 'dB', formatValue: (v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB` },
+      { id: 'band3200', name: '3.2k', min: -15, max: 15, step: 0.5, defaultValue: 0, unit: 'dB', formatValue: (v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB` },
+      { id: 'band6400', name: '6.4k', min: -15, max: 15, step: 0.5, defaultValue: 0, unit: 'dB', formatValue: (v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB` },
+      { id: 'level', name: 'LEVEL', min: -15, max: 15, step: 0.5, defaultValue: 0, unit: 'dB', formatValue: (v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB` },
+    ],
+  },
+  // Category: Chorus
+  'chorus-boss-ce2': {
+    type: 'chorus-boss-ce2',
+    name: 'Boss CE-2 Chorus',
+    subtitle: 'Warm Analog BBD Chorus',
+    category: 'chorus',
+    chassisColor: '#4caac7',
+    accentColor: '#1a1a1a',
+    parameters: [
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.5,
+        formatValue: (v) => `${(0.3 + Math.pow(v / 10, 1.8) * 3.2).toFixed(2)} Hz`,
+      },
+      {
+        id: 'depth',
+        name: 'DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 6.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+    ],
+  },
+  'chorus-boss-ch1': {
+    type: 'chorus-boss-ch1',
+    name: 'Boss CH-1 Super Chorus',
+    subtitle: 'Bright Modern Stereo Chorus',
+    category: 'chorus',
+    chassisColor: '#8ba6c5',
+    accentColor: '#1a1a1a',
+    parameters: [
+      {
+        id: 'eLevel',
+        name: 'E. LEVEL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'eq',
+        name: 'EQ',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => (v < 4.8 ? 'LO' : v > 5.2 ? 'HI' : 'FLAT'),
+      },
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${(0.2 + Math.pow(v / 10, 1.8) * 4.3).toFixed(2)} Hz`,
+      },
+      {
+        id: 'depth',
+        name: 'DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 6.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+    ],
+  },
+  'chorus-ehx-smallclone': {
+    type: 'chorus-ehx-smallclone',
+    name: 'Electro-Harmonix Small Clone',
+    subtitle: 'Classic Analog Full-Chorus',
+    category: 'chorus',
+    chassisColor: '#2b2e35',
+    accentColor: '#3b288a',
+    parameters: [
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.0,
+        formatValue: (v) => `${(0.5 + Math.pow(v / 10, 1.7) * 5.8).toFixed(2)} Hz`,
+      },
+      {
+        id: 'depth',
+        name: 'DEPTH',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 1,
+        formatValue: (v) => (v >= 0.5 ? 'DEEP' : 'SUBTLE'),
+      },
+    ],
+  },
+  'chorus-mxr-analog': {
+    type: 'chorus-mxr-analog',
+    name: 'MXR Analog Chorus',
+    subtitle: 'Classic BBD Chorus with Dual EQ',
+    category: 'chorus',
+    chassisColor: '#0ea5e9',
+    accentColor: '#0f172a',
+    parameters: [
+      {
+        id: 'low',
+        name: 'LOW',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 8.0,
+        formatValue: (v) => (v >= 9.0 ? 'FLAT' : v <= 1.0 ? 'CUT' : `${v.toFixed(1)}`),
+      },
+      {
+        id: 'high',
+        name: 'HIGH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 8.0,
+        formatValue: (v) => (v >= 9.0 ? 'FLAT' : v <= 1.0 ? 'CUT' : `${v.toFixed(1)}`),
+      },
+      {
+        id: 'level',
+        name: 'LEVEL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 6.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.5,
+        formatValue: (v) => `${(0.2 + Math.pow(v / 10, 1.8) * 4.8).toFixed(2)} Hz`,
+      },
+      {
+        id: 'depth',
+        name: 'DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 6.5,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -561,6 +747,20 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Chorus
+    case 'chorus-boss-ce2':
+      return new BossCe2Node(ctx, id, initialParams, enabled);
+    case 'chorus-boss-ch1':
+      return new BossCh1Node(ctx, id, initialParams, enabled);
+    case 'chorus-ehx-smallclone':
+      return new EhxSmallCloneNode(ctx, id, initialParams, enabled);
+    case 'chorus-mxr-analog':
+      return new MxrAnalogChorusNode(ctx, id, initialParams, enabled);
+
+    // Equalizer
+    case 'eq-boss-ge7':
+      return new BossGe7Node(ctx, id, initialParams, enabled);
+
     // Wah / Filter
     case 'wah-boss-aw3':
       return new BossAw3Node(ctx, id, initialParams, enabled);

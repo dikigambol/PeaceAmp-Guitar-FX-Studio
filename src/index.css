@@ -5253,7 +5253,696 @@ body {
   letter-spacing: 0.5px !important;
 }
 
+/* BOSS GE-7 EQUALIZER ENCLOSURE (Vintage Bone/Cream Satin Enamel) */
+.pedal-boss-ge7 {
+  width: 248px !important;
+  max-width: 248px !important;
+  min-height: 360px !important;
+  background: linear-gradient(180deg, #e5decb 0%, #dbd3bf 35%, #cec5af 80%, #b8af9a 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+  padding: 10px 12px 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
 
+/* Symmetrical Side 1/4" Phone Jacks */
+.pedal-boss-ge7 .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-boss-ge7 .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-boss-ge7 .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Recessed Black Slider Control Cavity */
+.boss-ge7-cavity {
+  width: 100% !important;
+  background: #111417 !important;
+  border-radius: 5px !important;
+  border: 1.5px solid #232936 !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95), 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  padding: 6px 4px 6px 4px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+}
+
+/* CHECK LED Indicator in Upper Right of Cavity */
+.boss-ge7-check-led-wrap {
+  position: absolute !important;
+  top: 4px !important;
+  right: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+  z-index: 4 !important;
+}
+
+.boss-ge7-check-led-wrap .boss-check-led {
+  width: 7px !important;
+  height: 7px !important;
+}
+
+/* Top Zigzag Frequency Bracket */
+.boss-ge7-bracket-svg {
+  width: calc(100% - 24px) !important;
+  margin-left: 20px !important;
+  height: 8px !important;
+  margin-bottom: 2px !important;
+  opacity: 0.75 !important;
+}
+
+/* Sliders Area */
+.boss-ge7-sliders-area {
+  display: flex !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  height: 114px !important;
+  position: relative !important;
+}
+
+/* Left Scale Legend */
+.ge7-scale-legend {
+  width: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  padding: 12px 2px 2px 0 !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+}
+
+.ge7-scale-legend .scale-num {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6px !important;
+  font-weight: 700 !important;
+  color: #94a3b8 !important;
+  line-height: 1 !important;
+}
+
+.ge7-scale-legend .scale-dash {
+  width: 3px !important;
+  height: 1px !important;
+  background: rgba(148, 163, 184, 0.5) !important;
+}
+
+/* 7 EQ Bands Group */
+.ge7-eq-bands-group {
+  flex: 1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr) !important;
+  gap: 0 !important;
+  height: 100% !important;
+}
+
+/* Divider Line between EQ bands and Level */
+.ge7-divider-line {
+  width: 1px !important;
+  height: 94px !important;
+  background: rgba(255, 255, 255, 0.45) !important;
+  margin: 14px 3px 0 3px !important;
+}
+
+/* Level Slider Group */
+.ge7-level-group {
+  width: 24px !important;
+  height: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+/* Individual Slider Column */
+.ge7-slider-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.ge7-slider-label {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6px !important;
+  font-weight: 700 !important;
+  color: #f8fafc !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+  margin-bottom: 3px !important;
+  white-space: nowrap !important;
+  user-select: none !important;
+}
+
+.ge7-slider-track {
+  width: 16px !important;
+  height: 92px !important;
+  position: relative !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  touch-action: none !important;
+}
+
+.ge7-slider-groove {
+  width: 3px !important;
+  height: 100% !important;
+  background: #07090c !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 1), 0 0 1px rgba(255, 255, 255, 0.12) !important;
+  border-radius: 2px !important;
+  margin: 0 auto !important;
+}
+
+.ge7-center-zero-tick {
+  position: absolute !important;
+  left: 2px !important;
+  right: 2px !important;
+  top: 50% !important;
+  height: 1px !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+  transform: translateY(-50%) !important;
+  pointer-events: none !important;
+}
+
+/* Global Zero Horizontal Line */
+.ge7-global-zero-line {
+  position: absolute !important;
+  left: 20px !important;
+  right: 8px !important;
+  top: 73px !important;
+  height: 1px !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+/* Physical Boss Capsule Slider Thumb */
+.ge7-slider-thumb {
+  position: absolute !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: 13px !important;
+  height: 15px !important;
+  background: linear-gradient(180deg, #fdfbf7 0%, #ebe3d3 40%, #d8cfbc 100%) !important;
+  border-radius: 3px !important;
+  border: 0.8px solid #a89d87 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.9), inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 2px rgba(0, 0, 0, 0.25) !important;
+  cursor: grab !important;
+  z-index: 3 !important;
+  transition: filter 0.1s ease !important;
+}
+
+.ge7-slider-thumb:hover {
+  filter: brightness(1.05) !important;
+}
+
+.ge7-slider-thumb.active {
+  cursor: grabbing !important;
+  filter: brightness(1.1) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.95), 0 0 6px rgba(220, 38, 38, 0.5) !important;
+}
+
+.ge7-thumb-stripe {
+  position: absolute !important;
+  left: 1px !important;
+  right: 1px !important;
+  top: 50% !important;
+  height: 2px !important;
+  transform: translateY(-50%) !important;
+  background: #dc2626 !important;
+  box-shadow: 0 0 2px rgba(220, 38, 38, 0.7) !important;
+  border-radius: 1px !important;
+}
+
+/* Floating Tooltip */
+.ge7-slider-tooltip {
+  position: absolute !important;
+  top: -20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: #0f172a !important;
+  color: #38bdf8 !important;
+  font-family: monospace !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  padding: 1px 4px !important;
+  border-radius: 3px !important;
+  border: 1px solid #0284c7 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.8) !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+  z-index: 10 !important;
+}
+
+/* Middle Model Typography: Equalizer GE-7 */
+.boss-ge7-mid {
+  width: 100% !important;
+  margin: 8px 0 10px !important;
+}
+
+.boss-ge7-typography {
+  text-align: center !important;
+  margin: 6px 0 8px !important;
+  line-height: 1.15 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-ge7-equalizer {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: none !important;
+}
+
+.boss-ge7-model {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 1.5px !important;
+  margin-left: 70px !important;
+  margin-top: -2px !important;
+}
+
+/* Treadle Plate Footswitch */
+.pedal-boss-ge7 .boss-treadle-plate {
+  width: 100% !important;
+  height: 96px !important;
+  margin-top: auto !important;
+}
+
+/* BOSS CE-2 CHORUS ENCLOSURE (Vintage 1979 Sky Blue Enamel) */
+.pedal-boss-ce2 {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 330px !important;
+  background: linear-gradient(180deg, #60bedb 0%, #4daecb 35%, #3a9bb7 80%, #29839e 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+  padding: 10px 10px 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks */
+.pedal-boss-ce2 .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-boss-ce2 .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-boss-ce2 .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Top Painted Recessed Control Cavity (Matching Sky Blue) */
+.boss-ce2-cavity {
+  width: 100% !important;
+  background: linear-gradient(180deg, #53b4d1 0%, #45a7c4 50%, #3695b0 100%) !important;
+  border-radius: 5px !important;
+  border: 1.5px solid rgba(0, 0, 0, 0.3) !important;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45), 0 1px 1px rgba(255, 255, 255, 0.35) !important;
+  padding: 6px 8px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* CHECK LED with Label */
+.boss-ce2-check-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  margin-bottom: 2px !important;
+  cursor: pointer !important;
+}
+
+.boss-ce2-check-text {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  color: #0b151c !important;
+}
+
+/* 2 Knobs Row */
+.boss-ce2-knobs-row {
+  display: flex !important;
+  justify-content: space-around !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+}
+
+.boss-ce2-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+.boss-ce2-knob-wrapper {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.boss-ce2-knob-wrapper .boss-dot-tick {
+  position: absolute !important;
+  width: 3.5px !important;
+  height: 3.5px !important;
+  border-radius: 50% !important;
+  background: #0f1c24 !important;
+}
+
+.boss-ce2-knob-wrapper .dot-min {
+  left: -2px !important;
+  bottom: 6px !important;
+}
+
+.boss-ce2-knob-wrapper .dot-max {
+  right: -2px !important;
+  bottom: 6px !important;
+}
+
+.boss-ce2-knob-label {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  color: #0b151c !important;
+  margin-top: 3px !important;
+  text-transform: uppercase !important;
+}
+
+.boss-ce2-sub-val {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 700 !important;
+  color: #123040 !important;
+  line-height: 1 !important;
+}
+
+/* Middle Model Typography: Chorus CE-2 */
+.boss-ce2-mid {
+  width: 100% !important;
+  margin: 8px 0 10px !important;
+}
+
+.boss-ce2-typography {
+  text-align: center !important;
+  margin: 6px 0 8px !important;
+  line-height: 1.15 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-ce2-chorus {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #0b151c !important;
+  letter-spacing: 0.8px !important;
+  text-transform: none !important;
+}
+
+.boss-ce2-model {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  color: #0b151c !important;
+  letter-spacing: 1.5px !important;
+  margin-left: 60px !important;
+  margin-top: -1px !important;
+}
+
+/* Treadle Plate Footswitch */
+.pedal-boss-ce2 .boss-treadle-plate {
+  width: 100% !important;
+  height: 96px !important;
+  margin-top: auto !important;
+}
+
+/* BOSS CH-1 SUPER CHORUS ENCLOSURE (Metallic Ice-Blue Enamel) */
+.pedal-boss-ch1 {
+  width: 248px !important;
+  max-width: 248px !important;
+  min-height: 340px !important;
+  background: linear-gradient(180deg, #9db7d6 0%, #8ba6c5 35%, #7692b1 80%, #617d9c 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+  padding: 10px 12px 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks */
+.pedal-boss-ch1 .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-boss-ch1 .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-boss-ch1 .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Recessed Black Control Cavity Plate */
+.boss-ch1-cavity {
+  width: 100% !important;
+  background: #0f1216 !important;
+  border-radius: 5px !important;
+  border: 1.5px solid #232936 !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95), 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  padding: 6px 4px 6px 4px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* CHECK LED */
+.boss-ch1-check-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  margin-bottom: 2px !important;
+  cursor: pointer !important;
+}
+
+.boss-ch1-check-text {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  color: #94a3b8 !important;
+}
+
+/* 4 Knobs Grid */
+.boss-ch1-knobs-row {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  width: 100% !important;
+  gap: 0 !important;
+  align-items: start !important;
+  justify-items: center !important;
+  padding: 0 2px !important;
+  box-sizing: border-box !important;
+}
+
+.boss-ch1-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 2px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  text-align: center !important;
+}
+
+.boss-ch1-knob-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+  margin-bottom: 2px !important;
+}
+
+.boss-ch1-ticks-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2.5px !important;
+  width: 100% !important;
+  margin-top: 1px !important;
+}
+
+.boss-ch1-ticks-row .tick-dot {
+  width: 2.5px !important;
+  height: 2.5px !important;
+  border-radius: 50% !important;
+  background: #94a3b8 !important;
+}
+
+.boss-ch1-ticks-row .tick-text {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 5px !important;
+  font-weight: 700 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.2px !important;
+}
+
+/* Output B Stereo Badge on Plate */
+.boss-ch1-output-b-badge {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding-left: 6px !important;
+  margin-top: 4px !important;
+}
+
+.boss-ch1-output-b-badge span {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 700 !important;
+  color: #cbd5e1 !important;
+  letter-spacing: 0.3px !important;
+}
+
+.boss-ch1-output-b-badge .badge-box {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 9px !important;
+  height: 9px !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 900 !important;
+  border-radius: 1px !important;
+  line-height: 1 !important;
+}
+
+/* Middle Model Typography: SUPER Chorus CH-1 */
+.boss-ch1-mid {
+  width: 100% !important;
+  margin: 6px 0 8px !important;
+}
+
+.boss-ch1-io-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 0.4px !important;
+}
+
+.boss-ch1-io-left .badge-box {
+  background: #111827 !important;
+  color: #ffffff !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 1px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 7px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
+.boss-ch1-io-left .sub-mono {
+  font-size: 6px !important;
+  font-weight: 700 !important;
+  margin-left: 1px !important;
+  color: #1e293b !important;
+}
+
+.boss-ch1-typography {
+  text-align: center !important;
+  margin: 4px 0 6px !important;
+  line-height: 1.15 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-ch1-super {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 2.5px !important;
+  text-transform: uppercase !important;
+}
+
+.boss-ch1-chorus {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 0.8px !important;
+  margin-top: -2px !important;
+  text-transform: none !important;
+}
+
+.boss-ch1-model {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #111827 !important;
+  letter-spacing: 1.5px !important;
+  margin-left: 70px !important;
+  margin-top: -2px !important;
+}
+
+/* Treadle Plate Footswitch */
+.pedal-boss-ch1 .boss-treadle-plate {
+  width: 100% !important;
+  height: 96px !important;
+  margin-top: auto !important;
+}
 
 .boss-top-bar {
   width: 100%;
@@ -11680,3 +12369,595 @@ body {
   border-color: #38455e;
   color: #cbd5e1;
 }
+
+/* ==========================================================================
+   ELECTRO-HARMONIX SMALL CLONE CHORUS ENCLOSURE
+   Folded bent-steel chassis with satin black front, purple badge, and classic stomp switch
+   ========================================================================== */
+
+.pedal-small-clone {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 345px !important;
+  background: linear-gradient(90deg, #9ca3af 0%, #cbd5e1 3%, #141518 6%, #121316 94%, #cbd5e1 97%, #9ca3af 100%) !important;
+  border-top: 3px solid #cbd5e1 !important;
+  border-bottom: 4px solid #9ca3af !important;
+  border-left: 1px solid #6b7280 !important;
+  border-right: 1px solid #6b7280 !important;
+  border-radius: 6px !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.92),
+    inset 0 1px 2px rgba(255, 255, 255, 0.7),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6) !important;
+  padding: 4px 6px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+  user-select: none !important;
+}
+
+/* Side Jacks */
+.pedal-small-clone .stompbox-side-jack {
+  top: 48px !important;
+}
+.pedal-small-clone .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-small-clone .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Top bar with mini close button */
+.small-clone-top-bar {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  height: 14px !important;
+  padding: 0 2px !important;
+  margin-bottom: 2px !important;
+  z-index: 10 !important;
+}
+
+/* Main Inner Faceplate */
+.small-clone-faceplate {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #111215 !important;
+  border: 1px solid #23272f !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.8) !important;
+  position: relative !important;
+}
+
+/* Horizontal Engraved Seam Dividers */
+.small-clone-divider-groove {
+  width: 100% !important;
+  height: 2px !important;
+  background: #08090b !important;
+  border-top: 1px solid #1a1c22 !important;
+  border-bottom: 1px solid #282c35 !important;
+}
+
+/* SECTION 1: TOP CONTROL AREA */
+.small-clone-top-control {
+  width: 100% !important;
+  background: #141519 !important;
+  padding: 6px 4px 6px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+}
+
+/* Top Chassis Label Strip */
+.small-clone-io-labels {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 0 8px 4px !important;
+  box-sizing: border-box !important;
+}
+
+.small-clone-io-labels .io-lbl {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+}
+
+.small-clone-io-labels .io-output {
+  width: 48px !important;
+  text-align: left !important;
+}
+
+.small-clone-io-labels .io-power {
+  flex: 1 !important;
+  text-align: center !important;
+}
+
+.small-clone-io-labels .io-input {
+  width: 48px !important;
+  text-align: right !important;
+}
+
+/* Controls Row */
+.small-clone-controls-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 2px 8px !important;
+  box-sizing: border-box !important;
+}
+
+/* Left: DEPTH Switch Column */
+.small-clone-depth-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  gap: 3px !important;
+}
+
+.ehx-bracket-screw {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #94a3b8 60%, #475569 100%) !important;
+  border: 0.5px solid #1e293b !important;
+  position: relative !important;
+}
+
+.ehx-bracket-screw::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 15% !important;
+  right: 15% !important;
+  height: 0.8px !important;
+  background: #1e293b !important;
+  transform: translateY(-50%) rotate(45deg) !important;
+}
+
+.small-clone-switch-slot {
+  width: 13px !important;
+  height: 29px !important;
+  background: #08090b !important;
+  border-radius: 2px !important;
+  border: 1.5px solid #2d333b !important;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.95) !important;
+  position: relative !important;
+  cursor: pointer !important;
+}
+
+.small-clone-switch-bat {
+  width: 9px !important;
+  height: 13px !important;
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 45%, #64748b 100%) !important;
+  border-radius: 2px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.9) !important;
+  position: absolute !important;
+  left: 1px !important;
+  transition: top 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.small-clone-switch-slot.switch-up .small-clone-switch-bat {
+  top: 1px !important;
+}
+
+.small-clone-switch-slot.switch-down .small-clone-switch-bat {
+  top: 13px !important;
+}
+
+.switch-grooves {
+  width: 5px !important;
+  height: 5px !important;
+  border-top: 1px solid #475569 !important;
+  border-bottom: 1px solid #475569 !important;
+}
+
+/* Center: RATE Knob Column */
+.small-clone-rate-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 76px !important;
+  position: relative !important;
+}
+
+.small-clone-radial-dials {
+  width: 72px !important;
+  height: 68px !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.small-clone-radial-dials .radial-tick {
+  position: absolute !important;
+  width: 1.8px !important;
+  height: 4.5px !important;
+  background: #ffffff !important;
+  border-radius: 1px !important;
+  top: 50% !important;
+  left: 50% !important;
+  margin-top: -2.25px !important;
+  margin-left: -0.9px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  pointer-events: none !important;
+}
+
+/* Right: STATUS LED Column */
+.small-clone-status-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 44px !important;
+  cursor: pointer !important;
+}
+
+.small-clone-led-bezel {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 50%, #475569 100%) !important;
+  border: 1px solid #1e293b !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+}
+
+.small-clone-led {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #3f0e0e !important;
+  border: 0.5px solid #1c0505 !important;
+  transition: all 0.2s ease !important;
+}
+
+.small-clone-led.lit {
+  background: #ef4444 !important;
+  box-shadow:
+    0 0 8px #ef4444,
+    0 0 16px #dc2626,
+    inset 0 0 2px #ffffff !important;
+}
+
+/* Shared Labels Row: 100% Horizontal Alignment & Centering */
+.small-clone-labels-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 3px 8px 2px !important;
+  box-sizing: border-box !important;
+}
+
+.small-clone-labels-row .control-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  display: inline-block !important;
+}
+
+.small-clone-labels-row .lbl-depth {
+  width: 44px !important;
+  text-align: center !important;
+}
+
+.small-clone-labels-row .lbl-rate {
+  width: 76px !important;
+  text-align: center !important;
+}
+
+.small-clone-labels-row .lbl-status {
+  width: 44px !important;
+  text-align: center !important;
+}
+
+/* SECTION 2: MIDDLE RECESSED PANEL WITH PURPLE BADGE */
+.small-clone-middle-section {
+  width: 100% !important;
+  background: #111215 !important;
+  padding: 6px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+
+/* Purple Rounded Badge */
+.small-clone-purple-badge {
+  width: 100% !important;
+  background: radial-gradient(circle at 50% 35%, #2a1b7e 0%, #1d0f5c 70%, #150949 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-radius: 8px !important;
+  box-shadow:
+    inset 0 1px 3px rgba(255, 255, 255, 0.4),
+    0 4px 10px rgba(0, 0, 0, 0.85) !important;
+  padding: 10px 8px 10px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Typography in Badge */
+.small-clone-titles {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.title-small,
+.title-clone {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 23px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 2px !important;
+  line-height: 0.95 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: center !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8) !important;
+  text-transform: uppercase !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+.title-sub {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 1.2px !important;
+  margin-top: 5px !important;
+  margin-bottom: 6px !important;
+  text-transform: uppercase !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  text-align: center !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+/* Footswitch Container inside Badge (using ClassicStompSwitch like Klon Centaur) */
+.small-clone-footswitch-block {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+}
+
+/* SECTION 3: BOTTOM BRANDING */
+.small-clone-footer-brand {
+  width: 100% !important;
+  background: #141519 !important;
+  padding: 8px 10px 10px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+}
+
+.ehx-brand-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
+.ehx-brand-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 1.2px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+.ehx-brand-logo-box {
+  width: 12px !important;
+  height: 12px !important;
+  border: 1.5px solid #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 1px !important;
+  box-sizing: border-box !important;
+}
+
+.ehx-plug-crest {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  line-height: 1 !important;
+}
+
+.ehx-origin-usa {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 2px !important;
+  text-align: center !important;
+  width: 100% !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* ==========================================================================
+   MXR M234 ANALOG CHORUS ENCLOSURE
+   Matches authentic MXR stompbox chassis styling (Dyna Comp, Distortion+, Micro Amp)
+   ========================================================================== */
+
+.pedal-mxr-analog-chorus {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 350px !important;
+  background: radial-gradient(circle at 50% 20%, #38bdf8 0%, #0284c7 45%, #0369a1 80%, #075985 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.8) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 8px 12px 14px !important;
+  position: relative !important;
+  user-select: none !important;
+}
+
+/* Stamped Side Port Labels */
+.pedal-mxr-analog-chorus .mxr-side-label-left,
+.pedal-mxr-analog-chorus .mxr-side-label-right {
+  color: #082f49 !important;
+  top: 180px !important;
+}
+
+/* Row 1: LOW & HIGH DUAL EQ */
+.mxr-chorus-eq-row {
+  display: flex !important;
+  justify-content: space-around !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+.mxr-chorus-eq-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.mxr-eq-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 68px !important;
+  margin-bottom: 2px !important;
+}
+
+.mxr-eq-header .eq-sub {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 6px !important;
+  font-weight: 800 !important;
+  color: #082f49 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.mxr-eq-header .eq-title {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  color: #082f49 !important;
+  letter-spacing: 0.8px !important;
+}
+
+/* Row 2: LEVEL, RATE, DEPTH */
+.mxr-chorus-main-knobs {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  margin-top: 6px !important;
+  padding: 0 2px !important;
+  box-sizing: border-box !important;
+}
+
+.mxr-chorus-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+}
+
+.mxr-chorus-knob-col .mxr-knob-title {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  color: #082f49 !important;
+  text-align: center !important;
+}
+
+/* Status LED Bezel */
+.mxr-chorus-bezel-led {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #475569 0%, #1e293b 60%, #0f172a 100%) !important;
+  border: 1.5px solid #082f49 !important;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9) !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  margin: 4px auto 3px !important;
+}
+
+.mxr-chorus-bezel-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #38bdf8 40%, #0284c7 70%, #0c4a6e 100%) !important;
+  box-shadow: 0 0 10px #38bdf8, 0 0 20px rgba(56, 189, 248, 0.85) !important;
+}
+
+/* MXR Logo Box Styling */
+.pedal-mxr-analog-chorus .mxr-logo-box {
+  margin: 3px auto 5px !important;
+  border-color: #082f49 !important;
+}
+
+.pedal-mxr-analog-chorus .mxr-logo-text {
+  color: #082f49 !important;
+}
+
+/* Bottom Title: analog chorus */
+.mxr-chorus-bottom-title {
+  margin-top: 5px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  line-height: 0.92 !important;
+}
+
+.mxr-chorus-bottom-title span {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  color: #082f49 !important;
+  text-align: center !important;
+  text-transform: lowercase !important;
+}
+
+
+

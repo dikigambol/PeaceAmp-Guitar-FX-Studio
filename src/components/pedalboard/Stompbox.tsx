@@ -43,6 +43,15 @@ import { XoticEpBoosterPedal } from './boost/XoticEpBoosterPedal';
 // Wah / Filter Components
 import { BossAw3Pedal } from './wah/BossAw3Pedal';
 
+// Equalizer Components
+import { BossGe7Pedal } from './eq/BossGe7Pedal';
+
+// Chorus Components
+import { BossCe2Pedal } from './chorus/BossCe2Pedal';
+import { BossCh1Pedal } from './chorus/BossCh1Pedal';
+import { EhxSmallClonePedal } from './chorus/EhxSmallClonePedal';
+import { MxrAnalogChorusPedal } from './chorus/MxrAnalogChorusPedal';
+
 interface StompboxProps {
   instance: PedalInstance;
   metadata: PedalMetadata;
@@ -150,6 +159,20 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
     // Category 6: Wah / Filter
     case 'wah-boss-aw3':
       return <BossAw3Pedal {...props} />;
+
+    // Category 7: Equalizer
+    case 'eq-boss-ge7':
+      return <BossGe7Pedal {...props} />;
+
+    // Category 8: Chorus
+    case 'chorus-boss-ce2':
+      return <BossCe2Pedal {...props} />;
+    case 'chorus-boss-ch1':
+      return <BossCh1Pedal {...props} />;
+    case 'chorus-ehx-smallclone':
+      return <EhxSmallClonePedal {...props} />;
+    case 'chorus-mxr-analog':
+      return <MxrAnalogChorusPedal {...props} />;
   }
 
   // Fallback for standard analog enclosure
