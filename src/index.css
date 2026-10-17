@@ -2620,37 +2620,15 @@ body {
   border: 1px solid rgba(200, 166, 101, 0.35);
 }
 
-.comp-tag {
-  background: rgba(200, 166, 101, 0.15);
-  color: #c8a665;
-  border: 1px solid rgba(200, 166, 101, 0.35);
-}
-
-.od-tag {
-  background: rgba(200, 166, 101, 0.18);
-  color: #d4b476;
-  border: 1px solid rgba(200, 166, 101, 0.4);
-}
-
-.dist-tag {
-  background: rgba(200, 166, 101, 0.18);
-  color: #d4b476;
-  border: 1px solid rgba(200, 166, 101, 0.4);
-}
-
-.fuzz-tag {
-  background: rgba(200, 166, 101, 0.18);
-  color: #d4b476;
-  border: 1px solid rgba(200, 166, 101, 0.4);
-}
-
-.boost-tag {
-  background: rgba(200, 166, 101, 0.18);
-  color: #d4b476;
-  border: 1px solid rgba(200, 166, 101, 0.4);
-}
-
-.wah-tag {
+.comp-tag,
+.od-tag,
+.dist-tag,
+.fuzz-tag,
+.boost-tag,
+.wah-tag,
+.eq-tag,
+.chorus-tag,
+.delay-tag {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
@@ -2746,37 +2724,15 @@ body {
   border: 1px solid rgba(200, 166, 101, 0.35);
 }
 
-.item-pill-badge.comp {
-  background: rgba(200, 166, 101, 0.14);
-  color: #c8a665;
-  border: 1px solid rgba(200, 166, 101, 0.3);
-}
-
-.item-pill-badge.od {
-  background: rgba(200, 166, 101, 0.18);
-  color: #d4b476;
-  border: 1px solid rgba(200, 166, 101, 0.4);
-}
-
-.item-pill-badge.dist {
-  background: rgba(200, 166, 101, 0.18);
-  color: #d4b476;
-  border: 1px solid rgba(200, 166, 101, 0.4);
-}
-
-.item-pill-badge.fuzz {
-  background: rgba(200, 166, 101, 0.18);
-  color: #d4b476;
-  border: 1px solid rgba(200, 166, 101, 0.4);
-}
-
-.item-pill-badge.boost {
-  background: rgba(200, 166, 101, 0.18);
-  color: #d4b476;
-  border: 1px solid rgba(200, 166, 101, 0.4);
-}
-
-.item-pill-badge.wah {
+.item-pill-badge.comp,
+.item-pill-badge.od,
+.item-pill-badge.dist,
+.item-pill-badge.fuzz,
+.item-pill-badge.boost,
+.item-pill-badge.wah,
+.item-pill-badge.eq,
+.item-pill-badge.chorus,
+.item-pill-badge.delay {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
@@ -6777,6 +6733,12 @@ body {
   border: 1px solid #b83000;
 }
 
+.boss-deck-dm2 {
+  background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45), 0 1px 1px rgba(255, 255, 255, 0.25);
+  border: 1px solid #5c1414;
+}
+
 .boss-check-led-wrap {
   display: flex;
   flex-direction: column;
@@ -6963,6 +6925,99 @@ body {
 }
 
 .boss-ds1-model {
+  font-family: 'Michroma', sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: 1.2px;
+  margin-left: 44px;
+  margin-top: 1px;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Boss DM-2 Delay Enclosure (Vintage 1981 Crimson Red) */
+.pedal-boss-dm2 {
+  background: linear-gradient(180deg, #b91c1c 0%, #991b1b 50%, #7f1d1d 100%) !important;
+  border: 2px solid #5c1414 !important;
+}
+
+/* Symmetrical 3-knob triangular layout for Boss DM-2 (matching Boss SD-1 outer-edge alignment) */
+.pedal-boss-dm2 .boss-top-knobs-row {
+  width: 95% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+.pedal-boss-dm2 .boss-knob-unit {
+  width: 62px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+.pedal-boss-dm2 .boss-knob-dial-wrap {
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.pedal-boss-dm2 .boss-knob-label-bot {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.8px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.25px !important;
+  color: #111827 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  margin-top: 2px !important;
+  line-height: 1 !important;
+}
+
+.pedal-boss-dm2 .boss-bottom-knob-unit {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: -4px !important;
+  width: 100% !important;
+}
+
+.pedal-boss-dm2 .boss-bottom-knob-unit .boss-knob-label-top {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  color: #111827 !important;
+  margin-bottom: 2px !important;
+  text-align: center !important;
+}
+
+.boss-dm2-typography {
+  text-align: center;
+  margin: 4px 0 8px;
+  line-height: 1.1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boss-dm2-title {
+  font-family: 'Michroma', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: 0.8px;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.2);
+}
+
+.boss-dm2-model {
   font-family: 'Michroma', sans-serif;
   font-size: 14.5px;
   font-weight: 800;
@@ -12947,9 +13002,7 @@ body {
   flex-direction: column !important;
   align-items: center !important;
   line-height: 0.92 !important;
-}
-
-.mxr-chorus-bottom-title span {
+}.mxr-chorus-bottom-title span {
   font-family: var(--font-ui), sans-serif !important;
   font-size: 16px !important;
   font-weight: 700 !important;
@@ -12958,6 +13011,433 @@ body {
   text-align: center !important;
   text-transform: lowercase !important;
 }
+
+/* ==========================================================================
+   2. MXR CARBON COPY ANALOG DELAY (M169)
+   ========================================================================== */
+.pedal-mxr-carbon-copy {
+  width: 200px !important;
+  max-width: 200px !important;
+  min-height: 330px !important;
+  background: radial-gradient(circle at 50% 25%, #0d4231 0%, #082d21 45%, #051e16 80%, #03140e 100%) !important;
+  border: 1.5px solid #0c4d38 !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.9),
+    inset 0 1px 2px rgba(110, 231, 183, 0.25) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 8px 10px 14px !important;
+  position: relative !important;
+  user-select: none !important;
+}
+
+/* Side 1/4" Phone Jacks aligned to JACK_Y_OFFSET = 57 */
+.pedal-mxr-carbon-copy .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-mxr-carbon-copy .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-mxr-carbon-copy .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Stamped Side Port Labels */
+.pedal-mxr-carbon-copy .mxr-side-label-left,
+.pedal-mxr-carbon-copy .mxr-side-label-right {
+  color: #f1f5f9 !important;
+  top: 180px !important;
+}
+
+/* MOD Button & Indicator LED (Top Left) */
+.mxr-cc-mod-section {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  padding-left: 4px;
+  margin-top: -2px;
+  margin-bottom: 2px;
+}
+
+.mxr-cc-mod-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #092017;
+  border: 1px solid #144030;
+  border-radius: 12px;
+  padding: 2.5px 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.7), 0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+.mxr-cc-mod-btn:hover {
+  border-color: #38bdf8;
+}
+
+.mxr-cc-mod-btn.active {
+  background: #0d2f23;
+  border-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.4), inset 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.mxr-cc-mod-led {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  background: #0f2b38;
+  border: 1px solid #1e4a5d;
+  transition: all 0.15s ease;
+}
+
+.mxr-cc-mod-led.lit {
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8, 0 0 12px rgba(56, 189, 248, 0.9);
+}
+
+.mxr-cc-mod-label {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #f1f5f9;
+}
+
+/* 3 Knobs Formation: REGEN (L) & MIX (R) on top, DELAY centered lower */
+.mxr-cc-top-knobs {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding: 0 8px !important;
+  box-sizing: border-box !important;
+  margin-top: 2px !important;
+}
+
+.mxr-cc-center-knob {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+}
+
+.pedal-mxr-carbon-copy .mxr-knob-title {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  color: #f1f5f9 !important;
+  text-align: center !important;
+  margin-top: 2px !important;
+}
+
+/* Center Blue Status LED & MXR Logo */
+.mxr-cc-bezel-led {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #475569 0%, #1e293b 60%, #0f172a 100%) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9) !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  margin: 4px auto 3px !important;
+}
+
+.mxr-cc-bezel-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #38bdf8 40%, #0284c7 70%, #0c4a6e 100%) !important;
+  box-shadow: 0 0 10px #38bdf8, 0 0 20px rgba(56, 189, 248, 0.9) !important;
+}
+
+.pedal-mxr-carbon-copy .mxr-logo-box {
+  margin: 3px auto 5px !important;
+  border-color: #f1f5f9 !important;
+}
+
+.pedal-mxr-carbon-copy .mxr-logo-text {
+  color: #f1f5f9 !important;
+}
+
+/* Bottom Title: carbon copy analog delay */
+.mxr-cc-bottom-title {
+  margin-top: 5px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  line-height: 0.95 !important;
+}
+
+.mxr-cc-bottom-title .mxr-cc-model {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  color: #f1f5f9 !important;
+  text-transform: lowercase !important;
+}
+
+.mxr-cc-bottom-title .mxr-cc-sub {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 8.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  color: #f1f5f9 !important;
+  text-transform: uppercase !important;
+  margin-top: 2px !important;
+}
+
+/* ==========================================================================
+   3. TC ELECTRONIC GAUSS TAPE ECHO
+   ========================================================================== */
+.pedal-tc-gauss {
+  width: 200px !important;
+  max-width: 200px !important;
+  min-height: 330px !important;
+  background: linear-gradient(180deg, #2b3d35 0%, #24352e 40%, #1e2c26 80%, #17241f 100%) !important;
+  border: 1.5px solid #14201a !important;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.9),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
+  padding: 6px 8px 12px !important;
+  position: relative !important;
+  user-select: none !important;
+}
+
+/* Outer Brushed Aluminum Side Bezels */
+.tc-gauss-bezel-left,
+.tc-gauss-bezel-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3.5px;
+  background: linear-gradient(180deg, #889e94 0%, #586e64 50%, #40544c 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.tc-gauss-bezel-left {
+  left: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.tc-gauss-bezel-right {
+  right: 0;
+  border-left: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+/* Side 1/4" Phone Jacks aligned to JACK_Y_OFFSET = 57 */
+.pedal-tc-gauss .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-tc-gauss .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-tc-gauss .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Inner Frame */
+.tc-gauss-inner-frame {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #4a6256;
+  border-radius: 6px;
+  padding: 4px 6px 6px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* Header Bar: tc electronic logo + Red LED */
+.tc-gauss-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1px;
+  margin-bottom: 2px;
+  gap: 2px;
+}
+
+.tc-gauss-brand {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.4px;
+  color: #d1ded7;
+  text-transform: lowercase;
+}
+
+.tc-gauss-led-wrap {
+  cursor: pointer;
+  padding: 1px;
+}
+
+.tc-gauss-led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #4a0d0d;
+  border: 1.5px solid #1e2c26;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  transition: all 0.15s ease;
+}
+
+.tc-gauss-led.lit {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444, 0 0 16px rgba(239, 68, 68, 0.85);
+}
+
+/* Row 1: DELAY (L) & VOLUME (R) */
+.tc-gauss-top-knobs {
+  display: flex;
+  justify-content: space-between;
+  width: 94%;
+  margin-top: 2px;
+}
+
+.tc-gauss-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tc-gauss-knob-title {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #a4bab0;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+}
+
+/* Row 2: SUSTAIN (Center) & MOD Slide Switch (Right) */
+.tc-gauss-mid-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 96%;
+  margin-top: 2px;
+}
+
+.tc-gauss-mid-spacer {
+  width: 28px;
+}
+
+.tc-gauss-sustain-col {
+  margin-left: 10px;
+}
+
+/* MOD Slide Switch */
+.tc-gauss-mod-switch-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5px;
+  cursor: pointer;
+  padding: 2px;
+  width: 32px;
+}
+
+.mod-pos-label {
+  font-family: var(--font-ui), sans-serif;
+  font-size: 6px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #6b8277;
+  transition: color 0.15s ease;
+}
+
+.mod-pos-label.active {
+  color: #f1f5f9;
+}
+
+.tc-gauss-slider-slot {
+  width: 14px;
+  height: 26px;
+  background: #0f1814;
+  border: 1px solid #2f4339;
+  border-radius: 3px;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.tc-gauss-slider-knob {
+  width: 12px;
+  height: 11px;
+  background: linear-gradient(180deg, #374740 0%, #1a2420 100%);
+  border: 1px solid #587064;
+  border-radius: 2px;
+  position: absolute;
+  left: 0px;
+  transition: top 0.12s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.tc-gauss-slider-slot.pos-on .tc-gauss-slider-knob {
+  top: 1px;
+}
+
+.tc-gauss-slider-slot.pos-off .tc-gauss-slider-knob {
+  top: 12px;
+}
+
+/* GAUSS Tape Echo Circle Badge */
+.tc-gauss-badge-wrap {
+  width: 82px;
+  height: 82px;
+  margin: 2px auto 2px;
+}
+
+.tc-gauss-badge-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Bottom Footswitch Section with Speed Stripes */
+.tc-gauss-bottom-section {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.tc-gauss-stripes {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(104, 132, 120, 0.35) 3px,
+    rgba(104, 132, 120, 0.35) 4px
+  );
+  pointer-events: none;
+}
+
+.tc-gauss-footswitch-wrap {
+  position: relative;
+  z-index: 2;
+}
+
+
 
 
 

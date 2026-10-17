@@ -51,6 +51,9 @@ import { BossCe2Pedal } from './chorus/BossCe2Pedal';
 import { BossCh1Pedal } from './chorus/BossCh1Pedal';
 import { EhxSmallClonePedal } from './chorus/EhxSmallClonePedal';
 import { MxrAnalogChorusPedal } from './chorus/MxrAnalogChorusPedal';
+import { BossDm2Pedal } from './delay/BossDm2Pedal';
+import { MxrCarbonCopyPedal } from './delay/MxrCarbonCopyPedal';
+import { TcGaussTapeEchoPedal } from './delay/TcGaussTapeEchoPedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -173,6 +176,14 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <EhxSmallClonePedal {...props} />;
     case 'chorus-mxr-analog':
       return <MxrAnalogChorusPedal {...props} />;
+
+    // Category 14: Delay
+    case 'delay-boss-dm2':
+      return <BossDm2Pedal {...props} />;
+    case 'delay-mxr-carbon-copy':
+      return <MxrCarbonCopyPedal {...props} />;
+    case 'delay-tce-gauss':
+      return <TcGaussTapeEchoPedal {...props} />;
   }
 
   // Fallback for standard analog enclosure

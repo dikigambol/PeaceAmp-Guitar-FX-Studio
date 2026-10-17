@@ -49,6 +49,11 @@ import { BossCh1Node } from './chorus/BossCh1Node';
 import { EhxSmallCloneNode } from './chorus/EhxSmallCloneNode';
 import { MxrAnalogChorusNode } from './chorus/MxrAnalogChorusNode';
 
+// Delay Nodes
+import { BossDm2Node } from './delay/BossDm2Node';
+import { MxrCarbonCopyNode } from './delay/MxrCarbonCopyNode';
+import { TcGaussTapeEchoNode } from './delay/TcGaussTapeEchoNode';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -737,6 +742,135 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       },
     ],
   },
+  'delay-boss-dm2': {
+    type: 'delay-boss-dm2',
+    name: 'Boss DM-2 Delay',
+    subtitle: '1981 Vintage BBD Analog Delay',
+    category: 'delay',
+    chassisColor: '#b91c1c',
+    accentColor: '#1a1a1a',
+    parameters: [
+      {
+        id: 'repeatRate',
+        name: 'REPEAT RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.5,
+        formatValue: (v) => `${Math.round(80 + (v / 10) * 250)} ms`,
+      },
+      {
+        id: 'intensity',
+        name: 'INTENSITY',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.0,
+        formatValue: (v) => (v >= 9.5 ? 'RUNAWAY' : v.toFixed(1)),
+      },
+      {
+        id: 'echo',
+        name: 'ECHO',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+    ],
+  },
+  'delay-mxr-carbon-copy': {
+    type: 'delay-mxr-carbon-copy',
+    name: 'MXR Carbon Copy',
+    subtitle: 'M169 Analog BBD Delay with Modulation',
+    category: 'delay',
+    chassisColor: '#082d21',
+    accentColor: '#38bdf8',
+    parameters: [
+      {
+        id: 'regen',
+        name: 'REGEN',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.5,
+        formatValue: (v) => (v >= 9.5 ? 'RUNAWAY' : v.toFixed(1)),
+      },
+      {
+        id: 'mix',
+        name: 'MIX',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'delay',
+        name: 'DELAY',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round(40 + (v / 10) * 560)} ms`,
+      },
+      {
+        id: 'mod',
+        name: 'MODULATION',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v >= 0.5 ? 'ON' : 'OFF'),
+      },
+    ],
+  },
+  'delay-tce-gauss': {
+    type: 'delay-tce-gauss',
+    name: 'TC Electronic Gauss Tape Echo',
+    subtitle: 'Vintage Magnetic Tape Echo with Wow & Flutter',
+    category: 'delay',
+    chassisColor: '#273b33',
+    accentColor: '#ef4444',
+    parameters: [
+      {
+        id: 'delay',
+        name: 'DELAY',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.5,
+        formatValue: (v) => `${Math.round(50 + (v / 10) * 450)} ms`,
+      },
+      {
+        id: 'sustain',
+        name: 'SUSTAIN',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.0,
+        formatValue: (v) => (v >= 9.2 ? 'RUNAWAY' : v.toFixed(1)),
+      },
+      {
+        id: 'volume',
+        name: 'VOLUME',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'mod',
+        name: 'MODULATION',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v >= 0.5 ? 'ON' : 'OFF'),
+      },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -747,6 +881,14 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Delay
+    case 'delay-boss-dm2':
+      return new BossDm2Node(ctx, id, initialParams, enabled);
+    case 'delay-mxr-carbon-copy':
+      return new MxrCarbonCopyNode(ctx, id, initialParams, enabled);
+    case 'delay-tce-gauss':
+      return new TcGaussTapeEchoNode(ctx, id, initialParams, enabled);
+
     // Chorus
     case 'chorus-boss-ce2':
       return new BossCe2Node(ctx, id, initialParams, enabled);

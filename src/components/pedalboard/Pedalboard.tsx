@@ -202,7 +202,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState<
-    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus'
+    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus' | 'delay'
   >('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
@@ -881,7 +881,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           ? 'auto wah filter envelope dynamic humanizer boss aw3 vocal tempo touch wah'
           : def.category === 'eq'
           ? 'equalizer eq graphic 7-band boss ge7 tone boost cut level frequency gyrator'
-          : 'chorus bbd analog boss ce2 ch1 super chorus rate depth e level eq swirl rotary modulation ensemble lush warmth chime';
+          : def.category === 'chorus'
+          ? 'chorus bbd analog boss ce2 ch1 super chorus rate depth e level eq swirl rotary modulation ensemble lush warmth chime'
+          : 'delay echo analog bbd boss dm2 mn3005 mxr carbon copy m169 regen mix mod modulation shimmer repeats tape ambient space tc electronic gauss tape echo delay-boss-dm2 delay-mxr-carbon-copy delay-tce-gauss';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -920,6 +922,10 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const choruses = useMemo(
     () => filteredPedals.filter((p) => p.category === 'chorus'),
+    [filteredPedals]
+  );
+  const delays = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'delay'),
     [filteredPedals]
   );
 
@@ -1094,6 +1100,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                     onClick={() => setActiveCategoryTab('chorus')}
                   >
                     Chorus ({availablePedals.filter((p) => p.category === 'chorus').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'delay' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('delay')}
+                  >
+                    Delay ({availablePedals.filter((p) => p.category === 'delay').length})
                   </button>
                 </div>
 
@@ -1330,6 +1342,35 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                                 <div className="item-title-row">
                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge chorus">CHORUS</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Delay */}
+                      {delays.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag delay-tag">DELAY</span>
+                            <span className="group-count">{delays.length} pedals</span>
+                          </div>
+                          {delays.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge delay">DELAY</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>
