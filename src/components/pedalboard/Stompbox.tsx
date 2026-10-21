@@ -54,6 +54,11 @@ import { MxrAnalogChorusPedal } from './chorus/MxrAnalogChorusPedal';
 import { BossDm2Pedal } from './delay/BossDm2Pedal';
 import { MxrCarbonCopyPedal } from './delay/MxrCarbonCopyPedal';
 import { TcGaussTapeEchoPedal } from './delay/TcGaussTapeEchoPedal';
+import { BossBf2Pedal } from './flanger/BossBf2Pedal';
+import { EhxElectricMistressPedal } from './flanger/EhxElectricMistressPedal';
+import { MxrFlangerPedal } from './flanger/MxrFlangerPedal';
+import { EhxSmallStonePedal } from './phaser/EhxSmallStonePedal';
+import { MxrPhase90Pedal } from './phaser/MxrPhase90Pedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -184,6 +189,20 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <MxrCarbonCopyPedal {...props} />;
     case 'delay-tce-gauss':
       return <TcGaussTapeEchoPedal {...props} />;
+
+    // Category 15: Flanger
+    case 'flanger-boss-bf2':
+      return <BossBf2Pedal {...props} />;
+    case 'flanger-ehx-electric-mistress':
+      return <EhxElectricMistressPedal {...props} />;
+    case 'flanger-mxr':
+      return <MxrFlangerPedal {...props} />;
+
+    // Category 16: Phaser
+    case 'phaser-ehx-smallstone':
+      return <EhxSmallStonePedal {...props} />;
+    case 'phaser-mxr-phase90':
+      return <MxrPhase90Pedal {...props} />;
   }
 
   // Fallback for standard analog enclosure

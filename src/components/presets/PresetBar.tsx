@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import type { PresetSchema } from '../../types/preset';
-import { Bookmark, Download, Upload, Plus, Trash2, Check, Save, Pencil, X } from 'lucide-react';
+import { Bookmark, Download, Upload, Plus, Trash2, Check, Save, Pencil } from 'lucide-react';
 
 interface PresetBarProps {
   presets: PresetSchema[];

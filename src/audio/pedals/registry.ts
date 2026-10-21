@@ -54,6 +54,15 @@ import { BossDm2Node } from './delay/BossDm2Node';
 import { MxrCarbonCopyNode } from './delay/MxrCarbonCopyNode';
 import { TcGaussTapeEchoNode } from './delay/TcGaussTapeEchoNode';
 
+// Flanger Nodes
+import { BossBf2Node } from './flanger/BossBf2Node';
+import { EhxElectricMistressNode } from './flanger/EhxElectricMistressNode';
+import { MxrFlangerNode } from './flanger/MxrFlangerNode';
+
+// Phaser Nodes
+import { EhxSmallStoneNode } from './phaser/EhxSmallStoneNode';
+import { MxrPhase90Node } from './phaser/MxrPhase90Node';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -871,6 +880,184 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       },
     ],
   },
+  'flanger-boss-bf2': {
+    type: 'flanger-boss-bf2',
+    name: 'Boss BF-2 Flanger',
+    subtitle: '1980 Vintage BBD Analog Flanger',
+    category: 'flanger',
+    chassisColor: '#83276b',
+    accentColor: '#1a1a1a',
+    parameters: [
+      {
+        id: 'manual',
+        name: 'MANUAL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${(2.2 + (v / 10) * 5.8).toFixed(1)} ms`,
+      },
+      {
+        id: 'depth',
+        name: 'DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 2.8,
+        formatValue: (v) => `${(0.08 * Math.pow(56, v / 10)).toFixed(2)} Hz`,
+      },
+      {
+        id: 'res',
+        name: 'RESONANCE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 3.5,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+    ],
+  },
+  'flanger-ehx-electric-mistress': {
+    type: 'flanger-ehx-electric-mistress',
+    name: 'EHX Stereo Electric Mistress',
+    subtitle: 'Flanger & Chorus Modulation',
+    category: 'flanger',
+    chassisColor: '#c8cbd0',
+    accentColor: '#e6007e',
+    parameters: [
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 3.5,
+        formatValue: (v) => `${(0.05 * Math.pow(90, v / 10)).toFixed(2)} Hz`,
+      },
+      {
+        id: 'flangerDepth',
+        name: 'FLANGER DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'chorusDepth',
+        name: 'CHORUS DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+    ],
+  },
+  'flanger-mxr': {
+    type: 'flanger-mxr',
+    name: 'MXR M117R Flanger',
+    subtitle: 'Classic Analog BBD Flanger',
+    category: 'flanger',
+    chassisColor: '#383d44',
+    accentColor: '#ffffff',
+    parameters: [
+      {
+        id: 'manual',
+        name: 'MANUAL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${(0.4 + (v / 10) * 3.8).toFixed(1)} ms`,
+      },
+      {
+        id: 'width',
+        name: 'WIDTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 6.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'speed',
+        name: 'SPEED',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 3.0,
+        formatValue: (v) => `${(0.04 * Math.pow(87.5, v / 10)).toFixed(2)} Hz`,
+      },
+      {
+        id: 'regen',
+        name: 'REGEN.',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+    ],
+  },
+
+  // Category: Phaser
+  'phaser-ehx-smallstone': {
+    type: 'phaser-ehx-smallstone',
+    name: 'EHX Nano Small Stone',
+    subtitle: 'Classic 4-Stage OTA Phase Shifter',
+    category: 'phaser',
+    chassisColor: '#d1d5db',
+    accentColor: '#cf5627',
+    parameters: [
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 3.5,
+        formatValue: (v) => `${(0.08 * Math.pow(81.25, v / 10)).toFixed(2)} Hz`,
+      },
+      {
+        id: 'color',
+        name: 'COLOR',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v >= 0.5 ? 'DEEP' : 'WARM'),
+      },
+    ],
+  },
+  'phaser-mxr-phase90': {
+    type: 'phaser-mxr-phase90',
+    name: 'MXR Phase 90',
+    subtitle: 'Classic 4-Stage JFET Phase Shifter',
+    category: 'phaser',
+    chassisColor: '#f97316',
+    accentColor: '#000000',
+    parameters: [
+      {
+        id: 'speed',
+        name: 'SPEED',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.0,
+        formatValue: (v) => `${(0.10 * Math.pow(52, v / 10)).toFixed(2)} Hz`,
+      },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -881,6 +1068,20 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Flanger
+    case 'flanger-boss-bf2':
+      return new BossBf2Node(ctx, id, initialParams, enabled);
+    case 'flanger-ehx-electric-mistress':
+      return new EhxElectricMistressNode(ctx, id, initialParams, enabled);
+    case 'flanger-mxr':
+      return new MxrFlangerNode(ctx, id, initialParams, enabled);
+
+    // Phaser
+    case 'phaser-ehx-smallstone':
+      return new EhxSmallStoneNode(ctx, id, initialParams, enabled);
+    case 'phaser-mxr-phase90':
+      return new MxrPhase90Node(ctx, id, initialParams, enabled);
+
     // Delay
     case 'delay-boss-dm2':
       return new BossDm2Node(ctx, id, initialParams, enabled);

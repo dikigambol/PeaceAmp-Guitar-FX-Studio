@@ -71,6 +71,7 @@ export class AudioEngine {
     model: '4x12-closed',
     mic: 'sm57',
     position: 0.5,
+    distance: 0.15,
     mix: 1.0,
     level: 0,
   };

@@ -2628,7 +2628,8 @@ body {
 .wah-tag,
 .eq-tag,
 .chorus-tag,
-.delay-tag {
+.delay-tag,
+.flanger-tag {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
@@ -2732,7 +2733,9 @@ body {
 .item-pill-badge.wah,
 .item-pill-badge.eq,
 .item-pill-badge.chorus,
-.item-pill-badge.delay {
+.item-pill-badge.delay,
+.item-pill-badge.flanger,
+.item-pill-badge.phaser {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
@@ -4978,17 +4981,17 @@ body {
   padding-bottom: 8px;
 }
 
-/* BOSS AW-3 DYNAMIC WAH ENCLOSURE (Symmetrical & Spacious 4-Knob Layout) */
+/* BOSS AW-3 DYNAMIC WAH ENCLOSURE (Standardized Boss SD-1 Form Factor) */
 .pedal-boss-aw3 {
-  width: 248px !important;
-  max-width: 248px !important;
-  min-height: 332px !important;
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 330px !important;
   background: linear-gradient(180deg, #dfd3ac 0%, #cfbf92 40%, #baaa79 80%, #9e8e60 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.45) !important;
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.88),
     inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
-  padding: 10px 12px 14px !important;
+  padding: 8px 10px 14px !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -5194,7 +5197,7 @@ body {
 /* Treadle Plate Footswitch */
 .pedal-boss-aw3 .boss-treadle-plate {
   width: 100% !important;
-  height: 96px !important;
+  height: 85px !important;
   margin-top: auto !important;
 }
 
@@ -5209,17 +5212,17 @@ body {
   letter-spacing: 0.5px !important;
 }
 
-/* BOSS GE-7 EQUALIZER ENCLOSURE (Vintage Bone/Cream Satin Enamel) */
+/* BOSS GE-7 EQUALIZER ENCLOSURE (Extra Wide for 7-Band Graphic Sliders + Level) */
 .pedal-boss-ge7 {
   width: 248px !important;
   max-width: 248px !important;
-  min-height: 360px !important;
+  min-height: 330px !important;
   background: linear-gradient(180deg, #e5decb 0%, #dbd3bf 35%, #cec5af 80%, #b8af9a 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.45) !important;
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.88),
     inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
-  padding: 10px 12px 14px !important;
+  padding: 8px 10px 14px !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -5496,7 +5499,7 @@ body {
 /* Treadle Plate Footswitch */
 .pedal-boss-ge7 .boss-treadle-plate {
   width: 100% !important;
-  height: 96px !important;
+  height: 85px !important;
   margin-top: auto !important;
 }
 
@@ -5658,21 +5661,21 @@ body {
 /* Treadle Plate Footswitch */
 .pedal-boss-ce2 .boss-treadle-plate {
   width: 100% !important;
-  height: 96px !important;
+  height: 85px !important;
   margin-top: auto !important;
 }
 
-/* BOSS CH-1 SUPER CHORUS ENCLOSURE (Metallic Ice-Blue Enamel) */
+/* BOSS CH-1 SUPER CHORUS ENCLOSURE (Standardized Boss SD-1 Form Factor) */
 .pedal-boss-ch1 {
-  width: 248px !important;
-  max-width: 248px !important;
-  min-height: 340px !important;
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 330px !important;
   background: linear-gradient(180deg, #9db7d6 0%, #8ba6c5 35%, #7692b1 80%, #617d9c 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.45) !important;
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.88),
     inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
-  padding: 10px 12px 14px !important;
+  padding: 8px 10px 14px !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -5896,7 +5899,7 @@ body {
 /* Treadle Plate Footswitch */
 .pedal-boss-ch1 .boss-treadle-plate {
   width: 100% !important;
-  height: 96px !important;
+  height: 85px !important;
   margin-top: auto !important;
 }
 
@@ -6813,6 +6816,70 @@ body {
   letter-spacing: 0.6px;
   color: #111827;
   margin-bottom: 1px;
+}
+
+/* ==========================================================================
+   UNIFIED BOSS PEDAL SYSTEM (ALL STANDARDIZED TO BOSS SD-1 ENCLOSURE SPECS)
+   ========================================================================== */
+.pedal-boss-sd1,
+.pedal-boss-od3,
+.pedal-boss-bd2,
+.pedal-boss-ds1,
+.pedal-boss-hm2,
+.pedal-boss-mt2,
+.pedal-boss-bf2,
+.pedal-boss-ce2,
+.pedal-boss-ch1,
+.pedal-boss-dm2,
+.pedal-boss-cs3,
+.pedal-boss-aw3 {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 330px !important;
+  border-radius: 9px !important;
+  padding: 8px 10px 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side Phone Jacks aligned across all Boss pedals */
+.pedal-boss-sd1 .stompbox-side-jack,
+.pedal-boss-od3 .stompbox-side-jack,
+.pedal-boss-bd2 .stompbox-side-jack,
+.pedal-boss-ds1 .stompbox-side-jack,
+.pedal-boss-hm2 .stompbox-side-jack,
+.pedal-boss-mt2 .stompbox-side-jack,
+.pedal-boss-bf2 .stompbox-side-jack,
+.pedal-boss-ce2 .stompbox-side-jack,
+.pedal-boss-ch1 .stompbox-side-jack,
+.pedal-boss-dm2 .stompbox-side-jack,
+.pedal-boss-cs3 .stompbox-side-jack,
+.pedal-boss-ge7 .stompbox-side-jack,
+.pedal-boss-aw3 .stompbox-side-jack {
+  top: 46px !important;
+}
+
+/* Standardized Boss Treadle Plate Footplate (matching Boss SD-1 85px) */
+.pedal-boss-sd1 .boss-treadle-plate,
+.pedal-boss-od3 .boss-treadle-plate,
+.pedal-boss-bd2 .boss-treadle-plate,
+.pedal-boss-ds1 .boss-treadle-plate,
+.pedal-boss-hm2 .boss-treadle-plate,
+.pedal-boss-mt2 .boss-treadle-plate,
+.pedal-boss-bf2 .boss-treadle-plate,
+.pedal-boss-ce2 .boss-treadle-plate,
+.pedal-boss-ch1 .boss-treadle-plate,
+.pedal-boss-dm2 .boss-treadle-plate,
+.pedal-boss-cs3 .boss-treadle-plate,
+.pedal-boss-ge7 .boss-treadle-plate,
+.pedal-boss-aw3 .boss-treadle-plate {
+  width: 100% !important;
+  height: 85px !important;
+  margin-top: auto !important;
 }
 
 /* Specific Boss Enclosures */
@@ -13436,6 +13503,1229 @@ body {
   position: relative;
   z-index: 2;
 }
+
+/* ==========================================================================
+   FLANGER PEDALS
+   1. BOSS BF-2 FLANGER (Iconic Vintage 1980 Purple / Violet Enclosure)
+   ========================================================================== */
+.pedal-boss-bf2 {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 330px !important;
+  background: linear-gradient(180deg, #99236d 0%, #7e1757 50%, #630f43 100%) !important;
+  border: 2px solid #4a0931 !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3) !important;
+  padding: 8px 10px 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks aligned to JACK_Y_OFFSET = 57 */
+.pedal-boss-bf2 .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-boss-bf2 .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-boss-bf2 .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Boss BF-2 Recessed Purple Control Deck (Matching Boss CE-2 design, No Black Box) */
+.boss-deck-bf2 {
+  width: 100% !important;
+  background: linear-gradient(180deg, #8a1f62 0%, #761653 50%, #5e0d40 100%) !important;
+  border-radius: 5px !important;
+  border: 1.5px solid rgba(0, 0, 0, 0.35) !important;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.45), 0 1px 1px rgba(255, 255, 255, 0.25) !important;
+  padding: 6px 4px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-deck-bf2 .boss-check-text {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  color: #12050f !important;
+}
+
+/* Symmetrical 4-Knob Grid for Boss BF-2 */
+.boss-bf2-knobs-row {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  width: 100% !important;
+  gap: 0 !important;
+  align-items: start !important;
+  justify-items: center !important;
+  padding: 0 2px !important;
+  box-sizing: border-box !important;
+  margin-top: 2px !important;
+}
+
+.boss-bf2-knobs-row .boss-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 2px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  text-align: center !important;
+}
+
+/* Smaller knob labels (5.5px) in dark ink matching CE-2 aesthetic */
+.boss-bf2-knobs-row .boss-knob-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 5.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.15px !important;
+  color: #12050f !important;
+  margin-bottom: 2px !important;
+  white-space: nowrap !important;
+  line-height: 1 !important;
+  text-transform: uppercase !important;
+}
+
+/* Middle IO Arrows: Matching Boss CE-2 dark ink styling */
+.pedal-boss-bf2 .boss-io-arrows {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+.pedal-boss-bf2 .boss-io-arrows span {
+  color: #12050f !important;
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+}
+
+/* Middle Model Typography: Flanger BF-2 sized to match Chorus CE-2 (22px & 17px) */
+.boss-bf2-mid {
+  width: 100% !important;
+  margin: 6px 0 8px !important;
+}
+
+.boss-bf2-typography {
+  text-align: center !important;
+  margin: 4px 0 6px !important;
+  line-height: 1.15 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-bf2-title {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  color: #12050f !important;
+  letter-spacing: 0.8px !important;
+  text-transform: none !important;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.boss-bf2-model {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 17px !important;
+  font-weight: 800 !important;
+  color: #12050f !important;
+  letter-spacing: 1.5px !important;
+  margin-left: 48px !important;
+  margin-top: 1px !important;
+  text-shadow: 0 0.5px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+.pedal-boss-bf2 .boss-treadle-plate {
+  width: 100% !important;
+  height: 85px !important;
+  margin-top: auto !important;
+}
+
+/* ==========================================================================
+   2. ELECTRO-HARMONIX STEREO ELECTRIC MISTRESS (Authentic Die-Cast Compact)
+   ========================================================================== */
+.pedal-ehx-stereo-mistress,
+.pedal-ehx-mistress {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 330px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(145deg, #e4e7eb 0%, #cbd1d8 35%, #b4bcc5 70%, #9aa3ae 100%) !important;
+  border: 1.5px solid #6b7785 !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.45) !important;
+  padding: 6px 7px 10px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks aligned to JACK_Y_OFFSET = 57, top: 46px */
+.pedal-ehx-stereo-mistress .stompbox-side-jack,
+.pedal-ehx-mistress .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-ehx-stereo-mistress .stompbox-side-jack.jack-left,
+.pedal-ehx-mistress .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-ehx-stereo-mistress .stompbox-side-jack.jack-right,
+.pedal-ehx-mistress .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Authentic Decorative Secondary Left Jack (STEREO OUT) */
+.pedal-ehx-stereo-mistress .ehx-deco-jack.deco-stereo-out {
+  position: absolute !important;
+  left: -8px !important;
+  top: 102px !important;
+  width: 14px !important;
+  height: 22px !important;
+  border-radius: 3px !important;
+  background: linear-gradient(90deg, #64748b 0%, #94a3b8 50%, #475569 100%) !important;
+  border: 1px solid #1e293b !important;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+  pointer-events: none !important;
+}
+
+.pedal-ehx-stereo-mistress .ehx-deco-jack.deco-stereo-out::after {
+  content: '' !important;
+  position: absolute !important;
+  top: 4px !important;
+  left: 2px !important;
+  width: 8px !important;
+  height: 12px !important;
+  background: #0f172a !important;
+  border-radius: 2px !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Top bar with close button */
+.pedal-ehx-stereo-mistress .ehx-top-bar {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  padding: 0 2px !important;
+  margin-bottom: 3px !important;
+  z-index: 10 !important;
+}
+
+/* Black Inset Faceplate with Dual Border (Outer White, Inner Hot-Pink) */
+.ehx-sm-faceplate {
+  width: 100% !important;
+  flex: 1 !important;
+  background: #0a0b0e !important;
+  border-radius: 7px !important;
+  border: 1.5px solid #ffffff !important;
+  outline: 2px solid #e6007e !important;
+  outline-offset: -5px !important;
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.9),
+    0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 8px 8px 10px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* 9V Polarity Badge at top */
+.ehx-sm-power-badge {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  margin-bottom: 2px !important;
+}
+
+.ehx-sm-power-badge span {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.4px !important;
+}
+
+.ehx-sm-power-badge .ehx-polarity-svg {
+  width: 22px !important;
+  height: 9px !important;
+}
+
+/* 3 Knobs Row: RATE, FLANGER DEPTH, CHORUS DEPTH */
+.ehx-sm-knobs-row {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  width: 100% !important;
+  gap: 2px !important;
+  align-items: start !important;
+  justify-items: center !important;
+  margin-top: 1px !important;
+  margin-bottom: 2px !important;
+}
+
+.ehx-sm-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+.ehx-sm-knob-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ehx-sm-knob-lbl {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.4px !important;
+  line-height: 1.15 !important;
+  min-height: 16px !important;
+}
+
+/* Status Pilot LED (Beneath FLANGER DEPTH knob) */
+.ehx-sm-led-container {
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1px !important;
+  margin-top: 2px !important;
+  margin-bottom: 3px !important;
+  z-index: 5 !important;
+}
+
+.ehx-sm-pilot-led {
+  width: 13px !important;
+  height: 13px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #94a3b8 0%, #475569 55%, #1e293b 100%) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.ehx-sm-led-inner {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 40% 40%, #e2e8f0 0%, #64748b 80%) !important;
+  transition: all 0.2s ease !important;
+}
+
+.ehx-sm-pilot-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 40%, #b91c1c 75%, #450a0a 100%) !important;
+  border-color: #fca5a5 !important;
+  box-shadow: 0 0 10px #ef4444, 0 0 18px rgba(239, 68, 68, 0.75), inset 0 1px 2px #fff !important;
+}
+
+.ehx-sm-pilot-led.lit .ehx-sm-led-inner {
+  background: radial-gradient(circle at 40% 40%, #ffffff 0%, #ef4444 80%) !important;
+}
+
+/* Graphic Logo Section: Stereo electric mistress */
+.ehx-sm-logo-section {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+  margin-top: 1px !important;
+  margin-bottom: 4px !important;
+}
+
+.ehx-sm-script-stereo {
+  font-family: 'Brush Script MT', 'Segoe Script', cursive, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #e6007e !important;
+  letter-spacing: 0.8px !important;
+  align-self: flex-start !important;
+  margin-left: 12px !important;
+  margin-bottom: -10px !important;
+  z-index: 2 !important;
+  text-shadow: 0 0 5px rgba(230, 0, 126, 0.5) !important;
+  transform: rotate(-7deg) !important;
+}
+
+.ehx-sm-sliced-title {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.ehx-sm-title-svg {
+  width: 154px !important;
+  height: 52px !important;
+}
+
+.ehx-svg-title-text {
+  font-family: 'Arial Black', 'Trebuchet MS', Impact, sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 25px !important;
+}
+
+/* Inside Faceplate Jack Labels */
+.ehx-sm-jack-labels {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+}
+
+.ehx-sm-jack-lbl {
+  position: absolute !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 5.8px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.5px !important;
+}
+
+.ehx-sm-jack-lbl.lbl-main-out {
+  top: 48px !important;
+  left: 9px !important;
+  transform: rotate(-90deg) !important;
+  transform-origin: left top !important;
+}
+
+.ehx-sm-jack-lbl.lbl-stereo-out {
+  top: 106px !important;
+  left: 9px !important;
+  transform: rotate(-90deg) !important;
+  transform-origin: left top !important;
+}
+
+.ehx-sm-jack-lbl.lbl-input {
+  top: 56px !important;
+  right: 9px !important;
+  transform: rotate(90deg) !important;
+  transform-origin: right top !important;
+}
+
+/* 3PDT Stomp Switch Section */
+.ehx-sm-stomp-section {
+  margin-top: 2px !important;
+  margin-bottom: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 5 !important;
+}
+
+/* Footer Brand Logo */
+.ehx-sm-footer-brand {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin-top: auto !important;
+  gap: 1.5px !important;
+}
+
+.ehx-sm-brand-serif {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.6px !important;
+  color: #ffffff !important;
+}
+
+.ehx-sm-origin-tag {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 5.6px !important;
+  font-weight: 700 !important;
+  color: #cbd5e1 !important;
+  letter-spacing: 1.4px !important;
+}
+
+/* ==========================================================================
+   3. MXR M117R FLANGER (Iconic Wide Horizontal Slate Charcoal Enclosure)
+   ========================================================================== */
+.pedal-mxr-flanger {
+  width: 256px !important;
+  max-width: 256px !important;
+  min-height: 195px !important;
+  height: 195px !important;
+  max-height: 195px !important;
+  border-radius: 10px !important;
+  background: radial-gradient(circle at 50% 25%, #424952 0%, #30353c 50%, #202428 100%) !important;
+  border: 1.5px solid #1a1e22 !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.9),
+    inset 0 1px 2px rgba(255, 255, 255, 0.28),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.7) !important;
+  padding: 6px 8px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks aligned to curJackY = 88, top: 77px */
+.pedal-mxr-flanger .stompbox-side-jack {
+  top: 77px !important;
+}
+.pedal-mxr-flanger .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-mxr-flanger .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Top bar with close button mounted on top-right */
+.pedal-mxr-flanger .mxr-top-bar {
+  position: absolute !important;
+  top: 4px !important;
+  right: 6px !important;
+  width: auto !important;
+  z-index: 35 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Faceplate */
+.mxr-flanger-faceplate {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+}
+
+/* White Pinstripe Inner Box Frame */
+.mxr-pinstripe-frame {
+  width: 100% !important;
+  height: 100% !important;
+  flex: 1 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.92) !important;
+  border-radius: 6px !important;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  padding: 6px 6px 4px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+/* Top Power Header Breaking Frame Line */
+.mxr-pinstripe-header {
+  position: absolute !important;
+  top: -6px !important;
+  left: 0 !important;
+  right: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+}
+
+.pinstripe-power-lbl {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 6.8px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  background: #393f47 !important;
+  padding: 0 6px !important;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Side Border Indicators (OUTPUT / INPUT) */
+.mxr-pinstripe-side-lbl {
+  position: absolute !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 6px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.6px !important;
+  background: #333940 !important;
+  padding: 0 4px !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+}
+
+.mxr-pinstripe-side-lbl.lbl-output {
+  left: -19px !important;
+  top: 60px !important;
+  transform: rotate(-90deg) !important;
+}
+
+.mxr-pinstripe-side-lbl.lbl-input {
+  right: -15px !important;
+  top: 60px !important;
+  transform: rotate(90deg) !important;
+}
+
+/* 4 Knobs Row: MANUAL, WIDTH, SPEED, REGEN. */
+.mxr-flanger-knobs-row {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  width: 100% !important;
+  gap: 2px !important;
+  align-items: start !important;
+  justify-items: center !important;
+  margin-top: 1px !important;
+  margin-bottom: 0 !important;
+}
+
+.mxr-flanger-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+.mxr-flanger-knob-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.mxr-flanger-knob-lbl {
+  font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 6.8px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+}
+
+/* Centered Deep Red Jewel Pilot LED */
+.mxr-flanger-led-wrap {
+  margin: 1px auto !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 5 !important;
+  padding: 1px !important;
+}
+
+.mxr-flanger-led {
+  width: 12px !important;
+  height: 12px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #475569 0%, #1e293b 65%, #0f172a 100%) !important;
+  border: 1.5px solid #64748b !important;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.9),
+    0 1px 3px rgba(0, 0, 0, 0.6) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.mxr-led-lens {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 40% 40%, #7f1d1d 0%, #450a0a 100%) !important;
+  transition: all 0.2s ease !important;
+}
+
+.mxr-flanger-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 40%, #b91c1c 75%, #450a0a 100%) !important;
+  border-color: #fca5a5 !important;
+  box-shadow:
+    0 0 10px #ef4444,
+    0 0 20px rgba(239, 68, 68, 0.8),
+    inset 0 1px 2px #ffffff !important;
+}
+
+.mxr-flanger-led.lit .mxr-led-lens {
+  background: radial-gradient(circle at 40% 40%, #ffffff 0%, #ef4444 80%) !important;
+}
+
+/* Lower Control Section: [ MXR ] logo, Chrome Stomp Switch, flanger */
+.mxr-flanger-lower-row {
+  margin-top: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 8px 2px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.mxr-logo-badge {
+  border: 1.8px solid #ffffff !important;
+  border-radius: 5px !important;
+  padding: 2px 6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.mxr-logo-text {
+  font-family: 'Arial Black', Impact, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  line-height: 1 !important;
+}
+
+.mxr-flanger-stomp-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 5 !important;
+}
+
+.mxr-flanger-title {
+  font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif !important;
+  font-size: 14.5px !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  line-height: 1 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* ==========================================================================
+   PHASER PEDALS
+   1. EHX NANO SMALL STONE (EH4800 OTA Phase Shifter)
+   ========================================================================== */
+.pedal-ehx-small-stone {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 330px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(145deg, #e4e7eb 0%, #cbd1d8 35%, #b4bcc5 70%, #9aa3ae 100%) !important;
+  border: 1.5px solid #6b7785 !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.85),
+    inset 0 -2px 5px rgba(0, 0, 0, 0.45) !important;
+  padding: 6px 7px 10px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks aligned to JACK_Y_OFFSET = 57, top: 46px */
+.pedal-ehx-small-stone .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-ehx-small-stone .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-ehx-small-stone .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+.pedal-ehx-small-stone .ehx-top-bar {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  padding: 0 2px !important;
+  margin-bottom: 2px !important;
+  z-index: 10 !important;
+}
+
+/* 9V Polarity Badge */
+.smallstone-power-badge {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  margin-bottom: 3px !important;
+}
+
+.smallstone-power-badge span {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  letter-spacing: 0.4px !important;
+}
+
+.smallstone-power-badge .ehx-polarity-svg {
+  width: 22px !important;
+  height: 9px !important;
+}
+
+/* Two-tone Inset Faceplate with White Border */
+.smallstone-faceplate {
+  width: 100% !important;
+  flex: 1 !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #ffffff !important;
+  box-shadow:
+    inset 0 1px 4px rgba(0, 0, 0, 0.7),
+    0 1px 3px rgba(0, 0, 0, 0.4) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  position: relative !important;
+}
+
+/* Upper Black Section */
+.smallstone-black-section {
+  width: 100% !important;
+  background: #090a0d !important;
+  padding: 6px 10px 6px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.smallstone-upper-row {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+}
+
+.smallstone-status-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  cursor: pointer !important;
+}
+
+.smallstone-led {
+  width: 13px !important;
+  height: 13px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #94a3b8 0%, #475569 60%, #1e293b 100%) !important;
+  border: 1.5px solid #cbd5e1 !important;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.smallstone-led-core {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 40% 40%, #e2e8f0 0%, #64748b 80%) !important;
+  transition: all 0.2s ease !important;
+}
+
+.smallstone-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 40%, #b91c1c 75%, #450a0a 100%) !important;
+  border-color: #fca5a5 !important;
+  box-shadow: 0 0 10px #ef4444, 0 0 18px rgba(239, 68, 68, 0.8), inset 0 1px 2px #fff !important;
+}
+
+.smallstone-led.lit .smallstone-led-core {
+  background: radial-gradient(circle at 40% 40%, #ffffff 0%, #ef4444 80%) !important;
+}
+
+.smallstone-rate-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+.smallstone-lbl {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 6.8px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.6px !important;
+  text-transform: uppercase !important;
+}
+
+/* COLOR Mini Toggle Switch */
+.smallstone-color-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 3px !important;
+  margin-top: 4px !important;
+  cursor: pointer !important;
+}
+
+.smallstone-toggle-housing {
+  width: 14px !important;
+  height: 22px !important;
+  border-radius: 3px !important;
+  background: #1e293b !important;
+  border: 1px solid #475569 !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8) !important;
+  position: relative !important;
+}
+
+.smallstone-toggle-bat {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 50%, #64748b 100%) !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+  position: absolute !important;
+  left: 1px !important;
+  transition: top 0.15s ease !important;
+}
+
+.smallstone-toggle-bat.up {
+  top: 1px !important;
+}
+
+.smallstone-toggle-bat.down {
+  top: 9px !important;
+}
+
+/* Lower Orange Section */
+.smallstone-orange-section {
+  width: 100% !important;
+  flex: 1 !important;
+  background: linear-gradient(180deg, #cf5627 0%, #b84318 60%, #9a3412 100%) !important;
+  padding: 8px 10px 10px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  position: relative !important;
+}
+
+.smallstone-side-lbl {
+  position: absolute !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 6px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.6px !important;
+  pointer-events: none !important;
+}
+
+.smallstone-side-lbl.lbl-amp {
+  top: 24px !important;
+  left: 6px !important;
+  transform: rotate(-90deg) !important;
+  transform-origin: left top !important;
+}
+
+.smallstone-side-lbl.lbl-input {
+  top: 32px !important;
+  right: 6px !important;
+  transform: rotate(90deg) !important;
+  transform-origin: right top !important;
+}
+
+.smallstone-title-wrap {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+}
+
+.smallstone-title-svg {
+  width: 140px !important;
+  height: 48px !important;
+}
+
+.smallstone-svg-text {
+  font-family: 'Arial Black', Impact, sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 24px !important;
+}
+
+.smallstone-sub-title {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+.smallstone-stomp-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 4px !important;
+}
+
+/* Footer Nano Badge */
+.smallstone-footer {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  margin-top: 4px !important;
+}
+
+.ehx-nano-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: #0f172a !important;
+  border: 1px solid #475569 !important;
+  border-radius: 3px !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+.ehx-nano-badge .badge-h {
+  font-family: 'Arial Black', sans-serif !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  padding: 1px 5px !important;
+  border-right: 1px solid #475569 !important;
+}
+
+.ehx-nano-badge .badge-nano {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.5px !important;
+  padding: 1px 6px !important;
+}
+
+.smallstone-origin {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 5.4px !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+  letter-spacing: 1.2px !important;
+}
+
+/* ==========================================================================
+   2. MXR M101 PHASE 90 (Classic Safety Orange Block Logo Enclosure)
+   ========================================================================== */
+.pedal-mxr-phase90 {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 330px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(165deg, #fb923c 0%, #f97316 40%, #ea580c 100%) !important;
+  border: 1.5px solid #c2410c !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.9),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.5) !important;
+  padding: 6px 10px 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks aligned to JACK_Y_OFFSET = 57, top: 46px */
+.pedal-mxr-phase90 .stompbox-side-jack {
+  top: 46px !important;
+}
+.pedal-mxr-phase90 .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+.pedal-mxr-phase90 .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+.pedal-mxr-phase90 .mxr-top-bar {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  padding: 0 2px !important;
+  margin-bottom: 2px !important;
+  z-index: 10 !important;
+}
+
+/* Side Labels */
+.phase90-side-lbl {
+  position: absolute !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  color: #000000 !important;
+  letter-spacing: 0.6px !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+}
+
+.phase90-side-lbl.lbl-output {
+  left: 3px !important;
+  top: 50px !important;
+  transform: rotate(-90deg) !important;
+  transform-origin: left top !important;
+}
+
+.phase90-side-lbl.lbl-input {
+  right: 3px !important;
+  top: 58px !important;
+  transform: rotate(90deg) !important;
+  transform-origin: right top !important;
+}
+
+/* Face Content */
+.phase90-face-content {
+  width: 100% !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 4px 0 2px !important;
+}
+
+.phase90-knob-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+  margin-top: 4px !important;
+}
+
+.phase90-knob-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.phase90-speed-lbl {
+  font-family: 'Montserrat', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 900 !important;
+  color: #000000 !important;
+  letter-spacing: 0.8px !important;
+}
+
+.phase90-logo-badge {
+  border: 2.2px solid #000000 !important;
+  border-radius: 8px !important;
+  padding: 3px 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 4px !important;
+  margin-bottom: 4px !important;
+}
+
+.phase90-logo-text {
+  font-family: 'Arial Black', Impact, sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  color: #000000 !important;
+  letter-spacing: 1.2px !important;
+  line-height: 1 !important;
+}
+
+/* Pilot LED */
+.phase90-led-wrap {
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2px !important;
+  margin: 2px auto !important;
+}
+
+.phase90-led {
+  width: 13px !important;
+  height: 13px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #551508 0%, #290802 70%, #0f0200 100%) !important;
+  border: 1.5px solid #1a0502 !important;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s ease !important;
+}
+
+.phase90-led-core {
+  width: 6.5px !important;
+  height: 6.5px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 40% 40%, #7f1d1d 0%, #450a0a 100%) !important;
+  transition: all 0.2s ease !important;
+}
+
+.phase90-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 40%, #b91c1c 75%, #450a0a 100%) !important;
+  border-color: #fca5a5 !important;
+  box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.8), inset 0 1px 2px #fff !important;
+}
+
+.phase90-led.lit .phase90-led-core {
+  background: radial-gradient(circle at 40% 40%, #ffffff 0%, #ef4444 80%) !important;
+}
+
+.phase90-stomp-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 4px !important;
+  margin-bottom: 6px !important;
+}
+
+.phase90-title-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.phase90-title-text {
+  font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #000000 !important;
+  letter-spacing: 0.6px !important;
+  line-height: 1 !important;
+}
+
+
+
+
+
 
 
 

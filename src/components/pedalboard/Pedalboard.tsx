@@ -42,12 +42,10 @@ export function getPedalDimensions(type: string): { w: number; h: number } {
   const isFuzzFactory = type === 'fuzz-fuzzfactory';
   const isFlatiron = type === 'fuzz-flatiron';
   const isHoof = type === 'fuzz-hoof';
-  const isBossAw3 = type === 'wah-boss-aw3';
-  const isBossGe7 = type === 'eq-boss-ge7';
-  const isBossCh1 = type === 'chorus-boss-ch1';
-
-  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : (isBossAw3 || isBossGe7 || isBossCh1) ? 248 : PEDAL_WIDTH;
-  const h = isMini ? 290 : 360;
+  const isGe7 = type === 'eq-boss-ge7' || type === 'boss-ge7';
+  const isMxrFlanger = type === 'flanger-mxr';
+  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : isGe7 ? 248 : isMxrFlanger ? 256 : PEDAL_WIDTH;
+  const h = isMini ? 290 : isFuzzFactory ? 176 : isMxrFlanger ? 195 : 360;
   return { w, h };
 }
 
@@ -156,7 +154,6 @@ export function calculateNextPedalPosition(
   // Find the last pedal placed
   const lastPedal = otherPedals[otherPedals.length - 1];
   const lastPos = allPositions[lastPedal.id];
-  const lastDims = getPedalDimensions(lastPedal.type);
 
   // Start immediately after the last pedal (flowing right-to-left)
   let candidateX = lastPos.x - (newDims.w + 40);
@@ -202,7 +199,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState<
-    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus' | 'delay'
+    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus' | 'delay' | 'flanger' | 'phaser'
   >('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
@@ -479,8 +476,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       const isFuzzFactory = pedal?.type === 'fuzz-fuzzfactory';
       const isFlatiron = pedal?.type === 'fuzz-flatiron';
       const isHoof = pedal?.type === 'fuzz-hoof';
+      const isMxrFlanger = pedal?.type === 'flanger-mxr';
       const curWidth = curDims.w;
-      const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isFlatiron ? 114 : isHoof ? 104 : JACK_Y_OFFSET;
+      const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isMxrFlanger ? 88 : isFlatiron ? 114 : isHoof ? 104 : JACK_Y_OFFSET;
       if (port === 'in') {
         // Right side jack (pedal input is on the right)
         return { x: pos.x + curWidth + 2, y: pos.y + curJackY };
@@ -883,7 +881,11 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           ? 'equalizer eq graphic 7-band boss ge7 tone boost cut level frequency gyrator'
           : def.category === 'chorus'
           ? 'chorus bbd analog boss ce2 ch1 super chorus rate depth e level eq swirl rotary modulation ensemble lush warmth chime'
-          : 'delay echo analog bbd boss dm2 mn3005 mxr carbon copy m169 regen mix mod modulation shimmer repeats tape ambient space tc electronic gauss tape echo delay-boss-dm2 delay-mxr-carbon-copy delay-tce-gauss';
+          : def.category === 'delay'
+          ? 'delay echo analog bbd boss dm2 mn3005 mxr carbon copy m169 regen mix mod modulation shimmer repeats tape ambient space tc electronic gauss tape echo delay-boss-dm2 delay-mxr-carbon-copy delay-tce-gauss'
+          : def.category === 'flanger'
+          ? 'flanger bbd analog boss bf2 ehx electro harmonix stereo electric mistress mxr m117r van halen evh unchained chorus depth flanger rate manual width speed regen gilmour pink floyd police whoosh sweep comb filter resonance flanger-boss-bf2 flanger-ehx-electric-mistress flanger-mxr'
+          : 'phaser 4-stage ota jfet ehx small stone nano mxr phase 90 speed color van halen eruption pink floyd rotary swirl modulation phaser-ehx-smallstone phaser-mxr-phase90';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -926,6 +928,14 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const delays = useMemo(
     () => filteredPedals.filter((p) => p.category === 'delay'),
+    [filteredPedals]
+  );
+  const flangers = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'flanger'),
+    [filteredPedals]
+  );
+  const phasers = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'phaser'),
     [filteredPedals]
   );
 
@@ -1106,6 +1116,18 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                     onClick={() => setActiveCategoryTab('delay')}
                   >
                     Delay ({availablePedals.filter((p) => p.category === 'delay').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'flanger' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('flanger')}
+                  >
+                    Flanger ({availablePedals.filter((p) => p.category === 'flanger').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'phaser' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('phaser')}
+                  >
+                    Phaser ({availablePedals.filter((p) => p.category === 'phaser').length})
                   </button>
                 </div>
 
@@ -1371,6 +1393,64 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                                 <div className="item-title-row">
                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge delay">DELAY</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Flanger */}
+                      {flangers.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag flanger-tag">FLANGER</span>
+                            <span className="group-count">{flangers.length} pedals</span>
+                          </div>
+                          {flangers.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge flanger">FLANGER</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Phaser */}
+                      {phasers.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag phaser-tag">PHASER</span>
+                            <span className="group-count">{phasers.length} pedals</span>
+                          </div>
+                          {phasers.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge phaser">PHASER</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>

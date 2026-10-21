@@ -41,7 +41,8 @@ export interface KnobProps {
     | 'marshall-black'
     | 'proco-rat'
     | 'tc-spark'
-    | 'xotic-clear';
+    | 'xotic-clear'
+    | 'ehx-pointer';
   showLabel?: boolean;
   showValue?: boolean;
   subLabel?: string;
@@ -503,6 +504,52 @@ const IbanezToneLokKnobDial: React.FC = () => (
       strokeWidth="3.2"
       strokeLinecap="round"
       filter="drop-shadow(0 0.5px 0.5px rgba(255,255,255,0.4))"
+    />
+  </svg>
+);
+
+const EhxPointerKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="ehx-knob-base" cx="42%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#3d424b" />
+        <stop offset="50%" stopColor="#1e2229" />
+        <stop offset="85%" stopColor="#111317" />
+        <stop offset="100%" stopColor="#08090b" />
+      </radialGradient>
+      <radialGradient id="ehx-knob-top" cx="46%" cy="40%" r="58%">
+        <stop offset="0%" stopColor="#2e333c" />
+        <stop offset="70%" stopColor="#171a20" />
+        <stop offset="100%" stopColor="#0a0c0f" />
+      </radialGradient>
+      <filter id="ehx-knob-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2.5" stdDeviation="2.5" floodColor="#000000" floodOpacity="0.85" />
+      </filter>
+    </defs>
+    {/* Base cylindrical body */}
+    <circle cx="50" cy="50" r="47" fill="url(#ehx-knob-base)" filter="url(#ehx-knob-shadow)" stroke="#050608" strokeWidth="1.5" />
+    {/* Fine tactile knurling around the rim (24 serrations) */}
+    {Array.from({ length: 24 }).map((_, i) => {
+      const a = (i * 15 * Math.PI) / 180;
+      const x1 = 50 + 43 * Math.sin(a);
+      const y1 = 50 - 43 * Math.cos(a);
+      const x2 = 50 + 47 * Math.sin(a);
+      const y2 = 50 - 47 * Math.cos(a);
+      return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#090a0d" strokeWidth="1.8" />;
+    })}
+    {/* Beveled top plateau */}
+    <circle cx="50" cy="50" r="37" fill="url(#ehx-knob-top)" stroke="#090a0d" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="35.5" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="0.8" />
+    {/* Crisp pure white indicator line down center */}
+    <line
+      x1="50"
+      y1="15"
+      x2="50"
+      y2="38"
+      stroke="#ffffff"
+      strokeWidth="3.6"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1px rgba(0,0,0,0.9))"
     />
   </svg>
 );
@@ -1429,6 +1476,7 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'proco-rat' && <ProCoRatKnobDial />}
           {variant === 'tc-spark' && <TcSparkKnobDial />}
           {variant === 'xotic-clear' && <XoticClearKnobDial />}
+          {variant === 'ehx-pointer' && <EhxPointerKnobDial />}
           {variant === 'default' && <DefaultKnobDial color={color} />}
         </div>
       </div>
