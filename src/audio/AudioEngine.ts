@@ -4,6 +4,7 @@ import { createDcBlocker } from './pedals/dspUtils';
 import type { PedalInstance } from '../types/pedal';
 import { SignalChain } from './SignalChain';
 import { AmpHeadNode } from './amp/AmpHeadNode';
+import { InputImpedanceNode } from './InputImpedanceNode';
 import type { AmpHeadSettings } from '../types/amp';
 import { CabinetNode } from './cabinet/CabinetNode';
 import type { CabinetSettings } from '../types/cabinet';
@@ -11,6 +12,14 @@ import { detectPitch, type TunerResult } from '../dsp/tuner/pitchDetector';
 import { ensureWorkletsRegistered } from './worklets/workletBundle';
 
 export type StateChangeCallback = (status: EngineStatus, error: string | null) => void;
+
+/**
+ * Check whether the browser exposes AudioContext.setSinkId for output routing.
+ * Kept as a standalone helper so UI can detect support without an engine instance.
+ */
+export function detectOutputSelectionSupport(): boolean {
+  return typeof AudioContext !== 'undefined' && 'setSinkId' in AudioContext.prototype;
+}
 
 /**
  * AudioEngine manages Web Audio API lifecycle, input media stream,
@@ -33,6 +42,9 @@ export class AudioEngine {
   private inputHighpass: BiquadFilterNode | null = null;
   private inputChannelMode: InputChannelMode = 'sum';
   private detectedInputChannels = 2;
+
+  // Input Impedance / Pickup Loading Simulator (first in chain, right after source)
+  private inputImpedanceNode: InputImpedanceNode | null = null;
 
   // Noise gate (AudioWorklet) with clean crossfade bypass
   private noiseGateNode: AudioWorkletNode | null = null;
@@ -186,10 +198,7 @@ export class AudioEngine {
    * Check if the browser supports AudioContext.setSinkId for hardware output routing
    */
   public isOutputSelectionSupported(): boolean {
-    return (
-      (typeof AudioContext !== 'undefined' && 'setSinkId' in AudioContext.prototype) ||
-      (this.ctx !== null && 'setSinkId' in this.ctx)
-    );
+    return detectOutputSelectionSupport() || (this.ctx !== null && 'setSinkId' in this.ctx);
   }
 
   public getSelectedInputId(): string | null {
@@ -297,6 +306,11 @@ export class AudioEngine {
         this.signalChain.dispose();
       }
 
+      if (this.inputImpedanceNode) {
+        this.inputImpedanceNode.dispose();
+        this.inputImpedanceNode = null;
+      }
+
       if (this.ampHeadNode) {
         this.ampHeadNode.dispose();
         this.ampHeadNode = null;
@@ -363,12 +377,22 @@ export class AudioEngine {
     this.inputRightGain.connect(this.inputMonoBus);
     this.applyInputChannelMode();
 
+    // Input Impedance / Pickup Loading Simulator (mono, before 30 Hz HPF)
+    this.inputImpedanceNode = new InputImpedanceNode(this.ctx, {
+      pickupType: 'single-coil',
+      cableLengthM: 3,
+      loadResistance: 1e6,
+      loadCapacitancePf: 80,
+      volumePosition: 0,
+    });
+
     // 30 Hz Butterworth high-pass: removes interface DC offset, mains rumble and handling thumps
     this.inputHighpass = this.ctx.createBiquadFilter();
     this.inputHighpass.type = 'highpass';
     this.inputHighpass.frequency.setValueAtTime(30, this.ctx.currentTime);
     this.inputHighpass.Q.setValueAtTime(0.707, this.ctx.currentTime);
-    this.inputMonoBus.connect(this.inputHighpass);
+    this.inputMonoBus.connect(this.inputImpedanceNode.inputNode);
+    this.inputImpedanceNode.outputNode.connect(this.inputHighpass);
     this.inputHighpass.connect(this.inputGainNode);
 
     // Input Analyser (2048 samples for accurate low E2 guitar pitch detection)
@@ -550,11 +574,11 @@ export class AudioEngine {
       } catch (err: unknown) {
         const errorName = err instanceof Error ? err.name : '';
         if (errorName === 'NotFoundError' || errorName === 'OverconstrainedError' || String(err).includes('not found')) {
-          throw new Error('Perangkat input audio tidak ditemukan. Pastikan soundcard, microphone, atau Virtual Cable terhubung.');
+          throw new Error('Perangkat input audio tidak ditemukan. Pastikan soundcard, microphone, atau Virtual Cable terhubung.', { cause: err });
         } else if (errorName === 'NotAllowedError' || errorName === 'PermissionDeniedError') {
-          throw new Error('Izin mikrofon ditolak oleh browser. Klik ikon gembok di address bar browser untuk mengizinkan akses audio.');
+          throw new Error('Izin mikrofon ditolak oleh browser. Klik ikon gembok di address bar browser untuk mengizinkan akses audio.', { cause: err });
         } else {
-          throw new Error(err instanceof Error ? err.message : 'Gagal mengakses perangkat input audio.');
+          throw new Error(err instanceof Error ? err.message : 'Gagal mengakses perangkat input audio.', { cause: err });
         }
       }
     }
@@ -681,6 +705,23 @@ export class AudioEngine {
   }
 
   /**
+   * Configure Input Impedance / Pickup Loading Simulator
+   */
+  public setInputImpedance(config: {
+    pickupType?: 'single-coil' | 'humbucker' | 'p90' | 'active';
+    cableLengthM?: number;
+    loadResistance?: number;
+    loadCapacitancePf?: number;
+    volumePosition?: number;
+  }): void {
+    this.inputImpedanceNode?.updateConfig(config);
+  }
+
+  public getInputImpedanceConfig() {
+    return this.inputImpedanceNode?.getConfig() ?? null;
+  }
+
+  /**
    * Control Master Volume (linear 0.0 to 1.5)
    */
   public setMasterVolume(val: number): void {
@@ -719,6 +760,7 @@ export class AudioEngine {
     if (this.signalChain) {
       this.signalChain.rebuild(this.pedalInstances);
     }
+    this.updateAutoInputImpedance();
   }
 
   /**
@@ -743,6 +785,48 @@ export class AudioEngine {
     if (this.signalChain) {
       this.signalChain.setEnabled(pedalId, enabled);
     }
+    this.updateAutoInputImpedance();
+  }
+
+  /**
+   * Auto-Z (Dynamic Variable Pickup Input Impedance):
+   * Inspects the first active pedal connected directly to the guitar pickups.
+   * If the first active pedal is a vintage Germanium fuzz (Fuzz Face, Tone Bender),
+   * Rangemaster treble booster, or vintage wah, the guitar pickups experience heavy
+   * resistive loading (~10k - 68k), causing natural high-end roll-off and singing compression.
+   * If the first pedal is a modern buffered pedal (or bypass), load resistance returns to 1MΩ.
+   */
+  private updateAutoInputImpedance(): void {
+    if (!this.inputImpedanceNode) return;
+
+    // Find the first enabled pedal instance
+    const firstActive = this.pedalInstances.find((p) => p.enabled);
+    if (!firstActive) {
+      // Direct into amp / bypass: 1M ohm standard high-Z
+      this.inputImpedanceNode.setLoadResistance(1_000_000);
+      return;
+    }
+
+    const type = firstActive.type.toLowerCase();
+    let loadR: number;
+
+    if (type.includes('fuzzface') || type.includes('fuzz-face')) {
+      loadR = 10_000; // 10 kΩ vintage Fuzz Face
+    } else if (type.includes('tonebender') || type.includes('tone-bender')) {
+      loadR = 15_000; // 15 kΩ Tone Bender
+    } else if (type.includes('fuzzfactory') || type.includes('fuzz-factory')) {
+      loadR = 12_000; // 12 kΩ Fuzz Factory
+    } else if (type.includes('rangemaster')) {
+      loadR = 22_000; // 22 kΩ Treble Booster
+    } else if (type.includes('wah')) {
+      loadR = 68_000; // 68 kΩ Wah
+    } else if (type.includes('bigmuff') || type.includes('big-muff') || type.includes('hoof') || type.includes('flatiron')) {
+      loadR = 100_000; // 100 kΩ Big Muff input loading
+    } else {
+      loadR = 1_000_000; // 1 MΩ standard high-Z
+    }
+
+    this.inputImpedanceNode.setLoadResistance(loadR);
   }
 
   /**

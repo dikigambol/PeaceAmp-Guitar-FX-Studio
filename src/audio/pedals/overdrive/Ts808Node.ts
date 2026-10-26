@@ -13,6 +13,7 @@ const TS808_CONFIG: TubeScreamerConfig = {
   humpHz: 720,
   clipKnee: 0.3,
   clipSharpness: 2.0,
+  loopFeedback: 0.62,
   potExponent: 3.0,
   toneMinHz: 723,
   toneMaxHz: 3200,

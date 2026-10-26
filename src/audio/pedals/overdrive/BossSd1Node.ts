@@ -15,6 +15,7 @@ const SD1_CONFIG: TubeScreamerConfig = {
   clipKnee: 0.42,
   clipKneeNeg: 0.26,
   clipSharpness: 2.0,
+  loopFeedback: 0.72,
   potExponent: 2.2,
   toneMinHz: 900,
   toneMaxHz: 4600,

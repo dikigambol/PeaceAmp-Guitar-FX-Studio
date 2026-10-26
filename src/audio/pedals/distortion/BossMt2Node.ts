@@ -20,7 +20,10 @@ const TRIM_SAT_DB = -6.0;
  *    - Pre-emphasis peak at 1.8 kHz (+6 dB) pushing the front-end hard.
  * 
  * 2. Dual-Stage High-Gain Distortion Cascade:
- *    - Dual op-amp overdrive with 4-diode symmetrical hard clipper.
+ *    - Two cascaded gain stages, each followed by a 2-diode hard clipper
+ *      (4 diodes total), with an interstage high-pass between them.
+ *    - Total drive is split across both stages so each saturates progressively
+ *      instead of relying on a single clipper.
  *    - Delivers massive, crushing saturation, endless singing sustain, and razor-sharp bite.
  *    - 4x oversampling prevents digital aliasing on extreme high-gain settings.
  *    - 5.5 kHz 2nd-order analog smoothing filter eliminating harsh fizzy splatter.
@@ -49,9 +52,12 @@ export class BossMt2Node implements AudioPedalNode {
   private inputHighpass: BiquadFilterNode;
   private inputPreEmphasis: BiquadFilterNode;
 
-  // 2. Dual-Stage Overdrive & 4-Diode Hard Clipper
-  private driveGain: GainNode;
-  private diodeClipper: WaveShaperNode;
+  // 2. Dual cascaded gain + diode-clip stages
+  private driveGain1: GainNode;
+  private diodeClipper1: WaveShaperNode;
+  private interstageHighpass: BiquadFilterNode;
+  private driveGain2: GainNode;
+  private diodeClipper2: WaveShaperNode;
   private dcBlocker: BiquadFilterNode;
   private postDistSmoothingFilter: BiquadFilterNode;
 
@@ -114,12 +120,24 @@ export class BossMt2Node implements AudioPedalNode {
     this.inputPreEmphasis.Q.setValueAtTime(1.1, ctx.currentTime);
     this.inputPreEmphasis.gain.setValueAtTime(6.0, ctx.currentTime);
 
-    // 2. Dual-Stage Overdrive & 4-Diode Hard Clipper
-    this.driveGain = ctx.createGain();
+    // 2. Dual cascaded gain + 2-diode hard clippers (4 diodes total)
+    this.driveGain1 = ctx.createGain();
 
-    this.diodeClipper = ctx.createWaveShaper();
-    this.diodeClipper.curve = this.createMt2ClippingCurve(4096) as Float32Array<ArrayBuffer>;
-    this.diodeClipper.oversample = '4x';
+    this.diodeClipper1 = ctx.createWaveShaper();
+    this.diodeClipper1.curve = this.createMt2ClippingCurve(4096, 3.6, 0.75, 0.90) as Float32Array<ArrayBuffer>;
+    this.diodeClipper1.oversample = '4x';
+
+    // Interstage high-pass keeps the second stage from turning low end into mud
+    this.interstageHighpass = ctx.createBiquadFilter();
+    this.interstageHighpass.type = 'highpass';
+    this.interstageHighpass.frequency.setValueAtTime(180, ctx.currentTime);
+    this.interstageHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
+
+    this.driveGain2 = ctx.createGain();
+
+    this.diodeClipper2 = ctx.createWaveShaper();
+    this.diodeClipper2.curve = this.createMt2ClippingCurve(4096, 6.2, 0.95, 0.82) as Float32Array<ArrayBuffer>;
+    this.diodeClipper2.oversample = '4x';
 
     this.dcBlocker = createDcBlocker(ctx, 15);
 
@@ -152,14 +170,18 @@ export class BossMt2Node implements AudioPedalNode {
     this.levelGain = ctx.createGain();
 
     // Wet signal routing:
-    // inputNode -> inputHighpass -> inputPreEmphasis -> driveGain -> diodeClipper -> dcBlocker
-    // -> postDistSmoothingFilter -> eqLow -> eqMid -> eqHigh -> postRecoveryFilter -> levelGain
-    // -> wetGain -> outputNode
+    // inputNode -> inputHighpass -> inputPreEmphasis
+    // -> driveGain1 -> diodeClipper1 -> interstageHighpass -> driveGain2 -> diodeClipper2
+    // -> dcBlocker -> postDistSmoothingFilter -> eqLow -> eqMid -> eqHigh
+    // -> postRecoveryFilter -> levelGain -> wetGain -> outputNode
     this.inputNode.connect(this.inputHighpass);
     this.inputHighpass.connect(this.inputPreEmphasis);
-    this.inputPreEmphasis.connect(this.driveGain);
-    this.driveGain.connect(this.diodeClipper);
-    this.diodeClipper.connect(this.dcBlocker);
+    this.inputPreEmphasis.connect(this.driveGain1);
+    this.driveGain1.connect(this.diodeClipper1);
+    this.diodeClipper1.connect(this.interstageHighpass);
+    this.interstageHighpass.connect(this.driveGain2);
+    this.driveGain2.connect(this.diodeClipper2);
+    this.diodeClipper2.connect(this.dcBlocker);
     this.dcBlocker.connect(this.postDistSmoothingFilter);
     this.postDistSmoothingFilter.connect(this.eqLow);
     this.eqLow.connect(this.eqMid);
@@ -178,21 +200,26 @@ export class BossMt2Node implements AudioPedalNode {
   }
 
   /**
-   * Authentic MT-2 Quad-Diode Hard Clipping transfer curve:
-   * Symmetrical multi-stage silicon saturation with rich compressed harmonics.
+   * MT-2 diode clipping transfer curve.
+   * Each stage is a 2-diode hard clipper; the two stages use different
+   * pre-gain / knee / ceiling values so the cascade saturates progressively.
    */
-  private createMt2ClippingCurve(samples: number): Float32Array {
+  private createMt2ClippingCurve(
+    samples: number,
+    preGain = 5.2,
+    sharpness = 0.88,
+    ceiling = 0.85
+  ): Float32Array {
     const curve = new Float32Array(samples);
     const mid = (samples - 1) / 2;
 
     for (let i = 0; i < samples; i++) {
       const x = (i - mid) / mid; // -1 to +1
 
-      // 4-diode series hard clipping: fast tanh saturation with square-wave limit
       const sign = x < 0 ? -1 : 1;
       const absX = Math.abs(x);
-      const v = absX * 5.2;
-      const y = sign * Math.tanh(v * 0.88) * 0.85;
+      const v = absX * preGain;
+      const y = sign * Math.tanh(v * sharpness) * ceiling;
 
       curve[i] = y;
     }
@@ -202,9 +229,12 @@ export class BossMt2Node implements AudioPedalNode {
 
   private updateDist(): void {
     const t = Math.max(0, Math.min(10, this.distVal)) / 10;
-    // Logarithmic high-gain drive range (10x to 220x)
-    const driveLin = 10.0 * Math.pow(22.0, t);
-    this.driveGain.gain.setTargetAtTime(driveLin, this.ctx.currentTime, 0.015);
+    // Logarithmic high-gain drive range (10x to 220x), split across two stages
+    const totalGain = 10.0 * Math.pow(22.0, t);
+    const stage1Gain = 2.5 + t * 12.5; // 2.5x .. 15x
+    const now = this.ctx.currentTime;
+    this.driveGain1.gain.setTargetAtTime(stage1Gain, now, 0.015);
+    this.driveGain2.gain.setTargetAtTime(totalGain / stage1Gain, now, 0.015);
     this.updateLevel();
   }
 
@@ -283,8 +313,11 @@ export class BossMt2Node implements AudioPedalNode {
       this.wetGain.disconnect();
       this.inputHighpass.disconnect();
       this.inputPreEmphasis.disconnect();
-      this.driveGain.disconnect();
-      this.diodeClipper.disconnect();
+      this.driveGain1.disconnect();
+      this.diodeClipper1.disconnect();
+      this.interstageHighpass.disconnect();
+      this.driveGain2.disconnect();
+      this.diodeClipper2.disconnect();
       this.dcBlocker.disconnect();
       this.postDistSmoothingFilter.disconnect();
       this.eqLow.disconnect();

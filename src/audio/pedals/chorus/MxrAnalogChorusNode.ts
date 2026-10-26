@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
+import { BbdAnalogWarmthStage } from './BbdAnalogWarmthStage';
 
 /**
  * MXR M234 ANALOG CHORUS
@@ -15,6 +16,7 @@ import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
  * - LEVEL: Wet signal mix level (from completely dry up to 50/50 lush comb filtering)
  * - RATE: Smooth analog LFO from 0.2 Hz (slow dimensional shimmer) to 5.0 Hz (fast Leslie vibrato)
  * - DEPTH: Delay modulation width from 0 ms up to ±2.0 ms
+ * - Authentic 4-pole Sallen-Key analog reconstruction filtering & compander non-linearity via BbdAnalogWarmthStage
  * - Unattenuated direct Dry signal for full clarity and dynamic impact
  */
 export class MxrAnalogChorusNode implements AudioPedalNode {
@@ -34,7 +36,7 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
   private lowCutFilter: BiquadFilterNode;
   private highCutFilter: BiquadFilterNode;
   private delayNode: DelayNode;
-  private postReconstruction: BiquadFilterNode;
+  private bbdWarmth: BbdAnalogWarmthStage;
 
   // LFO Modulation Core
   private lfoNode: OscillatorNode;
@@ -132,11 +134,12 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
     this.lfoNode.connect(this.lfoGainNode);
     this.lfoGainNode.connect(this.delayNode.delayTime);
 
-    // 8. Post-BBD Reconstruction Lowpass Filter (7.5 kHz 2-pole)
-    this.postReconstruction = ctx.createBiquadFilter();
-    this.postReconstruction.type = 'lowpass';
-    this.postReconstruction.frequency.setValueAtTime(7500, ctx.currentTime);
-    this.postReconstruction.Q.setValueAtTime(0.707, ctx.currentTime);
+    // 8. Post-BBD Reconstruction Lowpass Filter (4-pole Sallen-Key cascade) & Compander Saturation
+    this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
+      cutoffFreq: 7500,
+      saturationAmount: 0.35,
+      oversample: '4x',
+    });
 
     // 9. Wet / Dry Mix Summing
     this.dryGain = ctx.createGain();
@@ -157,13 +160,13 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
     this.bypassWet.connect(this.dryGain);
     this.dryGain.connect(this.chorusMixer);
 
-    // B) Wet chorus path with dual tone controls
+    // B) Wet chorus path with dual tone controls & BBD warmth stage
     this.bypassWet.connect(this.preHighpass);
     this.preHighpass.connect(this.lowCutFilter);
     this.lowCutFilter.connect(this.highCutFilter);
     this.highCutFilter.connect(this.delayNode);
-    this.delayNode.connect(this.postReconstruction);
-    this.postReconstruction.connect(this.wetGain);
+    this.delayNode.connect(this.bbdWarmth.inputNode);
+    this.bbdWarmth.outputNode.connect(this.wetGain);
     this.wetGain.connect(this.chorusMixer);
 
     // C) Master wet output
@@ -247,7 +250,7 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
       this.lowCutFilter.disconnect();
       this.highCutFilter.disconnect();
       this.delayNode.disconnect();
-      this.postReconstruction.disconnect();
+      this.bbdWarmth.dispose();
 
       this.dryGain.disconnect();
       this.wetGain.disconnect();

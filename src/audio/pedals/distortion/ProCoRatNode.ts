@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { levelToGain, applyBypassCrossfade, createDcBlocker, driveDependentTrimDb } from '../dspUtils';
+import { HardClipperStage, HARD_CLIPPER_PRESETS } from './HardClipperStage';
 
 /**
  * Output trim calibration:
@@ -27,7 +28,7 @@ const TRIM_SAT_DB = -6.0;
  *      rolls off frequencies above ~11 kHz, rounding sharp digital edges into smooth analog sustain.
  * 
  * 3. Hard Silicon Diode Clipper:
- *    - Symmetrical 1N4148 / 1N914 silicon diodes clipping to ground (Vf ≈ ±0.62V).
+ *    - Symmetrical 1N4148 / 1N914 silicon diodes clipping to ground via HardClipperStage (Vf ≈ ±0.60V).
  *    - Smooth Shockley conduction knee with ~3% vintage component tolerance for rich 2nd and 3rd harmonics.
  *    - 4x oversampling WaveShaper for pristine aliasing-free distortion.
  * 
@@ -52,11 +53,10 @@ export class ProCoRatNode implements AudioPedalNode {
 
   // 2. Dual RC feedback network & LM308 op-amp simulation
   private feedbackBassShelf: BiquadFilterNode;
-  private driveGain: GainNode;
   private lm308SlewFilter: BiquadFilterNode;
 
-  // 3. Symmetrical Silicon Diode Clipper
-  private diodeClipper: WaveShaperNode;
+  // 3. Symmetrical Silicon Diode Clipper Stage
+  private hardClipper: HardClipperStage;
   private diodeSmoothingFilter: BiquadFilterNode;
   private dcBlocker: BiquadFilterNode;
 
@@ -100,18 +100,18 @@ export class ProCoRatNode implements AudioPedalNode {
     this.feedbackBassShelf.type = 'lowshelf';
     this.feedbackBassShelf.frequency.setValueAtTime(650, ctx.currentTime);
 
-    this.driveGain = ctx.createGain();
-
     // LM308 slew-rate / 30pF compensation capacitor rolloff (~11.5 kHz)
     this.lm308SlewFilter = ctx.createBiquadFilter();
     this.lm308SlewFilter.type = 'lowpass';
     this.lm308SlewFilter.frequency.setValueAtTime(11500, ctx.currentTime);
     this.lm308SlewFilter.Q.setValueAtTime(0.707, ctx.currentTime);
 
-    // 3. Hard Silicon Diode Clipper
-    this.diodeClipper = ctx.createWaveShaper();
-    this.diodeClipper.oversample = '4x';
-    this.diodeClipper.curve = this.createSiliconDiodeCurve() as Float32Array<ArrayBuffer>;
+    // 3. Symmetrical Silicon 1N4148 Hard Diode Clipper Stage (4x oversampled)
+    this.hardClipper = new HardClipperStage(
+      ctx,
+      HARD_CLIPPER_PRESETS.SILICON_1N4148,
+      1.8
+    );
 
     // Diode high-frequency smoothing (~9.8 kHz)
     this.diodeSmoothingFilter = ctx.createBiquadFilter();
@@ -137,16 +137,14 @@ export class ProCoRatNode implements AudioPedalNode {
     this.dryGain.gain.setValueAtTime(enabled ? 0 : 1, ctx.currentTime);
 
     // Connect DSP Chain:
-    // Input -> inputSubCut -> feedbackBassShelf -> driveGain -> lm308SlewFilter
-    //       -> diodeClipper -> diodeSmoothingFilter -> dcBlocker -> ratFilterNode
-    //       -> outputGain -> wetGain -> Output
+    // Input -> inputSubCut -> feedbackBassShelf -> lm308SlewFilter -> hardClipper
+    //       -> diodeSmoothingFilter -> dcBlocker -> ratFilterNode -> outputGain -> wetGain -> Output
     // Dry: Input -> dryGain -> Output
     this.inputNode.connect(this.inputSubCut);
     this.inputSubCut.connect(this.feedbackBassShelf);
-    this.feedbackBassShelf.connect(this.driveGain);
-    this.driveGain.connect(this.lm308SlewFilter);
-    this.lm308SlewFilter.connect(this.diodeClipper);
-    this.diodeClipper.connect(this.diodeSmoothingFilter);
+    this.feedbackBassShelf.connect(this.lm308SlewFilter);
+    this.lm308SlewFilter.connect(this.hardClipper.inputNode);
+    this.hardClipper.outputNode.connect(this.diodeSmoothingFilter);
     this.diodeSmoothingFilter.connect(this.dcBlocker);
     this.dcBlocker.connect(this.ratFilterNode);
     this.ratFilterNode.connect(this.outputGain);
@@ -160,34 +158,6 @@ export class ProCoRatNode implements AudioPedalNode {
     this.updateDriveStage();
     this.updateFilter();
     this.updateVolume();
-  }
-
-  /**
-   * Generates authentic 1N4148 / 1N914 silicon diode conduction curve.
-   * Silicon features:
-   *  - Sharp threshold: ~0.60V - 0.65V
-   *  - Distinct knee into hard squared-off saturation
-   *  - Subtle ~3% component asymmetry for rich harmonic bloom
-   */
-  private createSiliconDiodeCurve(): Float32Array {
-    const samples = 8192;
-    const curve = new Float32Array(samples);
-    const posVf = 0.62;
-    const negVf = 0.60; // Subtle diode mismatch
-
-    for (let i = 0; i < samples; i++) {
-      const x = (i / (samples - 1)) * 2 - 1;
-      if (x >= 0) {
-        const norm = x / posVf;
-        curve[i] = (x / Math.pow(1 + Math.pow(norm, 3.8), 1 / 3.8)) * 1.04;
-      } else {
-        const absX = -x;
-        const norm = absX / negVf;
-        curve[i] = -(absX / Math.pow(1 + Math.pow(norm, 3.8), 1 / 3.8)) * 1.04;
-      }
-    }
-
-    return curve;
   }
 
   /**
@@ -209,17 +179,15 @@ export class ProCoRatNode implements AudioPedalNode {
     // Slew rate simulation: as gain approaches max, bandwidth narrows slightly (~11.5 kHz down to ~9.5 kHz)
     const slewCutoff = 11500 - 2000 * norm;
 
-    try {
-      this.driveGain.gain.cancelScheduledValues(now);
-      this.driveGain.gain.setTargetAtTime(gainFactor, now, 0.015);
+    this.hardClipper.setDrive(gainFactor);
 
+    try {
       this.feedbackBassShelf.gain.cancelScheduledValues(now);
       this.feedbackBassShelf.gain.setTargetAtTime(shelfCutDb, now, 0.015);
 
       this.lm308SlewFilter.frequency.cancelScheduledValues(now);
       this.lm308SlewFilter.frequency.setTargetAtTime(slewCutoff, now, 0.015);
     } catch {
-      this.driveGain.gain.setValueAtTime(gainFactor, now);
       this.feedbackBassShelf.gain.setValueAtTime(shelfCutDb, now);
       this.lm308SlewFilter.frequency.setValueAtTime(slewCutoff, now);
     }
@@ -295,9 +263,8 @@ export class ProCoRatNode implements AudioPedalNode {
       this.inputNode.disconnect();
       this.inputSubCut.disconnect();
       this.feedbackBassShelf.disconnect();
-      this.driveGain.disconnect();
       this.lm308SlewFilter.disconnect();
-      this.diodeClipper.disconnect();
+      this.hardClipper.dispose();
       this.diodeSmoothingFilter.disconnect();
       this.dcBlocker.disconnect();
       this.ratFilterNode.disconnect();

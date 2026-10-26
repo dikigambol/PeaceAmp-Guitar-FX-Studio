@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
+import { BbdAnalogWarmthStage } from '../chorus/BbdAnalogWarmthStage';
 
 /**
  * ELECTRO-HARMONIX STEREO ELECTRIC MISTRESS
@@ -11,6 +12,7 @@ import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
  *   - FLANGER DEPTH: Controls sweep depth & intensity of the flanger section
  *   - CHORUS DEPTH: Controls sweep depth & shimmer of the chorus section
  * - Bandpass-filtered feedback loop with 220Hz low-cut & soft-clip saturation ensures zero hum/drone
+ * - Authentic 4-pole Sallen-Key reconstruction filtering & compander saturation via BbdAnalogWarmthStage
  * - Authentic 1.0 Dry level preserves punchy guitar body and dynamics
  */
 export class EhxElectricMistressNode implements AudioPedalNode {
@@ -32,7 +34,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
   // Flanger section
   private flangerInputSum: GainNode;
   private flangerDelayNode: DelayNode;
-  private flangerPostLowpass: BiquadFilterNode;
+  private flangerBbdWarmth: BbdAnalogWarmthStage;
   private flangerFeedbackGain: GainNode;
   private flangerFeedbackHighpass: BiquadFilterNode;
   private flangerFeedbackLowpass: BiquadFilterNode;
@@ -42,7 +44,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
 
   // Chorus section
   private chorusDelayNode: DelayNode;
-  private chorusPostLowpass: BiquadFilterNode;
+  private chorusBbdWarmth: BbdAnalogWarmthStage;
   private chorusWetGain: GainNode;
   private chorusLfoGain: GainNode;
   private chorusLfoInvert: GainNode; // 180° inverted phase for lush 3D dimensional space
@@ -123,11 +125,12 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.flangerDelayNode.delayTime.setValueAtTime(0.0028, ctx.currentTime);
     this.flangerInputSum.connect(this.flangerDelayNode);
 
-    this.flangerPostLowpass = ctx.createBiquadFilter();
-    this.flangerPostLowpass.type = 'lowpass';
-    this.flangerPostLowpass.frequency.setValueAtTime(4800, ctx.currentTime);
-    this.flangerPostLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
-    this.flangerDelayNode.connect(this.flangerPostLowpass);
+    this.flangerBbdWarmth = new BbdAnalogWarmthStage(ctx, {
+      cutoffFreq: 4800,
+      saturationAmount: 0.35,
+      oversample: '4x',
+    });
+    this.flangerDelayNode.connect(this.flangerBbdWarmth.inputNode);
 
     // Feedback Loop (Bandpass 220Hz - 3.0kHz + pure tanh limiter)
     this.flangerFeedbackGain = ctx.createGain();
@@ -150,7 +153,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.flangerFeedbackLimiter.curve = this.createSaturationCurve(1024) as Float32Array<ArrayBuffer>;
     this.flangerFeedbackLimiter.oversample = '2x';
 
-    this.flangerPostLowpass.connect(this.flangerFeedbackGain);
+    this.flangerBbdWarmth.outputNode.connect(this.flangerFeedbackGain);
     this.flangerFeedbackGain.connect(this.flangerFeedbackHighpass);
     this.flangerFeedbackHighpass.connect(this.flangerFeedbackLowpass);
     this.flangerFeedbackLowpass.connect(this.flangerFeedbackLimiter);
@@ -161,7 +164,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
       this.calcFlangerWetMix(this.params.flangerDepth),
       ctx.currentTime
     );
-    this.flangerPostLowpass.connect(this.flangerWetGain);
+    this.flangerBbdWarmth.outputNode.connect(this.flangerWetGain);
 
     // =========================================================================
     // 6. CHORUS ENGINE (Analog BBD chorus delay ~7.5ms)
@@ -170,18 +173,19 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.chorusDelayNode.delayTime.setValueAtTime(0.0075, ctx.currentTime);
     this.warmBodyFilter.connect(this.chorusDelayNode);
 
-    this.chorusPostLowpass = ctx.createBiquadFilter();
-    this.chorusPostLowpass.type = 'lowpass';
-    this.chorusPostLowpass.frequency.setValueAtTime(5200, ctx.currentTime);
-    this.chorusPostLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
-    this.chorusDelayNode.connect(this.chorusPostLowpass);
+    this.chorusBbdWarmth = new BbdAnalogWarmthStage(ctx, {
+      cutoffFreq: 5200,
+      saturationAmount: 0.35,
+      oversample: '4x',
+    });
+    this.chorusDelayNode.connect(this.chorusBbdWarmth.inputNode);
 
     this.chorusWetGain = ctx.createGain();
     this.chorusWetGain.gain.setValueAtTime(
       this.calcChorusWetMix(this.params.chorusDepth),
       ctx.currentTime
     );
-    this.chorusPostLowpass.connect(this.chorusWetGain);
+    this.chorusBbdWarmth.outputNode.connect(this.chorusWetGain);
 
     // =========================================================================
     // 7. LFO MODULATION CORE
@@ -231,8 +235,9 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.mixer.connect(this.dcBlocker);
     this.dcBlocker.connect(this.outputNode);
 
-    // Apply initial bypass state
-    applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx);
+    // Apply initial bypass state (1 ms, matching the other bypass-style pedals so the
+    // startup crossfade finishes inside SignalChain's insert mute)
+    applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx, 0.001);
   }
 
   private calcRateHz(rate: number): number {
@@ -348,7 +353,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
 
     this.flangerInputSum.disconnect();
     this.flangerDelayNode.disconnect();
-    this.flangerPostLowpass.disconnect();
+    this.flangerBbdWarmth.dispose();
     this.flangerFeedbackGain.disconnect();
     this.flangerFeedbackHighpass.disconnect();
     this.flangerFeedbackLowpass.disconnect();
@@ -357,7 +362,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.flangerLfoGain.disconnect();
 
     this.chorusDelayNode.disconnect();
-    this.chorusPostLowpass.disconnect();
+    this.chorusBbdWarmth.dispose();
     this.chorusWetGain.disconnect();
     this.chorusLfoInvert.disconnect();
     this.chorusLfoGain.disconnect();

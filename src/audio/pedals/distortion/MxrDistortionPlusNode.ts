@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { levelToGain, applyBypassCrossfade, createDcBlocker, driveDependentTrimDb } from '../dspUtils';
+import { HardClipperStage, HARD_CLIPPER_PRESETS } from './HardClipperStage';
 
 /**
  * Output trim calibration:
@@ -25,8 +26,8 @@ const TRIM_SAT_DB = -3.5;
  *    - LM741 slew-rate and gain-bandwidth roll-off naturally cushions highs around 10-12 kHz.
  * 
  * 2. Back-to-Back Symmetrical Germanium Hard Diode Clipper:
- *    - Pair of vintage Germanium diodes (1N270 / 1N34A) shunting to ground.
- *    - Very low forward threshold: ~0.30V - 0.34V (compared to 0.6V Silicon).
+ *    - Pair of vintage Germanium diodes (1N270 / 1N34A) shunting to ground modeled via HardClipperStage.
+ *    - Very low forward threshold: ~0.31V - 0.33V (compared to 0.6V Silicon).
  *    - Soft, round exponential knee imparting warm, compressed, fuzzy vintage distortion
  *      rich in harmonic saturation.
  *    - Oversample 4x eliminates any digital aliasing artifacts.
@@ -48,10 +49,9 @@ export class MxrDistortionPlusNode implements AudioPedalNode {
 
   // 2. Frequency-dependent feedback network (720 Hz high-pass boost shelf)
   private feedbackBassShelf: BiquadFilterNode;
-  private driveGain: GainNode;
 
-  // 3. Germanium diode clipper & smoothing
-  private diodeClipper: WaveShaperNode;
+  // 3. Germanium shunt diode clipper & smoothing
+  private hardClipper: HardClipperStage;
   private diodeSmoothingFilter: BiquadFilterNode;
   private dcBlocker: BiquadFilterNode;
 
@@ -100,12 +100,12 @@ export class MxrDistortionPlusNode implements AudioPedalNode {
     this.feedbackBassShelf.type = 'lowshelf';
     this.feedbackBassShelf.frequency.setValueAtTime(720, ctx.currentTime);
 
-    this.driveGain = ctx.createGain();
-
-    // 4. Germanium diode wave shaper
-    this.diodeClipper = ctx.createWaveShaper();
-    this.diodeClipper.oversample = '4x';
-    this.diodeClipper.curve = this.createGermaniumDiodeCurve() as Float32Array<ArrayBuffer>;
+    // 4. Hard Diode Clipper Stage: Back-to-Back Germanium 1N270 Shunt to Ground
+    this.hardClipper = new HardClipperStage(
+      ctx,
+      HARD_CLIPPER_PRESETS.GERMANIUM_1N270,
+      1.5
+    );
 
     // 5. C5 (0.001 µF) diode parallel lowpass filter (~9.5 kHz)
     this.diodeSmoothingFilter = ctx.createBiquadFilter();
@@ -126,16 +126,15 @@ export class MxrDistortionPlusNode implements AudioPedalNode {
     this.dryGain.gain.setValueAtTime(enabled ? 0 : 1, ctx.currentTime);
 
     // Connect DSP Chain:
-    // Input -> inputSubCut -> feedbackBassShelf -> opAmpRollOff -> driveGain
-    //       -> diodeClipper -> diodeSmoothingFilter -> dcBlocker -> levelGain -> wetGain -> Output
+    // Input -> inputSubCut -> feedbackBassShelf -> opAmpRollOff -> hardClipper
+    //       -> diodeSmoothingFilter -> dcBlocker -> levelGain -> wetGain -> Output
     // Dry: Input -> dryGain -> Output
     this.inputNode.connect(this.inputSubCut);
     this.inputSubCut.connect(this.feedbackBassShelf);
     this.feedbackBassShelf.connect(this.opAmpRollOff);
-    this.opAmpRollOff.connect(this.driveGain);
+    this.opAmpRollOff.connect(this.hardClipper.inputNode);
 
-    this.driveGain.connect(this.diodeClipper);
-    this.diodeClipper.connect(this.diodeSmoothingFilter);
+    this.hardClipper.outputNode.connect(this.diodeSmoothingFilter);
     this.diodeSmoothingFilter.connect(this.dcBlocker);
     this.dcBlocker.connect(this.levelGain);
     this.levelGain.connect(this.wetGain);
@@ -147,38 +146,6 @@ export class MxrDistortionPlusNode implements AudioPedalNode {
     // Apply initial parameter values
     this.updateDriveStage();
     this.updateOutputGain();
-  }
-
-  /**
-   * Generates authentic Germanium diode conduction curve (back-to-back 1N270).
-   * Germanium features:
-   *  - Very low threshold: ~0.30V - 0.34V
-   *  - Soft, gradual exponential knee (rounder than Silicon)
-   *  - Slight ~4% component tolerance asymmetry for subtle, warm 2nd-order harmonics
-   */
-  private createGermaniumDiodeCurve(): Float32Array {
-    const samples = 8192;
-    const curve = new Float32Array(samples);
-    const posVf = 0.31; // Germanium positive threshold
-    const negVf = 0.33; // Germanium negative threshold (subtle vintage diode tolerance)
-
-    for (let i = 0; i < samples; i++) {
-      // Map i from 0..samples-1 to x in [-1, 1]
-      const x = (i / (samples - 1)) * 2 - 1;
-
-      // Soft Germanium saturation function:
-      // x / (1 + (|x| / Vf)^2.5)^(1/2.5) with soft knee rounding
-      if (x >= 0) {
-        const norm = x / posVf;
-        curve[i] = (x / Math.pow(1 + Math.pow(norm, 2.4), 1 / 2.4)) * 1.05;
-      } else {
-        const absX = -x;
-        const norm = absX / negVf;
-        curve[i] = -(absX / Math.pow(1 + Math.pow(norm, 2.4), 1 / 2.4)) * 1.05;
-      }
-    }
-
-    return curve;
   }
 
   /**
@@ -202,14 +169,12 @@ export class MxrDistortionPlusNode implements AudioPedalNode {
     // At maximum drive, bass below 720 Hz is shelving down by up to -14 dB relative to mid/highs.
     const shelfCutDb = -14.0 * Math.pow(norm, 1.2);
 
-    try {
-      this.driveGain.gain.cancelScheduledValues(now);
-      this.driveGain.gain.setTargetAtTime(gainFactor, now, 0.015);
+    this.hardClipper.setDrive(gainFactor);
 
+    try {
       this.feedbackBassShelf.gain.cancelScheduledValues(now);
       this.feedbackBassShelf.gain.setTargetAtTime(shelfCutDb, now, 0.015);
     } catch {
-      this.driveGain.gain.setValueAtTime(gainFactor, now);
       this.feedbackBassShelf.gain.setValueAtTime(shelfCutDb, now);
     }
 
@@ -274,8 +239,7 @@ export class MxrDistortionPlusNode implements AudioPedalNode {
       this.inputSubCut.disconnect();
       this.feedbackBassShelf.disconnect();
       this.opAmpRollOff.disconnect();
-      this.driveGain.disconnect();
-      this.diodeClipper.disconnect();
+      this.hardClipper.dispose();
       this.diodeSmoothingFilter.disconnect();
       this.dcBlocker.disconnect();
       this.levelGain.disconnect();

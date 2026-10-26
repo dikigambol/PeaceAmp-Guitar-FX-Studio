@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
+import { BbdAnalogWarmthStage } from './BbdAnalogWarmthStage';
 
 /**
  * BOSS CE-2 Chorus (1979 - 1990)
@@ -10,7 +11,7 @@ import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
  * - Low-frequency oscillator (LFO): smooth quasi-sinusoidal wave
  *   Rate: 0.3 Hz (slow lush ocean swirl) to 3.5 Hz (fast rotary shimmer)
  * - Modulation depth: sweeps delay variation between ±0.0 ms and ±2.2 ms
- * - Signature Sallen-Key analog reconstruction & de-emphasis lowpass filtering (7.2 kHz cutoff),
+ * - Authentic 4-pole Sallen-Key analog reconstruction filtering & compander non-linearity via BbdAnalogWarmthStage,
  *   giving the CE-2 its warm, rich, legendary vintage chorus voicing without digital harshness
  * - Analog 1:1 dry/wet mixing creating authentic constructive & destructive comb filtering
  */
@@ -30,7 +31,7 @@ export class BossCe2Node implements AudioPedalNode {
   private preHighpass: BiquadFilterNode;
   private preEmphasis: BiquadFilterNode;
   private delayNode: DelayNode;
-  private postLowpass: BiquadFilterNode;
+  private bbdWarmth: BbdAnalogWarmthStage;
   private deEmphasis: BiquadFilterNode;
 
   // LFO Modulation Core
@@ -117,11 +118,12 @@ export class BossCe2Node implements AudioPedalNode {
     this.lfoGainNode.connect(this.delayNode.delayTime);
 
     // 6. Post-BBD Reconstruction & Analog Anti-Aliasing Filters:
-    // Steep low-pass filter around 7.2 kHz modeled after the Sallen-Key 2-pole op-amp filter
-    this.postLowpass = ctx.createBiquadFilter();
-    this.postLowpass.type = 'lowpass';
-    this.postLowpass.frequency.setValueAtTime(7200, ctx.currentTime);
-    this.postLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
+    // Authentic 4-pole (24 dB/oct) Sallen-Key lowpass cascade & compander saturation
+    this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
+      cutoffFreq: 7200,
+      saturationAmount: 0.35,
+      oversample: '4x',
+    });
 
     // Matching de-emphasis filter
     this.deEmphasis = ctx.createBiquadFilter();
@@ -147,12 +149,12 @@ export class BossCe2Node implements AudioPedalNode {
     this.bypassWet.connect(this.dryGain);
     this.dryGain.connect(this.chorusMixer);
 
-    // B) Delayed modulated wet path
+    // B) Delayed modulated wet path with BBD warmth & 4-pole reconstruction
     this.bypassWet.connect(this.preHighpass);
     this.preHighpass.connect(this.preEmphasis);
     this.preEmphasis.connect(this.delayNode);
-    this.delayNode.connect(this.postLowpass);
-    this.postLowpass.connect(this.deEmphasis);
+    this.delayNode.connect(this.bbdWarmth.inputNode);
+    this.bbdWarmth.outputNode.connect(this.deEmphasis);
     this.deEmphasis.connect(this.wetGain);
     this.wetGain.connect(this.chorusMixer);
 
@@ -207,7 +209,7 @@ export class BossCe2Node implements AudioPedalNode {
       this.preHighpass.disconnect();
       this.preEmphasis.disconnect();
       this.delayNode.disconnect();
-      this.postLowpass.disconnect();
+      this.bbdWarmth.dispose();
       this.deEmphasis.disconnect();
 
       this.dryGain.disconnect();

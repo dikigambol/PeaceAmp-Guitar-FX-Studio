@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { AudioEngine } from './audio/AudioEngine';
+import { AudioEngine, detectOutputSelectionSupport } from './audio/AudioEngine';
 import type {
   AudioDeviceInfo,
   AudioEngineMetrics,
@@ -25,7 +25,8 @@ import { ChromaticTuner } from './components/tuner/ChromaticTuner';
 import { CabinetSimulatorPanel } from './components/sidebar/CabinetSimulatorPanel';
 import { AmpHeadPanel } from './components/sidebar/AmpHeadPanel';
 import { MasterOutputPanel } from './components/sidebar/MasterOutputPanel';
-import { Pedalboard, calculateNextPedalPosition, type PatchConnection } from './components/pedalboard/Pedalboard';
+import { Pedalboard, type PatchConnection } from './components/pedalboard/Pedalboard';
+import { calculateNextPedalPosition } from './components/pedalboard/pedalLayout';
 import { HeadphoneWarning } from './components/HeadphoneWarning';
 import { ManualModal } from './components/manual/ManualModal';
 import { DesktopOnlyBlocker } from './components/common/DesktopOnlyBlocker';
@@ -64,7 +65,7 @@ export function App() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>('');
   const [outputDevices, setOutputDevices] = useState<AudioDeviceInfo[]>([]);
   const [selectedOutputDeviceId, setSelectedOutputDeviceId] = useState<string>('');
-  const [isOutputSelectionSupported, setIsOutputSelectionSupported] = useState<boolean>(true);
+  const [isOutputSelectionSupported] = useState<boolean>(() => detectOutputSelectionSupport());
   const [isRefreshingDevices, setIsRefreshingDevices] = useState(false);
 
   const [inputGain, setInputGain] = useState(1.0);
@@ -80,8 +81,10 @@ export function App() {
 
   // Active pedals list (initialized as empty board by default)
   const [pedals, setPedals] = useState<PedalInstance[]>([]);
-  const pedalsRef = useRef<PedalInstance[]>(pedals);
-  pedalsRef.current = pedals;
+  const pedalsRef = useRef<PedalInstance[]>([]);
+  useEffect(() => {
+    pedalsRef.current = pedals;
+  }, [pedals]);
 
   // Pedalboard Canvas Layout & Routing State (Clean board by default on fresh page load)
   const [pedalPositions, setPedalPositions] = useState<Record<string, { x: number; y: number }>>({});
@@ -112,8 +115,10 @@ export function App() {
 
   // Tuner & Telemetry (Default: Non-aktif/Bypass; saat AKTIF output otomatis di-mute untuk silent tuning)
   const [tunerEnabled, setTunerEnabled] = useState(false);
-  const tunerEnabledRef = useRef(tunerEnabled);
-  tunerEnabledRef.current = tunerEnabled;
+  const tunerEnabledRef = useRef(false);
+  useEffect(() => {
+    tunerEnabledRef.current = tunerEnabled;
+  }, [tunerEnabled]);
   const [tunerResult, setTunerResult] = useState<TunerResult | null>(null);
   const [metrics, setMetrics] = useState<AudioEngineMetrics>(defaultMetrics);
   const [inputMeter, setInputMeter] = useState<MeterData>(defaultMeter);
@@ -142,8 +147,6 @@ export function App() {
         setSelectedOutputDeviceId((prev) => prev || outList[0].deviceId);
       }
     });
-
-    setIsOutputSelectionSupported(engine.isOutputSelectionSupported());
 
     return () => {
       engine.stop();
@@ -558,22 +561,6 @@ export function App() {
     });
   };
 
-  const handleMovePedal = (pedalId: string, direction: 'left' | 'right') => {
-    setPedals((prev) => {
-      const idx = prev.findIndex((p) => p.id === pedalId);
-      if (idx === -1) return prev;
-      const targetIdx = direction === 'left' ? idx - 1 : idx + 1;
-      if (targetIdx < 0 || targetIdx >= prev.length) return prev;
-
-      const next = [...prev];
-      const [item] = next.splice(idx, 1);
-      next.splice(targetIdx, 0, item);
-
-      engineRef.current?.setPedalInstances(next);
-      return next;
-    });
-  };
-
   const handleActiveChainChange = useCallback((activePedals: PedalInstance[]) => {
     engineRef.current?.setPedalInstances(activePedals);
   }, []);
@@ -908,10 +895,8 @@ export function App() {
             onToggleEnabled={handleTogglePedalEnabled}
             onChangeParam={handleChangePedalParam}
             onRemovePedal={handleRemovePedal}
-            onMovePedal={handleMovePedal}
             onAddPedal={handleAddPedal}
             onActiveChainChange={handleActiveChainChange}
-            isEngineRunning={status === 'running'}
           />
         </section>
       </main>

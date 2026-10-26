@@ -46,6 +46,30 @@ export function createDcBlocker(ctx: BaseAudioContext, frequency = 12): BiquadFi
 }
 
 /**
+ * True first-order (6 dB/oct) low-pass built from an IIRFilterNode.
+ *
+ * BiquadFilterNode 'lowpass' is always 2nd-order (12 dB/oct) even at Q = 0.5,
+ * so static RC filters that are single-pole in the real circuit need this.
+ * Coefficients use the bilinear transform with K = tan(pi * fc / fs).
+ */
+export function createOnePoleLowpass(ctx: BaseAudioContext, frequency: number): IIRFilterNode {
+  const fs = ctx.sampleRate;
+  const fc = Math.max(1, Math.min(frequency, fs * 0.45));
+  const k = Math.tan((Math.PI * fc) / fs);
+  const b0 = k / (1 + k);
+  return ctx.createIIRFilter([b0, b0], [1, (k - 1) / (k + 1)]);
+}
+
+/** True first-order (6 dB/oct) high-pass. See createOnePoleLowpass. */
+export function createOnePoleHighpass(ctx: BaseAudioContext, frequency: number): IIRFilterNode {
+  const fs = ctx.sampleRate;
+  const fc = Math.max(1, Math.min(frequency, fs * 0.45));
+  const k = Math.tan((Math.PI * fc) / fs);
+  const b0 = 1 / (1 + k);
+  return ctx.createIIRFilter([b0, -b0], [1, (k - 1) / (k + 1)]);
+}
+
+/**
  * Click-free, pop-free true bypass crossfade.
  * Resilient against conflicting scheduled automation and guarantees exact 0.0 wet leakage.
  */

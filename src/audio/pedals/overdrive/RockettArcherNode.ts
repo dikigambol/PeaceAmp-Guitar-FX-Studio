@@ -8,6 +8,9 @@ const OUTPUT_TRIM_DB = -2.3;
  * J. Rockett Audio Designs Archer (Tour Series)
  * Boutique recreation of the mythical Klon Centaur circuit with NOS germanium diodes,
  * pristine clean buffer, dual-ganged clean blend potentiometer, and active Treble circuit.
+ *
+ * Note: shares its DSP topology with KlonCentaurNode; the voicing constants (450 Hz
+ * pre-filter, 1.2 kHz mid-hump, 3.8 kHz treble shelf, tighter diode knee) are the differences.
  */
 export class RockettArcherNode implements AudioPedalNode {
   public id: string;

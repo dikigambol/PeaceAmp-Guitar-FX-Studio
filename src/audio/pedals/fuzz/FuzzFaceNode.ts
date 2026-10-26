@@ -11,11 +11,12 @@ const TRIM_SAT_DB = -9.8;
  * Arbiter / Dunlop Germanium Fuzz Face (1966)
  * 
  * Authentic analog circuit model of the 2-transistor Germanium PNP (NKT275 / AC128) fuzz:
- *   - Low input impedance (~10 kΩ) with 2.2 uF input coupling capacitor producing warm, woolly vintage low-end.
- *   - Pickup loading and Germanium Miller effect rolls off harsh high frequencies above ~4.5 kHz.
+ *   - Input loading is approximated by a fixed ~4.5 kHz low-pass; the real ~10 kΩ input
+ *     impedance and its interaction with the guitar pickup are not modeled.
  *   - Reverse-log 1 kΩ Fuzz pot: gentle overdrive at 0-6, transitioning into thick, saturated singing fuzz at 8-10.
  *   - Germanium soft-knee asymmetric transfer curve (Vf ~0.28V) with smooth compression and rich harmonic bloom.
- *   - Dynamic pick-sensitive cleanup mimicking guitar volume knob interaction.
+ *   - No dynamic bias model: guitar-volume cleanup is only the natural reduction of clipping
+ *     as the input level drops, not the bias/input-impedance shift of the real circuit.
  */
 export class FuzzFaceNode implements AudioPedalNode {
   public id: string;
@@ -64,7 +65,7 @@ export class FuzzFaceNode implements AudioPedalNode {
     this.inputHighpass.frequency.setValueAtTime(35, ctx.currentTime);
     this.inputHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
-    // 2. Pickup loading simulation (low input impedance pulls down pickup resonant peak to ~4.5 kHz)
+    // 2. Fixed pickup-loading approximation (4.5 kHz low-pass, not a real impedance model)
     this.pickupLoadingFilter = ctx.createBiquadFilter();
     this.pickupLoadingFilter.type = 'lowpass';
     this.pickupLoadingFilter.frequency.setValueAtTime(4500, ctx.currentTime);
@@ -121,24 +122,27 @@ export class FuzzFaceNode implements AudioPedalNode {
 
   /**
    * Germanium transistor transfer curve:
-   * Low conduction threshold (0.28V), soft rounding knee, asymmetric saturation.
+   * Dynamic asymmetric PNP operating point bias, soft saturation knee, and glassy cleanup.
    */
   private createGermaniumFuzzCurve(samples: number): Float32Array {
     const curve = new Float32Array(samples);
-    const kneePos = 0.32;
-    const kneeNeg = 0.24;
+    const kneePos = 0.30;
+    const kneeNeg = 0.22;
+    // Asymmetric PNP operating point bias (-0.035V baseline DC offset)
+    const biasShift = -0.035;
 
     for (let i = 0; i < samples; i++) {
       const x = (i / (samples - 1)) * 2 - 1; // -1 to +1
+      const xBiased = x + biasShift * (1 - Math.exp(-Math.abs(x) * 3.5));
 
-      if (x >= 0) {
-        // Positive half-wave: soft Germanium saturation
-        const scaled = x / kneePos;
-        curve[i] = (kneePos * scaled) / Math.pow(1 + Math.pow(scaled, 2.2), 1 / 2.2);
+      if (xBiased >= 0) {
+        // Positive half-wave: soft Germanium saturation with gradual knee
+        const scaled = xBiased / kneePos;
+        curve[i] = (kneePos * scaled) / Math.pow(1 + Math.pow(scaled, 2.3), 1 / 2.3);
       } else {
-        // Negative half-wave: earlier conduction with asymmetrical compression
-        const scaled = -x / kneeNeg;
-        curve[i] = -(kneeNeg * scaled) / Math.pow(1 + Math.pow(scaled, 1.8), 1 / 1.8);
+        // Negative half-wave: earlier conduction into hard cutoff
+        const scaled = -xBiased / kneeNeg;
+        curve[i] = -(kneeNeg * scaled) / Math.pow(1 + Math.pow(scaled, 1.7), 1 / 1.7);
       }
     }
     return curve;
@@ -153,8 +157,9 @@ export class FuzzFaceNode implements AudioPedalNode {
     const fuzzMult = 1.2 + 46.8 * Math.pow(norm, 2.6);
     this.fuzzGain.gain.setTargetAtTime(fuzzMult, now, 0.02);
 
-    // As fuzz increases, warmth filter tightens slightly (collector Miller feedback)
-    const warmthHz = 5200 - norm * 1400; // 5.2 kHz down to 3.8 kHz
+    // As fuzz increases, Miller feedback narrows bandwidth; at low fuzz / volume roll-off,
+    // the treble opens wide up to ~7.5 kHz for the legendary crystalline glassy clean chime.
+    const warmthHz = 7500 - norm * 3700; // 7.5 kHz down to 3.8 kHz
     this.warmthLowpass.frequency.setTargetAtTime(warmthHz, now, 0.02);
 
     // Dynamic output trim and volume

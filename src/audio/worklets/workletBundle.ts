@@ -1,6 +1,6 @@
 /**
  * Inlined AudioWorklet processor code for zero-latency, thread-isolated
- * Noise Gate and Infinite Layer Looper.
+ * Noise Gate, Infinite Layer Looper, Compressor and Phaser cores.
  * 
  * Inlined via Blob URL to avoid Vite path resolution and MIME-type issues
  * across production bundles, PWA offline caches, and dev servers.
@@ -374,9 +374,242 @@ class CompressorProcessor extends AudioWorkletProcessor {
   }
 }
 
+/**
+ * 4-stage first-order all-pass phaser (4 poles, 2 notches when mixed with dry).
+ *
+ * The whole phase-shift core lives in one processor because a native Web Audio
+ * feedback cycle without a DelayNode is muted; here the feedback path is
+ * sample-accurate and the LFO modulates the all-pass cutoff per sample.
+ * Varying the cutoff inside the loop is what produces the analog "sweep" instead
+ * of a control-rate stepped filter.
+ */
+class PhaserProcessor extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    return [
+      { name: 'rate', defaultValue: 0.6, minValue: 0.01, maxValue: 12, automationRate: 'k-rate' },
+      { name: 'center', defaultValue: 900, minValue: 40, maxValue: 8000, automationRate: 'k-rate' },
+      { name: 'sweep', defaultValue: 600, minValue: 0, maxValue: 7000, automationRate: 'k-rate' },
+      { name: 'feedback', defaultValue: 0, minValue: 0, maxValue: 0.9, automationRate: 'k-rate' },
+    ];
+  }
+
+  constructor() {
+    super();
+    this.phase = 0;
+    this.fb = [0, 0];
+    this.hist = [];
+    for (let s = 0; s < 4; s++) {
+      this.hist.push({ x: [0, 0], y: [0, 0] });
+    }
+  }
+
+  process(inputs, outputs, parameters) {
+    const input = inputs[0];
+    const output = outputs[0];
+    if (!input || input.length === 0 || !output || output.length === 0) return true;
+
+    const channels = Math.min(input.length, output.length);
+    const len = input[0].length;
+    const rate = parameters.rate[0];
+    const center = parameters.center[0];
+    const sweep = parameters.sweep[0];
+    const feedback = parameters.feedback[0];
+    const inc = rate / sampleRate;
+    const coeffs = [0, 0, 0, 0];
+
+    for (let i = 0; i < len; i++) {
+      const lfo = Math.sin(2 * Math.PI * this.phase);
+      this.phase += inc;
+      if (this.phase >= 1) this.phase -= 1;
+
+      // First-order all-pass coefficient a = (tan(pi*fc/fs) - 1) / (tan(pi*fc/fs) + 1)
+      for (let s = 0; s < 4; s++) {
+        const f = Math.max(20, Math.min(sampleRate * 0.45, center + sweep * lfo));
+        const t = Math.tan((Math.PI * f) / sampleRate);
+        coeffs[s] = (t - 1) / (t + 1);
+      }
+
+      for (let ch = 0; ch < channels; ch++) {
+        let x = input[ch][i] + feedback * this.fb[ch];
+        for (let s = 0; s < 4; s++) {
+          const h = this.hist[s];
+          const a = coeffs[s];
+          const y = a * x + h.x[ch] - a * h.y[ch];
+          h.x[ch] = x;
+          h.y[ch] = y;
+          x = y;
+        }
+        if (!isFinite(x)) x = 0;
+        this.fb[ch] = x;
+        output[ch][i] = x;
+      }
+    }
+
+    return true;
+  }
+}
+
+/**
+ * Feedback-loop diode clipper for op-amp overdrive stages (Tube Screamer family).
+ *
+ * Behavioural model, not a SPICE netlist:
+ *   - Input side: 720 Hz gain shelf (unity path + drive * high-passed path).
+ *   - Nonlinear element sits in the feedback path, not after the gain stage.
+ *   - The loop is implicit; it is solved with a one-pole feedback state at the
+ *     Rf || Cf corner, so the knee softens dynamically instead of being a fixed
+ *     memoryless curve.
+ *   - 4x oversampling with linear interpolation and a 4th-order decimator.
+ *
+ * The feedback state update is the only approximation: the true zero-delay loop
+ * is solved one sample late at the oversampled rate (5.2 us at 48 kHz).
+ */
+class FeedbackClipperProcessor extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    return [
+      { name: 'drive', defaultValue: 11, minValue: 0.5, maxValue: 400, automationRate: 'k-rate' },
+      { name: 'feedback', defaultValue: 0.6, minValue: 0, maxValue: 0.95, automationRate: 'k-rate' },
+      { name: 'kneePos', defaultValue: 0.77, minValue: 0.05, maxValue: 2.0, automationRate: 'k-rate' },
+      { name: 'kneeNeg', defaultValue: 0.77, minValue: 0.05, maxValue: 2.0, automationRate: 'k-rate' },
+      { name: 'humpHz', defaultValue: 720, minValue: 20, maxValue: 5000, automationRate: 'k-rate' },
+      { name: 'feedbackHz', defaultValue: 20000, minValue: 200, maxValue: 80000, automationRate: 'k-rate' },
+      { name: 'makeup', defaultValue: 0.5, minValue: 0.02, maxValue: 4, automationRate: 'k-rate' },
+    ];
+  }
+
+  constructor() {
+    super();
+    this.os = 4;
+    this.prev = [0, 0];
+    this.humpLp = [0, 0];
+    this.fbState = [0, 0];
+    this.dcX = [0, 0];
+    this.dcY = [0, 0];
+    // Two cascaded biquads per channel, stored as [ch * 2 + stage][z1, z2].
+    this.decZ = [];
+    this.dec = null;
+    this.decRate = 0;
+  }
+
+  decimator(fs) {
+    if (this.dec && this.decRate === fs) return this.dec;
+    const cutoff = sampleRate * 0.42;
+    const w0 = (2 * Math.PI * cutoff) / fs;
+    const cosw = Math.cos(w0);
+    const alpha = Math.sin(w0) / (2 * 0.7071067811865476);
+    const a0 = 1 + alpha;
+    const b0 = ((1 - cosw) / 2) / a0;
+    const b1 = (1 - cosw) / a0;
+    const b2 = b0;
+    const a1 = (-2 * cosw) / a0;
+    const a2 = (1 - alpha) / a0;
+    this.dec = [b0, b1, b2, a1, a2];
+    this.decRate = fs;
+    return this.dec;
+  }
+
+  process(inputs, outputs, parameters) {
+    const input = inputs[0];
+    const output = outputs[0];
+    if (!input || input.length === 0 || !output || output.length === 0) return true;
+
+    const channels = Math.min(input.length, output.length);
+    const len = input[0].length;
+    const drive = parameters.drive[0];
+    const feedback = parameters.feedback[0];
+    const kneePos = Math.max(0.02, parameters.kneePos[0]);
+    const kneeNeg = Math.max(0.02, parameters.kneeNeg[0]);
+    const humpHz = parameters.humpHz[0];
+    const feedbackHz = parameters.feedbackHz[0];
+    const makeup = parameters.makeup[0];
+
+    const fsOs = sampleRate * this.os;
+    const humpA = 1 - Math.exp((-2 * Math.PI * humpHz) / fsOs);
+    const fbHz = Math.min(feedbackHz, fsOs * 0.45);
+    const fbA = 1 - Math.exp((-2 * Math.PI * fbHz) / fsOs);
+    const dcR = Math.exp((-2 * Math.PI * 15) / fsOs);
+    const dec = this.decimator(fsOs);
+    const b0 = dec[0];
+    const b1 = dec[1];
+    const b2 = dec[2];
+    const a1 = dec[3];
+    const a2 = dec[4];
+
+    for (let ch = 0; ch < channels; ch++) {
+      if (!this.decZ[ch * 2]) this.decZ[ch * 2] = [0, 0];
+      if (!this.decZ[ch * 2 + 1]) this.decZ[ch * 2 + 1] = [0, 0];
+      const zA = this.decZ[ch * 2];
+      const zB = this.decZ[ch * 2 + 1];
+
+      const inCh = input[ch];
+      const outCh = output[ch];
+      const prevX = this.prev[ch];
+      let lastOut = 0;
+
+      for (let i = 0; i < len; i++) {
+        const x = inCh[i];
+
+        for (let k = 1; k <= this.os; k++) {
+          // First-order hold between the previous and current input sample.
+          const xs = prevX + (x - prevX) * (k / this.os);
+
+          // 720 Hz gain shelf: unity at DC, drive * high-pass above the corner.
+          this.humpLp[ch] += humpA * (xs - this.humpLp[ch]);
+          const hp = xs - this.humpLp[ch];
+          const target = (1 + feedback) * (xs + drive * hp);
+
+          // Diode nonlinearity in the feedback path. The (1 + feedback) term
+          // restores the small-signal gain that the loop would otherwise pull
+          // down, so only the knee/compression changes, not the overall level.
+          const u = target - feedback * this.fbState[ch];
+          const y = u >= 0
+            ? kneePos * Math.tanh(u / kneePos)
+            : -kneeNeg * Math.tanh(-u / kneeNeg);
+
+          // Rf || Cf feedback state: the loop reacts over time instead of
+          // clipping instantaneously.
+          this.fbState[ch] += fbA * (y - this.fbState[ch]);
+
+          // Asymmetric knees can leave DC; block it before the decimator.
+          const dc = y - this.dcX[ch] + dcR * this.dcY[ch];
+          this.dcX[ch] = y;
+          this.dcY[ch] = dc;
+
+          let s = dc * makeup;
+
+          let w = b0 * s + zA[0];
+          zA[0] = b1 * s - a1 * w + zA[1];
+          zA[1] = b2 * s - a2 * w;
+          s = w;
+
+          w = b0 * s + zB[0];
+          zB[0] = b1 * s - a1 * w + zB[1];
+          zB[1] = b2 * s - a2 * w;
+          s = w;
+
+          if (k === this.os) lastOut = s;
+        }
+
+        if (!isFinite(lastOut)) {
+          lastOut = 0;
+          this.fbState[ch] = 0;
+          this.humpLp[ch] = 0;
+          this.dcX[ch] = 0;
+          this.dcY[ch] = 0;
+        }
+        outCh[i] = lastOut;
+        this.prev[ch] = x;
+      }
+    }
+
+    return true;
+  }
+}
+
 registerProcessor('noise-gate-processor', NoiseGateProcessor);
 registerProcessor('looper-processor', LooperProcessor);
 registerProcessor('compressor-processor', CompressorProcessor);
+registerProcessor('phaser-processor', PhaserProcessor);
+registerProcessor('feedback-clipper-processor', FeedbackClipperProcessor);
 `;
 
 let workletModuleUrl: string | null = null;

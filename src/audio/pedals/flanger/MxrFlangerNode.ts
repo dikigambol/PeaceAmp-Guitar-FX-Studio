@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
+import { BbdAnalogWarmthStage } from '../chorus/BbdAnalogWarmthStage';
 
 /**
  * MXR M117R FLANGER
@@ -13,7 +14,7 @@ import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
  *   - SPEED: LFO sweep frequency from ultra-slow cosmic roar (~0.04 Hz) to rapid swirl (~3.5 Hz)
  *   - REGEN: Regeneration / feedback resonance into BBD input
  * - 220 Hz low-cut filter in feedback loop prevents low-frequency drone/hum even at maximum REGEN
- * - Soft saturation tanh limiter emulates vintage analog BBD harmonic warmth
+ * - Authentic 4-pole Sallen-Key reconstruction filter & compander saturation via BbdAnalogWarmthStage
  */
 export class MxrFlangerNode implements AudioPedalNode {
   public id: string;
@@ -32,7 +33,7 @@ export class MxrFlangerNode implements AudioPedalNode {
   private warmBodyFilter: BiquadFilterNode;
   private delayInputSum: GainNode;
   private delayNode: DelayNode;
-  private postLowpass: BiquadFilterNode;
+  private bbdWarmth: BbdAnalogWarmthStage;
 
   // Feedback (REGEN) loop
   private feedbackGain: GainNode;
@@ -111,12 +112,13 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.delayNode.delayTime.setValueAtTime(initialDelay, ctx.currentTime);
     this.delayInputSum.connect(this.delayNode);
 
-    // 7. BBD Reconstruction & Anti-Aliasing Lowpass (4.2 kHz)
-    this.postLowpass = ctx.createBiquadFilter();
-    this.postLowpass.type = 'lowpass';
-    this.postLowpass.frequency.setValueAtTime(4200, ctx.currentTime);
-    this.postLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
-    this.delayNode.connect(this.postLowpass);
+    // 7. BBD Reconstruction & Anti-Aliasing (4-Pole Sallen-Key 4.2 kHz) & Compander Saturation
+    this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
+      cutoffFreq: 4200,
+      saturationAmount: 0.35,
+      oversample: '4x',
+    });
+    this.delayNode.connect(this.bbdWarmth.inputNode);
 
     // 8. Feedback (REGEN) loop: Bandpass filtered (220Hz - 3.2kHz) + soft saturation limiter
     this.feedbackGain = ctx.createGain();
@@ -139,7 +141,7 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.feedbackLimiter.curve = this.createSaturationCurve(1024) as Float32Array<ArrayBuffer>;
     this.feedbackLimiter.oversample = '2x';
 
-    this.postLowpass.connect(this.feedbackGain);
+    this.bbdWarmth.outputNode.connect(this.feedbackGain);
     this.feedbackGain.connect(this.feedbackHighpass);
     this.feedbackHighpass.connect(this.feedbackLowpass);
     this.feedbackLowpass.connect(this.feedbackLimiter);
@@ -165,7 +167,7 @@ export class MxrFlangerNode implements AudioPedalNode {
 
     this.wetGain = ctx.createGain();
     this.wetGain.gain.setValueAtTime(0.82, ctx.currentTime);
-    this.postLowpass.connect(this.wetGain);
+    this.bbdWarmth.outputNode.connect(this.wetGain);
 
     this.mixer = ctx.createGain();
     this.dryGain.connect(this.mixer);
@@ -176,8 +178,9 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.mixer.connect(this.dcBlocker);
     this.dcBlocker.connect(this.outputNode);
 
-    // Apply initial bypass state
-    applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx);
+    // Apply initial bypass state (1 ms, matching the other bypass-style pedals so the
+    // startup crossfade finishes inside SignalChain's insert mute)
+    applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx, 0.001);
   }
 
   private calcBaseDelay(manual: number): number {
@@ -281,7 +284,7 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.warmBodyFilter.disconnect();
     this.delayInputSum.disconnect();
     this.delayNode.disconnect();
-    this.postLowpass.disconnect();
+    this.bbdWarmth.dispose();
     this.feedbackGain.disconnect();
     this.feedbackHighpass.disconnect();
     this.feedbackLowpass.disconnect();

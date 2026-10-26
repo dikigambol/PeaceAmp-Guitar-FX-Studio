@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { levelToGain, applyBypassCrossfade, createDcBlocker, driveDependentTrimDb } from '../dspUtils';
+import { HardClipperStage, HARD_CLIPPER_PRESETS } from './HardClipperStage';
 
 /**
  * Output trim calibration:
@@ -19,7 +20,7 @@ const TRIM_SAT_DB = -7.0;
  *    - Pre-gain emphasis peak around 2.2 kHz (+4 dB) for aggressive pick response.
  * 
  * 2. Cascaded Op-Amp Gain Stages & Diode Hard Clipping:
- *    - Dual-stage high-gain overdrive pushing symmetrical diode clipping.
+ *    - Dual-stage high-gain overdrive pushing symmetrical LED diode clipping via HardClipperStage.
  *    - Delivers the thick, singing, saturated roar of a cranked Marshall JCM800 stack.
  *    - 4x oversampling eliminates digital aliasing.
  *    - Analog low-pass smoothing filter at 5.8 kHz.
@@ -45,9 +46,8 @@ export class MarshallShredMasterNode implements AudioPedalNode {
   private inputHighpass: BiquadFilterNode;
   private inputPreEmphasis: BiquadFilterNode;
 
-  // 2. High-Gain Drive & Diode Hard Clipper
-  private driveGain: GainNode;
-  private diodeClipper: WaveShaperNode;
+  // 2. High-Gain Drive & Hard Clipper Stage
+  private hardClipper: HardClipperStage;
   private dcBlocker: BiquadFilterNode;
   private postDistSmoothing: BiquadFilterNode;
 
@@ -108,12 +108,12 @@ export class MarshallShredMasterNode implements AudioPedalNode {
     this.inputPreEmphasis.Q.setValueAtTime(1.1, ctx.currentTime);
     this.inputPreEmphasis.gain.setValueAtTime(4.0, ctx.currentTime);
 
-    // 2. High-Gain Drive & Clipper
-    this.driveGain = ctx.createGain();
-
-    this.diodeClipper = ctx.createWaveShaper();
-    this.diodeClipper.curve = this.createShredClippingCurve(4096) as Float32Array<ArrayBuffer>;
-    this.diodeClipper.oversample = '4x';
+    // 2. High-Gain Drive & Hard Diode Clipper Stage (Symmetrical Red LED, 4x oversampled)
+    this.hardClipper = new HardClipperStage(
+      ctx,
+      HARD_CLIPPER_PRESETS.RED_LED,
+      2.0
+    );
 
     this.dcBlocker = createDcBlocker(ctx, 15);
 
@@ -147,14 +147,13 @@ export class MarshallShredMasterNode implements AudioPedalNode {
     this.volumeGain = ctx.createGain();
 
     // Signal Routing:
-    // inputNode -> inputHighpass -> inputPreEmphasis -> driveGain -> diodeClipper -> dcBlocker
+    // inputNode -> inputHighpass -> inputPreEmphasis -> hardClipper -> dcBlocker
     // -> postDistSmoothing -> eqBass -> eqContour -> eqTreble -> postRecoveryFilter
     // -> volumeGain -> wetGain -> outputNode
     this.inputNode.connect(this.inputHighpass);
     this.inputHighpass.connect(this.inputPreEmphasis);
-    this.inputPreEmphasis.connect(this.driveGain);
-    this.driveGain.connect(this.diodeClipper);
-    this.diodeClipper.connect(this.dcBlocker);
+    this.inputPreEmphasis.connect(this.hardClipper.inputNode);
+    this.hardClipper.outputNode.connect(this.dcBlocker);
     this.dcBlocker.connect(this.postDistSmoothing);
     this.postDistSmoothing.connect(this.eqBass);
     this.eqBass.connect(this.eqContour);
@@ -172,34 +171,11 @@ export class MarshallShredMasterNode implements AudioPedalNode {
     this.updateVolume();
   }
 
-  /**
-   * Authentic Marshall ShredMaster asymmetrical hard clipping curve:
-   * Symmetrical silicon diodes with warm compressed saturation knee and singing sustain.
-   */
-  private createShredClippingCurve(samples: number): Float32Array {
-    const curve = new Float32Array(samples);
-    const mid = (samples - 1) / 2;
-
-    for (let i = 0; i < samples; i++) {
-      const x = (i - mid) / mid; // -1 to +1
-
-      // Soft-knee tanh with progressive hard ceiling
-      const sign = x < 0 ? -1 : 1;
-      const absX = Math.abs(x);
-      const v = absX * 4.6;
-      const y = sign * Math.tanh(v * 0.92) * 0.88;
-
-      curve[i] = y;
-    }
-
-    return curve;
-  }
-
   private updateGain(): void {
     const t = Math.max(0, Math.min(10, this.gainVal)) / 10;
     // Logarithmic gain sweep (8x to 200x)
     const driveLin = 8.0 * Math.pow(25.0, t);
-    this.driveGain.gain.setTargetAtTime(driveLin, this.ctx.currentTime, 0.015);
+    this.hardClipper.setDrive(driveLin);
     this.updateVolume();
   }
 
@@ -277,8 +253,7 @@ export class MarshallShredMasterNode implements AudioPedalNode {
       this.wetGain.disconnect();
       this.inputHighpass.disconnect();
       this.inputPreEmphasis.disconnect();
-      this.driveGain.disconnect();
-      this.diodeClipper.disconnect();
+      this.hardClipper.dispose();
       this.dcBlocker.disconnect();
       this.postDistSmoothing.disconnect();
       this.eqBass.disconnect();

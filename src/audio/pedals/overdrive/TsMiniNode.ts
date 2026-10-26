@@ -13,6 +13,7 @@ const TS_MINI_CONFIG: TubeScreamerConfig = {
   humpHz: 720,
   clipKnee: 0.3,
   clipSharpness: 2.0,
+  loopFeedback: 0.6,
   potExponent: 3.3,
   toneMinHz: 723,
   toneMaxHz: 3000,

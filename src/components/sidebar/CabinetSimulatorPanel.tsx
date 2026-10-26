@@ -304,7 +304,7 @@ export const CabinetSimulatorPanel: React.FC<CabinetSimulatorPanelProps> = ({
           {/* Quick Demo IRs */}
           <div style={{ marginTop: '6px' }}>
             <div style={{ fontSize: '9px', color: '#bfa168', marginBottom: '3px', fontWeight: 600 }}>
-              FREE DEMO IR SAMPLES:
+              REAL CAPTURED IR SAMPLES:
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
               <button
@@ -322,7 +322,7 @@ export const CabinetSimulatorPanel: React.FC<CabinetSimulatorPanelProps> = ({
                     console.error(e);
                   }
                 }}
-                title="Try 24-bit 48kHz Mesa 4x12 V30 Demo IR"
+                title="Real measured Mesa 4x12 Oversized V30 + SM57 IR"
               >
                 Mesa V30
               </button>
@@ -341,7 +341,7 @@ export const CabinetSimulatorPanel: React.FC<CabinetSimulatorPanelProps> = ({
                     console.error(e);
                   }
                 }}
-                title="Try 24-bit 48kHz Marshall Greenback Demo IR"
+                title="Real measured Marshall 1960AX Celestion Greenback IR (48kHz/24-bit)"
               >
                 Marshall 1960
               </button>
@@ -360,9 +360,66 @@ export const CabinetSimulatorPanel: React.FC<CabinetSimulatorPanelProps> = ({
                     console.error(e);
                   }
                 }}
-                title="Try 24-bit 48kHz Fender Twin Ribbon Demo IR"
+                title="Real measured Fender Vintage 2x12 Open Back IR"
               >
-                Twin Ribbon
+                Twin 2x12
+              </button>
+              <button
+                type="button"
+                className="cab-upload-btn"
+                style={{ fontSize: '9px', padding: '3px 4px' }}
+                disabled={!settings.enabled}
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/sample-irs/Vox_AC30_2x12_Alnico_SM57.wav');
+                    const blob = await res.blob();
+                    const file = new File([blob], 'Vox_AC30_2x12_Alnico_SM57.wav', { type: 'audio/wav' });
+                    onLoadCustomIR?.(file);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+                title="Real measured Vox AC30 2x12 Celestion Blue + SM57 IR"
+              >
+                Vox AC30
+              </button>
+              <button
+                type="button"
+                className="cab-upload-btn"
+                style={{ fontSize: '9px', padding: '3px 4px' }}
+                disabled={!settings.enabled}
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/sample-irs/Roland_JC120_2x12_Studio_SM7.wav');
+                    const blob = await res.blob();
+                    const file = new File([blob], 'Roland_JC120_2x12_Studio_SM7.wav', { type: 'audio/wav' });
+                    onLoadCustomIR?.(file);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+                title="Real measured Roland JC-120 2x12 Studio + SM7 IR"
+              >
+                JC-120
+              </button>
+              <button
+                type="button"
+                className="cab-upload-btn"
+                style={{ fontSize: '9px', padding: '3px 4px' }}
+                disabled={!settings.enabled}
+                onClick={async () => {
+                  try {
+                    const res = await fetch('/sample-irs/Orange_PPC412_V30_SM57.wav');
+                    const blob = await res.blob();
+                    const file = new File([blob], 'Orange_PPC412_V30_SM57.wav', { type: 'audio/wav' });
+                    onLoadCustomIR?.(file);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }}
+                title="Real measured Orange PPC412 Baltic Birch V30 + SM57 IR"
+              >
+                Orange 4x12
               </button>
             </div>
           </div>

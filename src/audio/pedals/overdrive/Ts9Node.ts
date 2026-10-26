@@ -13,6 +13,7 @@ const TS9_CONFIG: TubeScreamerConfig = {
   humpHz: 720,
   clipKnee: 0.31,
   clipSharpness: 2.3,
+  loopFeedback: 0.58,
   potExponent: 3.0,
   toneMinHz: 723,
   toneMaxHz: 3300,

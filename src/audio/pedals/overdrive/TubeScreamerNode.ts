@@ -1,19 +1,25 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { createDcBlocker, levelToGain, applyBypassCrossfade } from '../dspUtils';
+import { FeedbackClipperStage } from './FeedbackClipperStage';
 
 /**
- * Tube Screamer family core (TS808 / TS9 / TS Mini).
+ * Tube Screamer family core (TS808 / TS9 / TS Mini / SD-1).
  *
- * Models the actual op-amp topology instead of a "high-pass + clipper":
+ * Op-amp topology:
  *
  *   gain(f) = 1 + (Rf / Rg) * highpass_720Hz(f)      Rg = 4.7k + 47nF, Rf = 51k + DRIVE (500k audio taper)
  *
  *   - Below ~720 Hz the stage has UNITY gain, so the bass/body of the guitar passes straight
  *     through (this is what a real TS does - the mid-hump is a gain shelf, not a bass cut).
- *   - Above ~720 Hz gain rises to 21..41 dB depending on DRIVE.
+ *   - Above ~720 Hz gain rises to ~21..41 dB depending on DRIVE.
  *   - Rf is shunted by 51 pF, so the drive-dependent feedback low-pass sits at 61 kHz (drive 0)
- *     down to 5.7 kHz (drive 10).
- *   - The 1N914 / 1S1588 diode pair lives in the feedback loop: soft, symmetrical clipping.
+ *     down to 5.7 kHz.
+ *   - The 1N914 / 1S1588 diode pair sits in the op-amp feedback loop in the real circuit.
+ *     The drive stage is an AudioWorklet feedback clipper (FeedbackClipperStage): the diode
+ *     nonlinearity lives inside a filtered feedback loop instead of a memoryless series
+ *     shaper, so the knee compresses dynamically. It remains a behavioural model, not a
+ *     component-level SPICE netlist. Contexts without AudioWorklet fall back to the older
+ *     memoryless series clipper.
  *   - Tone: passive low-pass sweeping ~0.72 kHz .. 3.2 kHz.
  */
 export interface TubeScreamerConfig {
@@ -27,6 +33,8 @@ export interface TubeScreamerConfig {
   clipKneeNeg?: number;
   /** Knee sharpness (2 = tanh-like, higher = harder) */
   clipSharpness: number;
+  /** Normalized feedback amount for the worklet loop (0..0.95). Defaults to 0.6. */
+  loopFeedback?: number;
   /** Drive pot taper exponent (audio taper ~3) */
   potExponent: number;
   /** Tone sweep (Hz) */
@@ -42,8 +50,6 @@ const RG = 4.7e3;
 const RF_MIN = 51e3;
 const POT_MAX = 500e3;
 const CF = 51e-12;
-/** Guitar level -> shaper domain (full scale == 2 V of op-amp swing) */
-const SHAPER_INPUT_SCALE = 0.5;
 
 export class TubeScreamerNode implements AudioPedalNode {
   public id: string;
@@ -53,13 +59,7 @@ export class TubeScreamerNode implements AudioPedalNode {
   private ctx: AudioContext;
   private cfg: TubeScreamerConfig;
 
-  private unityPath: GainNode;
-  private humpFilter: IIRFilterNode;
-  private driveGain: GainNode;
-  private feedbackLowpass: BiquadFilterNode;
-  private summing: GainNode;
-  private shaperScale: GainNode;
-  private shaper: WaveShaperNode;
+  private driveStage: FeedbackClipperStage;
   private dcBlocker: BiquadFilterNode;
   private toneFilter: BiquadFilterNode;
   private presenceFilter: BiquadFilterNode | null = null;
@@ -92,26 +92,19 @@ export class TubeScreamerNode implements AudioPedalNode {
     this.inputNode = ctx.createGain();
     this.outputNode = ctx.createGain();
 
-    // Unity (bass / body) path of the non-inverting op-amp
-    this.unityPath = ctx.createGain();
-
-    // First-order high-pass (Rg * Cg) feeding the gain-setting path
-    this.humpFilter = ctx.createIIRFilter(...TubeScreamerNode.firstOrderHighpass(cfg.humpHz, ctx.sampleRate));
-    this.driveGain = ctx.createGain();
-
-    // Rf || 51pF -> drive dependent low-pass on the gain path
-    this.feedbackLowpass = ctx.createBiquadFilter();
-    this.feedbackLowpass.type = 'lowpass';
-    this.feedbackLowpass.Q.setValueAtTime(0.5, ctx.currentTime);
-
-    this.summing = ctx.createGain();
-
-    // Diode pair in the feedback loop: soft symmetrical clipping
-    this.shaperScale = ctx.createGain();
-    this.shaperScale.gain.setValueAtTime(SHAPER_INPUT_SCALE, ctx.currentTime);
-    this.shaper = ctx.createWaveShaper();
-    this.shaper.curve = this.createDiodeCurve(8192) as Float32Array<ArrayBuffer>;
-    this.shaper.oversample = '4x';
+    // Op-amp drive stage: unity + high-passed gain path with the diodes in a
+    // filtered feedback loop (worklet) or a memoryless fallback.
+    this.driveStage = new FeedbackClipperStage(
+      ctx,
+      {
+        humpHz: cfg.humpHz,
+        clipKnee: cfg.clipKnee,
+        clipKneeNeg: cfg.clipKneeNeg,
+        clipSharpness: cfg.clipSharpness,
+        feedback: cfg.loopFeedback ?? 0.6,
+      },
+      RF_MIN / RG
+    );
 
     // Symmetric clipping of an asymmetric guitar waveform still leaves a little DC
     this.dcBlocker = createDcBlocker(ctx);
@@ -142,18 +135,9 @@ export class TubeScreamerNode implements AudioPedalNode {
     this.inputNode.connect(this.dryGain);
     this.dryGain.connect(this.outputNode);
 
-    // Op-amp: unity + (hump-filtered * drive gain)
-    this.inputNode.connect(this.unityPath);
-    this.unityPath.connect(this.summing);
-    this.inputNode.connect(this.humpFilter);
-    this.humpFilter.connect(this.driveGain);
-    this.driveGain.connect(this.feedbackLowpass);
-    this.feedbackLowpass.connect(this.summing);
-
-    // Clipping -> DC -> tone -> (presence) -> level
-    this.summing.connect(this.shaperScale);
-    this.shaperScale.connect(this.shaper);
-    this.shaper.connect(this.dcBlocker);
+    // Drive stage -> DC -> tone -> (presence) -> level
+    this.inputNode.connect(this.driveStage.inputNode);
+    this.driveStage.outputNode.connect(this.dcBlocker);
     this.dcBlocker.connect(this.toneFilter);
     if (this.presenceFilter) {
       this.toneFilter.connect(this.presenceFilter);
@@ -163,25 +147,6 @@ export class TubeScreamerNode implements AudioPedalNode {
     }
     this.postGain.connect(this.wetGain);
     this.wetGain.connect(this.outputNode);
-  }
-
-  /** H(z) = (1+a)/2 * (1 - z^-1) / (1 - a z^-1),  a = exp(-2*pi*fc/fs) */
-  private static firstOrderHighpass(fc: number, fs: number): [number[], number[]] {
-    const a = Math.exp((-2 * Math.PI * fc) / fs);
-    const k = (1 + a) / 2;
-    return [[k, -k], [1, -a]];
-  }
-
-  /** Soft diode-pair clipper: y = x / (1 + (|x|/knee)^p)^(1/p) */
-  private createDiodeCurve(samples: number): Float32Array {
-    const { clipKnee, clipSharpness, clipKneeNeg } = this.cfg;
-    const curve = new Float32Array(samples);
-    for (let i = 0; i < samples; i++) {
-      const x = (i * 2) / (samples - 1) - 1;
-      const knee = x < 0 && clipKneeNeg !== undefined ? clipKneeNeg : clipKnee;
-      curve[i] = x / Math.pow(1 + Math.pow(Math.abs(x) / knee, clipSharpness), 1 / clipSharpness);
-    }
-    return curve;
   }
 
   private applyParameters(immediate = false): void {
@@ -196,9 +161,10 @@ export class TubeScreamerNode implements AudioPedalNode {
 
     // Rf = 51k + DRIVE pot (audio taper); gain-path gain = Rf / Rg
     const rf = RF_MIN + POT_MAX * Math.pow(drivePos, this.cfg.potExponent);
-    set(this.driveGain.gain, rf / RG);
+    this.driveStage.setDrive(rf / RG);
+    this.driveStage.setFeedback(0.1 + drivePos * 0.7);
     const feedbackCutoff = Math.min(20000, 1 / (2 * Math.PI * rf * CF));
-    set(this.feedbackLowpass.frequency, feedbackCutoff);
+    this.driveStage.setFeedbackCutoff(feedbackCutoff);
 
     // Tone: geometric sweep between min / max cutoff
     const toneCutoff = this.cfg.toneMinHz * Math.pow(this.cfg.toneMaxHz / this.cfg.toneMinHz, tonePos);
@@ -222,13 +188,7 @@ export class TubeScreamerNode implements AudioPedalNode {
   public dispose(): void {
     this.inputNode.disconnect();
     this.outputNode.disconnect();
-    this.unityPath.disconnect();
-    this.humpFilter.disconnect();
-    this.driveGain.disconnect();
-    this.feedbackLowpass.disconnect();
-    this.summing.disconnect();
-    this.shaperScale.disconnect();
-    this.shaper.disconnect();
+    this.driveStage.dispose();
     this.dcBlocker.disconnect();
     this.toneFilter.disconnect();
     this.presenceFilter?.disconnect();

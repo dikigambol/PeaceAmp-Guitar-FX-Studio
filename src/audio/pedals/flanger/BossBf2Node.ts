@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
+import { BbdAnalogWarmthStage } from '../chorus/BbdAnalogWarmthStage';
 
 /**
  * BOSS BF-2 Flanger (1980 - 2002)
@@ -12,7 +13,7 @@ import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
  * - DEPTH control sets the modulation width
  * - RES (Resonance) control feeds delayed signal back into BBD input through warm analog lowpass
  *   and tanh saturation, producing that signature thick, chewy, round metallic whoosh
- * - Analog reconstruction & de-emphasis filter at 5.0 kHz (eliminates digital fizziness)
+ * - Authentic 4-pole Sallen-Key reconstruction filter & compander saturation via BbdAnalogWarmthStage
  * - Warm body filter at 320 Hz to preserve low-end roundness and punch during phase cancellation
  */
 export class BossBf2Node implements AudioPedalNode {
@@ -32,7 +33,7 @@ export class BossBf2Node implements AudioPedalNode {
   private warmBodyFilter: BiquadFilterNode;
   private delayInputSum: GainNode;
   private delayNode: DelayNode;
-  private postLowpass: BiquadFilterNode;
+  private bbdWarmth: BbdAnalogWarmthStage;
 
   // Feedback loop (Resonance)
   private feedbackGain: GainNode;
@@ -112,13 +113,13 @@ export class BossBf2Node implements AudioPedalNode {
     this.delayNode.delayTime.setValueAtTime(initialDelay, ctx.currentTime);
     this.delayInputSum.connect(this.delayNode);
 
-    // 7. Analog BBD Reconstruction Filter (Low-pass at 4.5 kHz)
-    // Tames harsh high-frequency fizziness and ensures smooth, rounded analog sweep
-    this.postLowpass = ctx.createBiquadFilter();
-    this.postLowpass.type = 'lowpass';
-    this.postLowpass.frequency.setValueAtTime(4500, ctx.currentTime);
-    this.postLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
-    this.delayNode.connect(this.postLowpass);
+    // 7. Analog BBD 4-Pole Sallen-Key Reconstruction Filter & Compander Saturation (~4.5 kHz)
+    this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
+      cutoffFreq: 4500,
+      saturationAmount: 0.35,
+      oversample: '4x',
+    });
+    this.delayNode.connect(this.bbdWarmth.inputNode);
 
     // 8. Feedback (Resonance) loop: Bandpass filtered (200Hz - 2.8kHz) & pure tanh soft-clip
     // Low-cut at 200Hz eliminates low hum/droning; high-cut at 2.8kHz prevents metallic whistling
@@ -139,7 +140,7 @@ export class BossBf2Node implements AudioPedalNode {
     this.feedbackLimiter.curve = this.createSaturationCurve(1024) as Float32Array<ArrayBuffer>;
     this.feedbackLimiter.oversample = '2x';
 
-    this.postLowpass.connect(this.feedbackGain);
+    this.bbdWarmth.outputNode.connect(this.feedbackGain);
     this.feedbackGain.connect(this.feedbackHighpass);
     this.feedbackHighpass.connect(this.feedbackLowpass);
     this.feedbackLowpass.connect(this.feedbackLimiter);
@@ -165,7 +166,7 @@ export class BossBf2Node implements AudioPedalNode {
 
     this.wetGain = ctx.createGain();
     this.wetGain.gain.setValueAtTime(0.75, ctx.currentTime);
-    this.postLowpass.connect(this.wetGain);
+    this.bbdWarmth.outputNode.connect(this.wetGain);
 
     this.mixer = ctx.createGain();
     this.dryGain.connect(this.mixer);
@@ -176,8 +177,9 @@ export class BossBf2Node implements AudioPedalNode {
     this.mixer.connect(this.dcBlocker);
     this.dcBlocker.connect(this.outputNode);
 
-    // Apply initial bypass state
-    applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx);
+    // Apply initial bypass state (1 ms, matching the other bypass-style pedals so the
+    // startup crossfade finishes inside SignalChain's insert mute)
+    applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx, 0.001);
   }
 
   private calcBaseDelay(manual: number): number {
@@ -290,7 +292,7 @@ export class BossBf2Node implements AudioPedalNode {
     this.warmBodyFilter.disconnect();
     this.delayInputSum.disconnect();
     this.delayNode.disconnect();
-    this.postLowpass.disconnect();
+    this.bbdWarmth.dispose();
     this.feedbackGain.disconnect();
     this.feedbackHighpass.disconnect();
     this.feedbackLowpass.disconnect();

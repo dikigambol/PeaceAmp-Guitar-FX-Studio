@@ -1,5 +1,6 @@
 import type { AudioPedalNode } from '../../../types/pedal';
 import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
+import { BbdAnalogWarmthStage } from './BbdAnalogWarmthStage';
 
 /**
  * ELECTRO-HARMONIX Small Clone (EH 4600 Full-Chorus)
@@ -12,7 +13,7 @@ import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
  *   - UP (Deep): Full wide modulation excursion (±2.8 ms) for the legendary Kurt Cobain "Come As You Are"
  *     watery, liquid, sea-sick detuned grunge swirl
  * - RATE Knob: Smooth analog LFO from 0.5 Hz (slow hypnotic ocean swell) to 7.0 Hz (fast Leslie vibrato)
- * - Warm, woody, organic BBD reconstruction lowpass filter at 5.8 kHz with gentle mid-presence
+ * - Authentic 4-pole Sallen-Key analog reconstruction filtering & compander non-linearity via BbdAnalogWarmthStage
  * - Analog 50/50 dry/wet summing creating authentic deep comb filtering notches
  */
 export class EhxSmallCloneNode implements AudioPedalNode {
@@ -31,7 +32,7 @@ export class EhxSmallCloneNode implements AudioPedalNode {
   private preHighpass: BiquadFilterNode;
   private preEmphasis: BiquadFilterNode;
   private delayNode: DelayNode;
-  private postLowpass: BiquadFilterNode;
+  private bbdWarmth: BbdAnalogWarmthStage;
   private deEmphasis: BiquadFilterNode;
 
   // LFO Modulation Core
@@ -116,11 +117,13 @@ export class EhxSmallCloneNode implements AudioPedalNode {
     this.lfoNode.connect(this.lfoGainNode);
     this.lfoGainNode.connect(this.delayNode.delayTime);
 
-    // 6. Post-BBD Warm Reconstruction Filtering (~6.0 kHz 2-pole lowpass)
-    this.postLowpass = ctx.createBiquadFilter();
-    this.postLowpass.type = 'lowpass';
-    this.postLowpass.frequency.setValueAtTime(6000, ctx.currentTime);
-    this.postLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
+    // 6. Post-BBD Reconstruction & Analog Anti-Aliasing Filters:
+    // Authentic 4-pole Sallen-Key lowpass cascade (~5.8 kHz) and BBD compander non-linearity
+    this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
+      cutoffFreq: 5800,
+      saturationAmount: 0.38,
+      oversample: '4x',
+    });
 
     this.deEmphasis = ctx.createBiquadFilter();
     this.deEmphasis.type = 'lowshelf';
@@ -146,12 +149,12 @@ export class EhxSmallCloneNode implements AudioPedalNode {
     this.bypassWet.connect(this.dryGain);
     this.dryGain.connect(this.chorusMixer);
 
-    // B) Modulated wet path
+    // B) Modulated wet path with BBD warmth & 4-pole reconstruction
     this.bypassWet.connect(this.preHighpass);
     this.preHighpass.connect(this.preEmphasis);
     this.preEmphasis.connect(this.delayNode);
-    this.delayNode.connect(this.postLowpass);
-    this.postLowpass.connect(this.deEmphasis);
+    this.delayNode.connect(this.bbdWarmth.inputNode);
+    this.bbdWarmth.outputNode.connect(this.deEmphasis);
     this.deEmphasis.connect(this.wetGain);
     this.wetGain.connect(this.chorusMixer);
 
@@ -207,7 +210,7 @@ export class EhxSmallCloneNode implements AudioPedalNode {
       this.preHighpass.disconnect();
       this.preEmphasis.disconnect();
       this.delayNode.disconnect();
-      this.postLowpass.disconnect();
+      this.bbdWarmth.dispose();
       this.deEmphasis.disconnect();
 
       this.dryGain.disconnect();

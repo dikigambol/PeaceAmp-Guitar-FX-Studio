@@ -18,5 +18,9 @@ export default defineConfig([
     languageOptions: {
       globals: globals.browser,
     },
+    rules: {
+      // localStorage access is best-effort; empty catch blocks are intentional.
+      'no-empty': ['error', { allowEmptyCatch: true }],
+    },
   },
 ])

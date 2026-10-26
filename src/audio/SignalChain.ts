@@ -4,6 +4,7 @@ import { createPedalAudioNode } from './pedals/registry';
 interface ActiveNodeEntry {
   node: AudioPedalNode;
   type: string;
+  enabled: boolean;
 }
 
 export class SignalChain {
@@ -35,7 +36,12 @@ export class SignalChain {
       for (const inst of instances) {
         const entry = this.activeEntries.get(inst.id);
         if (entry) {
-          entry.node.setEnabled(inst.enabled);
+          // Only touch the bypass crossfade when the state actually changed;
+          // knob moves must not restart the fade on every parameter update.
+          if (entry.enabled !== inst.enabled) {
+            entry.node.setEnabled(inst.enabled);
+            entry.enabled = inst.enabled;
+          }
           if (inst.parameters) {
             for (const [paramId, val] of Object.entries(inst.parameters)) {
               entry.node.updateParameter(paramId, val);
@@ -101,11 +107,14 @@ export class SignalChain {
           inst.parameters,
           inst.enabled
         );
-        entry = { node: audioNode, type: inst.type };
+        entry = { node: audioNode, type: inst.type, enabled: inst.enabled };
         this.activeEntries.set(inst.id, entry);
       } else {
         // Reuse node: sync enabled state and parameter values
-        entry.node.setEnabled(inst.enabled);
+        if (entry.enabled !== inst.enabled) {
+          entry.node.setEnabled(inst.enabled);
+          entry.enabled = inst.enabled;
+        }
         if (inst.parameters) {
           for (const [paramId, val] of Object.entries(inst.parameters)) {
             entry.node.updateParameter(paramId, val);
@@ -144,8 +153,9 @@ export class SignalChain {
 
   public setEnabled(pedalId: string, enabled: boolean): void {
     const entry = this.activeEntries.get(pedalId);
-    if (entry) {
+    if (entry && entry.enabled !== enabled) {
       entry.node.setEnabled(enabled);
+      entry.enabled = enabled;
     }
   }
 

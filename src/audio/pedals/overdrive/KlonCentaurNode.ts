@@ -9,6 +9,9 @@ const OUTPUT_TRIM_DB = -2.3;
  * Legendary transparent overdrive featuring an internal 18V charge-pump headroom,
  * dual-ganged potentiometer blending clean boost with germanium diode clipping,
  * and an active peaking Treble circuit.
+ *
+ * Note: shares its DSP topology with RockettArcherNode; only the voicing constants
+ * (mid-hump, treble shelf, clean/drive blend, diode knee) differ.
  */
 export class KlonCentaurNode implements AudioPedalNode {
   public id: string;

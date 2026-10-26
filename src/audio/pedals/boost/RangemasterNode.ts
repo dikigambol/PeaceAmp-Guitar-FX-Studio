@@ -1,5 +1,5 @@
 import type { AudioPedalNode } from '../../../types/pedal';
-import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
+import { applyBypassCrossfade, createDcBlocker, createOnePoleHighpass } from '../dspUtils';
 
 /**
  * Dallas Rangemaster / British Pedal Company Treble Booster
@@ -41,7 +41,7 @@ export class RangemasterNode implements AudioPedalNode {
   private bypassWet: GainNode;
 
   // Signal conditioning & EQ modeling
-  private trebleBoostHighpass: BiquadFilterNode;
+  private trebleBoostHighpass: IIRFilterNode;
   private chimePeaking: BiquadFilterNode;
   private hfRollOff: BiquadFilterNode;
 
@@ -77,11 +77,8 @@ export class RangemasterNode implements AudioPedalNode {
     this.bypassDry = ctx.createGain();
     this.bypassWet = ctx.createGain();
 
-    // 1. Treble Booster Highpass: 5 nF into ~18 kΩ input impedance (~1550 Hz, 6dB/oct gentle slope)
-    this.trebleBoostHighpass = ctx.createBiquadFilter();
-    this.trebleBoostHighpass.type = 'highpass';
-    this.trebleBoostHighpass.frequency.setValueAtTime(1550, ctx.currentTime);
-    this.trebleBoostHighpass.Q.setValueAtTime(0.65, ctx.currentTime);
+    // 1. Treble Booster Highpass: 5 nF into ~18 kΩ input impedance (~1550 Hz, true one-pole 6 dB/oct)
+    this.trebleBoostHighpass = createOnePoleHighpass(ctx, 1550);
 
     // 2. Midrange Vocal Chime Peak (~2900 Hz, +3.5 dB, Q=0.9)
     this.chimePeaking = ctx.createBiquadFilter();

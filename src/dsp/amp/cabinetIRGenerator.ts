@@ -322,8 +322,52 @@ function applyBiquad(x: Float32Array, c: Biquad): void {
   }
 }
 
+/** Adds one exponentially damped sine (a cabinet/speaker resonance mode). */
+function addResonantMode(
+  ir: Float32Array,
+  fs: number,
+  freq: number,
+  amp: number,
+  decayMs: number
+): void {
+  const w0 = (2 * Math.PI * freq) / fs;
+  const decay = 1000 / Math.max(5, decayMs); // amplitude decay per second
+  for (let i = 0; i < ir.length; i++) {
+    ir[i] += amp * Math.sin(w0 * i) * Math.exp(-(i / fs) * decay);
+  }
+}
+
 /**
- * Generates an authentic, highly distinct guitar cabinet + microphone impulse response (IR).
+ * Adds a short diffuse tail built from seeded noise, low-passed to the speaker
+ * band. Real cabinet IRs are broadband decaying noise after the initial
+ * transient; this keeps the convolution from sounding like a single click.
+ */
+function addDiffuseTail(ir: Float32Array, fs: number, seedBase: number, distNorm: number): void {
+  let seed = (0x9e3779b9 ^ Math.round(seedBase * 1000)) >>> 0;
+  const rnd = (): number => {
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    seed >>>= 0;
+    return (seed / 0xffffffff) * 2 - 1;
+  };
+
+  let lp = 0;
+  const lpCoef = 0.5; // ~4.8 kHz one-pole
+  const tau = 0.028 + distNorm * 0.035;
+  for (let i = 0; i < ir.length; i++) {
+    lp += lpCoef * (rnd() - lp);
+    const t = i / fs;
+    const attack = 1 - Math.exp(-t / 0.0012);
+    ir[i] += lp * attack * Math.exp(-t / tau) * 0.10;
+  }
+}
+
+/**
+ * Procedurally generates a guitar cabinet + microphone impulse response.
+ *
+ * This is a synthetic model (filtered transient + modal/noise decay), not a
+ * measured capture of the real cabinets it is named after.
  *
  * Distinct acoustic characteristics are modeled for:
  * 1. Enclosure dimensions & low-end thump resonance (1x8 up to 4x12 Oversized)
@@ -339,8 +383,10 @@ export function generateCabinetImpulseResponse(
   distance: number = 0.15
 ): AudioBuffer {
   const fs = ctx.sampleRate;
-  // 60ms impulse length captures full speaker attack, low-end tail and enclosure reflection
-  const length = Math.floor(fs * 0.06);
+  // 180ms: long enough to carry the low resonance / cone-mode decay of a real cabinet.
+  // The previous 60ms window cut the tail off after a few cycles, so convolution
+  // behaved like a static EQ spike instead of a resonant cabinet.
+  const length = Math.floor(fs * 0.18);
   const buffer = ctx.createBuffer(2, length, fs);
 
   const profile = CABINET_PROFILES[cabinet === 'custom' ? '4x12-closed' : cabinet] || CABINET_PROFILES['4x12-closed'];
@@ -434,7 +480,23 @@ export function generateCabinetImpulseResponse(
   // 4. Synthesize Raw Impulse Response
   // -------------------------------------------------------------
   const ir = new Float32Array(length);
-  ir[0] = 1.0;
+  // The direct mic transient dominates the attack. Its level relative to the
+  // modal/noise tail is set so that, after midband calibration, the attack is
+  // still clearly louder than the decay (as in a real close-mic IR).
+  ir[0] = 5.0;
+
+  // 4a. Modal cabinet response. The delta above only carries the direct mic
+  // transient; a real speaker/cabinet keeps ringing at its cone modes for a few
+  // ms. The low-end resonance/thump is already produced by the peaking filter
+  // below, so only the short cone modes are added explicitly here (adding a
+  // second low-frequency resonator made the bass level unpredictable/inverted
+  // depending on phase).
+  addResonantMode(ir, fs, 1450, 0.014, 18);
+  addResonantMode(ir, fs, 2300, 0.010, 12);
+  addResonantMode(ir, fs, 3400, 0.007, 8);
+
+  // 4b. Diffuse cone/air tail (deterministic filtered noise), stronger with mic distance.
+  addDiffuseTail(ir, fs, profile.resonanceFreq, distNorm);
 
   // A. Cabinet Acoustic Low-Cut (enclosure air spring limit)
   applyBiquad(ir, biquad('highpass', fs, profile.lowCutFreq, 0.707));
@@ -512,11 +574,22 @@ export function generateCabinetImpulseResponse(
   const midBandRms = Math.sqrt(refEnergy / refFreqs.length) || 1.0;
   const calibrationGain = 1.0 / midBandRms;
 
+  // The previous 60 ms IR produced a white-noise convolution RMS of ~0.56.
+  // A longer decay adds energy, so normalize total energy too; otherwise the
+  // cabinet would jump several dB louder just because the tail is longer.
+  let energy = 0;
+  for (let i = 0; i < length; i++) {
+    const v = ir[i] * calibrationGain;
+    energy += v * v;
+  }
+  const loudnessGain = 0.56 / (Math.sqrt(energy) || 1);
+  const finalGain = calibrationGain * loudnessGain;
+
   const left = buffer.getChannelData(0);
   const right = buffer.getChannelData(1);
 
   for (let i = 0; i < length; i++) {
-    left[i] = ir[i] * calibrationGain;
+    left[i] = ir[i] * finalGain;
   }
 
   // Subtle micro-decorrelation for realistic stereo room dispersion

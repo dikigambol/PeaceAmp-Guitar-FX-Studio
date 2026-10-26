@@ -1,268 +1,221 @@
 ﻿# PeaceAmp — Guitar FX Studio
 
-PeaceAmp is a browser-based guitar effects studio built with React and TypeScript. It uses the Web Audio API to create a real-time pedalboard and digital guitar processing chain, allowing musicians to experiment with effects, custom signal flow, tuner, MIDI control, and loop recording directly in the browser.
+PeaceAmp is a browser-based, real-time guitar effects studio built with React and TypeScript. It uses the Web Audio API to build a virtual pedalboard, an amp head, and a cabinet IR simulator — no backend, no audio leaves the browser.
 
-This project is designed for guitarists who want a flexible virtual pedalboard without needing physical hardware. The interface is built as a studio-style control surface with real-time meters, effect controls, preset management, and a looping workflow.
+The UI is designed as a studio-style control surface with a free-form pedalboard canvas, patch cables, live meters, a chromatic tuner, and preset management.
 
 ## Overview
 
 PeaceAmp lets you:
 
-- build a virtual guitar signal chain with multiple effects
-- adjust parameters in real time
-- use a chromatic tuner while playing
-- add a looping station for practice or performance
-- save and load preset configurations
-- connect to external MIDI controllers
-- monitor input and output levels from the browser
-
-## Key Features
-
-- Virtual pedalboard with dynamic effect ordering
-- Integrated guitar effects including:
-  - Noise Gate
-  - Compressor
-  - Gain / Booster
-  - Overdrive
-  - Distortion
-  - Fuzz
-  - 3-band EQ
-  - Chorus
-  - Tremolo
-  - Phaser
-  - Flanger
-  - Delay
-  - Reverb
-  - Amp and cabinet modeling
-- Real-time parameter control for each pedal
-- Input gain, master volume, and mute controls
-- Chromatic tuner with live pitch feedback
-- Phrase looper for recording and overdubbing audio loops
-- Browser-based preset system with import/export support
-- Web MIDI support for hardware control
-- Real-time RMS/peak metering and engine status
-- Desktop-oriented UI optimized for studio workflow
+- build a custom signal chain on a drag-and-drop pedalboard canvas
+- add, remove, reorder, and bypass pedals in real time
+- shape tone with 45 pedal models across 11 categories
+- run the signal through an amp head and cabinet IR simulator
+- tune silently with the built-in chromatic tuner
+- monitor input/output levels, peak hold, clipping, and latency
+- save, rename, delete, export, and import presets
+- install the app as a PWA for offline use
 
 ## Tech Stack
 
-- React 19
-- TypeScript
-- Vite
-- Web Audio API
-- Custom CSS and component-driven UI
-- Browser MIDI API
-- LocalStorage for preset persistence
+| Layer | Technology |
+| --- | --- |
+| UI | React 19 + TypeScript 6 (`.tsx`) |
+| Build | Vite 8 + `@vitejs/plugin-react` |
+| Audio | Web Audio API + custom AudioWorklet processors |
+| DSP | Hand-written distortion/amp curves, pitch detection, IR generation |
+| Cabinet | Convolution reverb with generated IRs, bundled WAV IRs, or custom IR upload |
+| Icons | `lucide-react` |
+| Styling | Plain CSS (`src/index.css`, `src/App.css`) — no CSS framework |
+| State | React hooks only — no Redux/Zustand/Router |
+| Persistence | `localStorage` for presets, pedal positions, and patch cables |
+| Lint | ESLint 10 (flat config) + `typescript-eslint`, `react-hooks`, `react-refresh` |
+| PWA | `manifest.webmanifest` + service worker (production only) |
+| MIDI | Web MIDI API scaffold (`src/midi/MidiManager.ts`) |
 
-## Project Structure
+## Requirements
 
-```bash
-root/
-├── public/
-│   ├── manifest.webmanifest
-│   └── sw.js
-├── src/
-│   ├── App.tsx
-│   ├── index.css
-│   ├── main.tsx
-│   ├── assets/
-│   │   └── audio/
-│   │       ├── AudioEngine.ts
-│   │       ├── SignalChain.ts
-│   │       ├── pedals/
-│   │       │   ├── AmpPedalNode.ts
-│   │       │   ├── CabPedalNode.ts
-│   │       │   ├── ChorusPedalNode.ts
-│   │       │   ├── CompressorPedalNode.ts
-│   │       │   ├── DelayPedalNode.ts
-│   │       │   ├── DistortionPedalNode.ts
-│   │       │   ├── Eq3BandPedalNode.ts
-│   │       │   ├── FlangerPedalNode.ts
-│   │       │   ├── FuzzPedalNode.ts
-│   │       │   ├── GainPedalNode.ts
-│   │       │   ├── LooperPedalNode.ts
-│   │       │   ├── NoiseGatePedalNode.ts
-│   │       │   ├── OverdrivePedalNode.ts
-│   │       │   ├── PhaserPedalNode.ts
-│   │       │   ├── ReverbPedalNode.ts
-│   │       │   ├── TremoloPedalNode.ts
-│   │       │   └── registry.ts
-│   │       └── worklets/
-│   │           └── workletBundle.ts
-│   ├── components/
-│   │   ├── AudioHeader.tsx
-│   │   ├── HeadphoneWarning.tsx
-│   │   ├── PassthroughPanel.tsx
-│   │   ├── common/
-│   │   ├── looper/
-│   │   ├── manual/
-│   │   ├── meters/
-│   │   ├── midi/
-│   │   ├── pedalboard/
-│   │   ├── presets/
-│   │   └── tuner/
-│   ├── dsp/
-│   │   ├── amp/
-│   │   ├── distortion/
-│   │   └── tuner/
-│   ├── midi/
-│   │   └── MidiManager.ts
-│   ├── presets/
-│   │   ├── defaultPresets.ts
-│   │   └── presetStorage.ts
-│   └── types/
-│       ├── audio.ts
-│       ├── pedal.ts
-│       └── preset.ts
-├── .gitignore
-├── eslint.config.js
-├── index.html
-├── package.json
-├── README.md
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-├── vite.config.ts
-├── web-guitar-fx-rancangan.md
-└── package-lock.json
-```
+- **Node.js `^20.19.0 || >=22.12.0`** — required by Vite 8. Older Node versions (including Node 18/16) will fail to start the dev server.
+- npm (the repo ships with `package-lock.json`)
+- A modern Chromium-based desktop browser (Chrome or Edge recommended)
+- An audio input (guitar, audio interface, or microphone)
+- Headphones or studio monitors
 
-## Core Architecture
-
-### Audio Engine
-The main audio processing logic is located in:
-
-- `src/assets/audio/AudioEngine.ts`
-- `src/assets/audio/SignalChain.ts`
-
-This layer handles:
-
-- audio context creation
-- input streaming
-- signal chain processing
-- meter calculations
-- engine state and status
-
-### Pedal Registry
-Pedal definitions and metadata are centralized in:
-
-- `src/assets/audio/pedals/registry.ts`
-
-This registers each effect type, default values, display names, and parameter configuration.
-
-### Preset Management
-Preset storage is handled in:
-
-- `src/presets/presetStorage.ts`
-
-The app stores user presets in `localStorage`, making settings persist across browser sessions.
+> The app is intentionally desktop-only. `DesktopOnlyBlocker` shows a blocker on mobile/tablet viewports.
 
 ## Getting Started
-
-### Prerequisites
-
-Before running the app, make sure you have:
-
-- Node.js 18 or newer
-- npm installed
-- a modern browser such as Chrome or Edge
-- audio input available from a guitar, interface, or mic
-- headphones or speakers for monitoring
-
-> This project is optimized for desktop usage. It is designed for a more stable studio-style workflow and uses browser audio and MIDI features that are most reliable on desktop browsers.
-
-### Installation
-
-Clone the repository:
 
 ```bash
 git clone <repository-url>
 cd guitar-fx-diy
-```
-
-Install dependencies:
-
-```bash
 npm install
-```
-
-Start the app in development mode:
-
-```bash
 npm run dev
 ```
 
-Then open the local URL shown in the terminal, usually:
+Open the URL printed by Vite, usually <http://localhost:5173>.
 
-```bash
-http://localhost:5173
+### Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the Vite dev server |
+| `npm run build` | Type-check with `tsc -b`, then build to `dist/` |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | Run ESLint over the project |
+
+The service worker is registered only in production (`import.meta.env.PROD`), so use `npm run build && npm run preview` to test PWA/offline behavior.
+
+## Using PeaceAmp
+
+1. **Power the engine** — click the power button in the top bar and allow microphone/audio input access.
+2. **Select devices and set input level** — pick input/output devices, choose the input channel mode (`sum`, `left`, `right`), adjust input gain, and tune the noise gate.
+3. **Build the pedalboard** — add pedals from the pedal picker, drag them anywhere on the canvas, and wire them with patch cables.
+4. **Shape the amp** — set gain, bass, mid, treble, presence, and master on the amp head.
+5. **Choose a cabinet and mic** — select a cabinet, microphone, mic position, distance, mix, and output trim, or upload your own IR.
+6. **Tune** — enable the chromatic tuner; output is muted automatically for silent tuning.
+7. **Save presets** — save/overwrite the current rig, create a new preset, rename, delete, or export/import presets as JSON.
+8. **Open the manual** — the in-app **MANUAL BOOK** button opens the full operation guide.
+
+## Signal Flow
+
+```text
+Input device
+  → stereo-to-mono fold (sum / left / right)
+  → 30 Hz high-pass filter
+  → input gain
+  → noise gate (AudioWorklet)
+  → pedal chain (ordered)
+  → DC blocker
+  → amp head (preamp / tone stack / power stage)
+  → cabinet IR (ConvolverNode)
+  → master gain
+  → safety limiter (DynamicsCompressor)
+  → output analyser → destination
 ```
 
-## How to Use
+The pedal chain is rebuilt in `src/audio/SignalChain.ts`. Nodes are reused when the topology is unchanged, and rewiring applies a short micro-fade to avoid clicks.
 
-### 1. Power the Audio Engine
+## Pedal Catalog
 
-- click the power button in the top header
-- allow browser access to your audio input
-- select the audio device you want to use
+45 models are registered in `src/audio/pedals/registry.ts`:
 
-### 2. Adjust Input and Output Levels
+| Category | Count | Models |
+| --- | --- | --- |
+| Compressor / Dynamics | 4 | MXR Dyna Comp, Ross Compressor, Boss CS-3, Keeley Compressor |
+| Overdrive | 10 | Tube Screamer TS-808, Ibanez TS9, Boss SD-1, Boss OD-3, Boss BD-2, Klon Centaur, Fulltone OCD, Tube Screamer Mini, Nobels ODR-1, Rockett Archer |
+| Distortion | 7 | Boss DS-1, Boss HM-2, Boss MT-2, Ibanez SM7, Marshall ShredMaster, MXR Distortion+, ProCo RAT 2 |
+| Fuzz | 6 | EHX Big Muff, Fuzz Face, Tone Bender, ZVEX Fuzz Factory, EHX Flatiron Fuzz, EQD Hoof |
+| Boost | 4 | MXR Micro Amp, Rangemaster Treble Booster, TC Spark Mini, Xotic EP Booster |
+| Wah | 1 | Boss AW-3 Dynamic Wah |
+| EQ | 1 | Boss GE-7 (7-band graphic EQ) |
+| Chorus | 4 | Boss CE-2, Boss CH-1, EHX Small Clone, MXR Analog Chorus |
+| Delay | 3 | Boss DM-2, MXR Carbon Copy, TC Gauss Tape Echo |
+| Flanger | 3 | Boss BF-2, EHX Electric Mistress, MXR M117R |
+| Phaser | 2 | EHX Small Stone, MXR Phase 90 |
 
-- set the input gain to match your guitar signal level
-- adjust master volume for output level
-- use mute when needed during setup or breaks
+Each pedal has its own audio node under `src/audio/pedals/<category>/` and its own UI component under `src/components/pedalboard/<category>/`.
 
-### 3. Build Your Signal Chain
+## Amp & Cabinet Modeling
 
-- add pedals from the virtual pedalboard
-- change their order to shape the overall tone
-- tweak values such as gain, tone, level, threshold, attack, and decay
+- **18 amp voicings** (`src/types/amp.ts`), including Fender, Vox, Marshall, Orange, Mesa/Boogie, Dumble, Soldano, Bogner, EVH/Peavey, and ENGL-style models.
+- **16 built-in cabinets + custom IR** (`src/types/cabinet.ts`): 1×8, 1×10, 1×12, 2×12, 4×10, and 4×12 configurations, open and closed back.
+- **6 microphone models**: SM57, SM7B, MD421, Royer R-121, Beyerdynamic M160, and a large-diaphragm condenser.
+- Cabinet EQ/IR is generated procedurally in `src/dsp/amp/cabinetIRGenerator.ts`; three ready-to-use WAV IRs are bundled in `public/sample-irs/`.
 
-### 4. Use the Tuner
+## Presets
 
-- the chromatic tuner updates in real time while the engine is running
-- use it to quickly tune the guitar before recording or performing
+Presets are stored in `localStorage` under `web_guitar_fx_user_presets_v1`. A preset captures:
 
-### 5. Record Loops
+- pedal instances, ordering, and parameters
+- pedal canvas positions
+- patch cable connections
+- input gain and master volume
+- amp head and cabinet settings
 
-- add the looper to the chain
-- use record, play, overdub, stop, undo, and clear functions
-- useful for practice, rhythm ideas, or layered textures
+Factory presets are currently empty (`src/presets/defaultPresets.ts`), so the board starts clean on a fresh load. You can create presets, overwrite the active one, rename/delete user presets, and import/export the full preset list as JSON.
 
-### 6. Save and Load Presets
+## Project Structure
 
-- save the current pedal chain and settings as a preset
-- reload previous setups instantly
-- export/import presets for backup or sharing
-
-### 7. MIDI Control
-
-- if a MIDI device is connected, the app can respond to controller input
-- this includes preset switching, pedal toggling, and volume control
-
-## Audio Workflow
-
-A typical signal chain may look like this:
-
-Input -> Noise Gate -> Compressor -> Overdrive/Distortion -> EQ -> Chorus/Phaser/Tremolo -> Delay -> Reverb -> Output
-
-This makes it easy to experiment with classic rock, clean amp tones, crunchy distortion, ambient textures, and modulation-heavy effects.
+```text
+.
+├── public/
+│   ├── manifest.webmanifest
+│   ├── sw.js                     # PWA service worker (stale-while-revalidate)
+│   ├── pedals-pic/               # Pedal artwork
+│   ├── sample-irs/               # Bundled cabinet IR WAV files
+│   └── icons / favicons
+├── src/
+│   ├── App.tsx                   # App state, engine wiring, layout
+│   ├── main.tsx                  # React entry + production SW registration
+│   ├── index.css / App.css       # Studio UI styling
+│   ├── audio/
+│   │   ├── AudioEngine.ts        # AudioContext, input conditioning, metering
+│   │   ├── SignalChain.ts        # Pedal graph rebuild / node reuse
+│   │   ├── amp/AmpHeadNode.ts    # Amp preamp + tone stack + power stage
+│   │   ├── cabinet/CabinetNode.ts# Convolver-based cabinet IR
+│   │   ├── pedals/
+│   │   │   ├── registry.ts       # Pedal metadata + node factory
+│   │   │   ├── dspUtils.ts
+│   │   │   └── boost|chorus|compressor|delay|distortion|eq|
+│   │   │       flanger|fuzz|overdrive|phaser|wah/
+│   │   └── worklets/workletBundle.ts  # Noise gate / compressor (+ looper DSP) worklets
+│   ├── components/
+│   │   ├── AudioHeader.tsx
+│   │   ├── pedalboard/
+│   │   │   ├── Pedalboard.tsx    # Canvas, cables, pedal picker
+│   │   │   ├── Stompbox.tsx
+│   │   │   └── boost|chorus|compressors|delay|distortion|eq|
+│   │   │       flanger|fuzz|overdrives|phaser|wah/
+│   │   ├── sidebar/              # Input, amp head, cabinet, master output
+│   │   ├── common/               # Knobs, stomp switch, desktop blocker
+│   │   ├── manual/               # In-app operation manual
+│   │   ├── meters/               # VU meter
+│   │   ├── presets/              # Preset bar
+│   │   └── tuner/                # Chromatic tuner
+│   ├── dsp/
+│   │   ├── amp/                  # Tube curves + cabinet IR generator
+│   │   ├── distortion/curves.ts
+│   │   └── tuner/pitchDetector.ts
+│   ├── midi/MidiManager.ts       # Web MIDI scaffold (not wired to UI yet)
+│   ├── presets/                  # Preset storage + factory presets
+│   └── types/                    # audio, amp, cabinet, pedal, preset types
+├── eslint.config.js
+├── index.html
+├── package.json
+├── tsconfig*.json
+└── vite.config.ts
+```
 
 ## Compatibility Notes
 
-- best experience: Chrome or Edge on desktop
-- headphones are strongly recommended during live monitoring
-- some browser audio permissions may block input until granted
-- MIDI support depends on the browser and connected controller
-- mobile/tablet layouts are intentionally restricted for a more stable studio workflow
+- Best experience: **Chrome or Edge on desktop**.
+- Requires **AudioWorklet** support (noise gate and compressor processors).
+- Output-device selection uses `AudioContext.setSinkId`; unsupported browsers fall back to the system default output and show a notice.
+- The tuner mutes the output while active (silent tuning).
+- Browser audio permissions may block input until granted.
+- Mobile/tablet layouts are blocked on purpose.
 
-## Project Status
+## Status & Known Limitations
 
-This project is a functional guitar pedalboard and effects prototype designed for experimentation, learning, and creative sound design in the browser.
+Working: pedalboard, 45 pedal models, amp head, cabinet IR, noise gate, tuner, metering, presets, PWA.
+
+Partial / not yet exposed in the UI:
+
+- **Looper** — a `looper-processor` AudioWorklet exists in `workletBundle.ts`, but there is no looper panel or engine wiring.
+- **MIDI** — `MidiManager` can request MIDI access and maps CCs, but it is not imported by the app yet.
+- **Factory presets** — the factory list is intentionally empty.
+- **Tests** — no automated test suite is configured.
 
 ## Contributing
 
-Contributions are welcome. If you want to improve the pedal architecture, add new effects, refine the UI, or improve audio behavior, feel free to fork the project and open a pull request.
+Contributions are welcome. To add a pedal:
+
+1. Implement the audio node in `src/audio/pedals/<category>/`.
+2. Register metadata and the node factory case in `src/audio/pedals/registry.ts`.
+3. Build the UI component in `src/components/pedalboard/<category>/`.
+4. Add the pedal to the pedalboard picker and, if needed, extend the preset types.
 
 ## Summary
 
-PeaceAmp combines a virtual pedalboard, real-time digital signal processing, tuner, looper, presets, and MIDI support in a single browser-based guitar FX environment. It is meant as a practical and creative tool for exploring tone shaping without requiring traditional hardware pedals.
+PeaceAmp combines a modular virtual pedalboard, real-time Web Audio DSP, amp and cabinet modeling, a chromatic tuner, preset management, and a PWA shell in one browser-only application. It is a practical environment for exploring guitar tone without physical hardware — and a substantial frontend/audio-DSP portfolio project.

@@ -1,0 +1,14 @@
+{
+  "excludes": [
+    "public/pedals-pic/",
+    "public/sample-irs/",
+    "public/icons.svg",
+    "public/favicon.svg",
+    "public/icon.svg",
+    "public/ikon.png",
+    "public/les-paul-silhouette.svg",
+    "src/assets/",
+    "graphify-out/",
+    "graphify-out/**"
+  ]
+}

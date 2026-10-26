@@ -4,16 +4,15 @@ import { applyBypassCrossfade, createDcBlocker } from '../dspUtils';
 /**
  * BOSS CH-1 Super Chorus (1989 - Present)
  *
- * Full Authentic Hardware Modeling:
- * - Crisp, bright, modern chorus designed to cut through dense band mixes
- * - 4 Control Parameters:
- *   1. E. LEVEL (Effect Level): Blends the modulated wet chorus voice (0% to 100%)
- *   2. EQ (Tone / Brilliance): Dedicated active EQ shelf/peak on the chorus voice
- *      - LO (0): Warm, rolled-off vintage voicing
- *      - HI (10): Crystal clear, glassy 80s/90s chime
- *   3. RATE: LFO modulation speed (0.2 Hz slow ocean swirl to 4.5 Hz fast shimmer)
- *   4. DEPTH: Delay time excursion depth (0 to ±1.8 ms)
- * - Shorter BBD base delay (~4.5 ms) than the CE-2 for tighter comb filtering and sharper definition
+ * Bright, modern stereo chorus:
+ * - Two short BBD-style delay lines (~4.5 ms base) modulated in anti-phase by one
+ *   LFO, then merged to true stereo L/R (ChannelMerger).
+ * - E. LEVEL: blends the modulated wet chorus voice (0% to 100%).
+ * - EQ: active peaking tone control on the chorus voice (-9 dB .. +9 dB @ 3.6 kHz).
+ * - RATE: 0.2 Hz to 4.5 Hz. DEPTH: 0 to ±1.8 ms delay excursion.
+ *
+ * Note: the pedal input is mono (as on the real pedal); stereo comes from the two
+ * out-of-phase modulated delay lines, not from processing a stereo input.
  */
 export class BossCh1Node implements AudioPedalNode {
   public id: string;
@@ -27,15 +26,19 @@ export class BossCh1Node implements AudioPedalNode {
   private bypassDry: GainNode;
   private bypassWet: GainNode;
 
-  // Chorus Audio Path Nodes
+  // Mono input sum -> two anti-phase modulated delay lines -> stereo merger
+  private monoSum: GainNode;
   private preHighpass: BiquadFilterNode;
-  private delayNode: DelayNode;
+  private delayLeft: DelayNode;
+  private delayRight: DelayNode;
+  private merger: ChannelMergerNode;
   private eqFilter: BiquadFilterNode;
   private postLowpass: BiquadFilterNode;
 
   // LFO Modulation Core
   private lfoNode: OscillatorNode;
-  private lfoGainNode: GainNode;
+  private lfoGainLeft: GainNode;
+  private lfoGainRight: GainNode;
 
   // Wet / Dry Summing Mixer
   private dryGain: GainNode;
@@ -77,21 +80,29 @@ export class BossCh1Node implements AudioPedalNode {
     this.inputNode.connect(this.bypassDry);
     this.bypassDry.connect(this.outputNode);
 
-    // 2. Wet chorus input
+    // 2. Wet chorus input (mono sum; the chain is mono)
     this.inputNode.connect(this.bypassWet);
+    this.monoSum = ctx.createGain();
+    this.monoSum.channelCount = 1;
+    this.monoSum.channelCountMode = 'explicit';
+    this.monoSum.channelInterpretation = 'speakers';
+    this.bypassWet.connect(this.monoSum);
 
     // 3. Pre-filtering: 40 Hz highpass to eliminate sub-audio mud
     this.preHighpass = ctx.createBiquadFilter();
     this.preHighpass.type = 'highpass';
     this.preHighpass.frequency.setValueAtTime(40, ctx.currentTime);
     this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
+    this.monoSum.connect(this.preHighpass);
 
-    // 4. Short analog delay line (~4.5 ms base delay for crisp Super Chorus chime)
-    this.delayNode = ctx.createDelay(0.05);
+    // 4. Two short analog delay lines (~4.5 ms base delay for crisp Super Chorus chime)
     const baseDelaySec = 0.0045;
-    this.delayNode.delayTime.setValueAtTime(baseDelaySec, ctx.currentTime);
+    this.delayLeft = ctx.createDelay(0.05);
+    this.delayLeft.delayTime.setValueAtTime(baseDelaySec, ctx.currentTime);
+    this.delayRight = ctx.createDelay(0.05);
+    this.delayRight.delayTime.setValueAtTime(baseDelaySec, ctx.currentTime);
 
-    // 5. Analog LFO Oscillator & Depth Driver
+    // 5. Analog LFO Oscillator & anti-phase depth drivers (true stereo)
     this.lfoNode = ctx.createOscillator();
     this.lfoNode.type = 'sine';
 
@@ -99,16 +110,19 @@ export class BossCh1Node implements AudioPedalNode {
     const rateHz = 0.2 + Math.pow(rateVal / 10, 1.8) * 4.3;
     this.lfoNode.frequency.setValueAtTime(rateHz, ctx.currentTime);
 
-    this.lfoGainNode = ctx.createGain();
     const depthVal = Math.max(0, Math.min(10, this.params.depth ?? 6.0));
     const depthSec = (depthVal / 10) * 0.0018; // up to ±1.8 ms delay excursion
-    this.lfoGainNode.gain.setValueAtTime(depthSec, ctx.currentTime);
+    this.lfoGainLeft = ctx.createGain();
+    this.lfoGainLeft.gain.setValueAtTime(depthSec, ctx.currentTime);
+    this.lfoGainRight = ctx.createGain();
+    this.lfoGainRight.gain.setValueAtTime(-depthSec, ctx.currentTime);
 
-    // Connect LFO into delayTime AudioParam
-    this.lfoNode.connect(this.lfoGainNode);
-    this.lfoGainNode.connect(this.delayNode.delayTime);
+    this.lfoNode.connect(this.lfoGainLeft);
+    this.lfoNode.connect(this.lfoGainRight);
+    this.lfoGainLeft.connect(this.delayLeft.delayTime);
+    this.lfoGainRight.connect(this.delayRight.delayTime);
 
-    // 6. Signature CH-1 EQ Filter (Active High Shelf / Peaking)
+    // 6. Signature CH-1 EQ filter (active peaking, 3.6 kHz)
     // At center (5.0) = 0 dB. Towards LO = cut highs, towards HI = boost presence
     this.eqFilter = ctx.createBiquadFilter();
     this.eqFilter.type = 'peaking';
@@ -124,7 +138,10 @@ export class BossCh1Node implements AudioPedalNode {
     this.postLowpass.frequency.setValueAtTime(8500, ctx.currentTime);
     this.postLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
-    // 7. Dry & Wet Mixing Network
+    // 7. Merge the two modulated lines into true stereo L/R
+    this.merger = ctx.createChannelMerger(2);
+
+    // 8. Dry & Wet Mixing Network
     this.dryGain = ctx.createGain();
     this.dryGain.gain.setValueAtTime(0.707, ctx.currentTime);
 
@@ -139,14 +156,16 @@ export class BossCh1Node implements AudioPedalNode {
     this.makeupGain.gain.setValueAtTime(1.05, ctx.currentTime);
 
     // Audio Routing:
-    // A) Direct dry path
-    this.bypassWet.connect(this.dryGain);
+    // A) Direct dry path (mono, upmixed by the stereo mixer)
+    this.monoSum.connect(this.dryGain);
     this.dryGain.connect(this.chorusMixer);
 
-    // B) Modulated wet path
-    this.bypassWet.connect(this.preHighpass);
-    this.preHighpass.connect(this.delayNode);
-    this.delayNode.connect(this.eqFilter);
+    // B) Anti-phase modulated wet paths -> stereo merge
+    this.preHighpass.connect(this.delayLeft);
+    this.preHighpass.connect(this.delayRight);
+    this.delayLeft.connect(this.merger, 0, 0);
+    this.delayRight.connect(this.merger, 0, 1);
+    this.merger.connect(this.eqFilter);
     this.eqFilter.connect(this.postLowpass);
     this.postLowpass.connect(this.wetGain);
     this.wetGain.connect(this.chorusMixer);
@@ -175,7 +194,8 @@ export class BossCh1Node implements AudioPedalNode {
       this.lfoNode.frequency.setTargetAtTime(rateHz, now, tc);
     } else if (paramId === 'depth') {
       const depthSec = (clampedVal / 10) * 0.0018;
-      this.lfoGainNode.gain.setTargetAtTime(depthSec, now, tc);
+      this.lfoGainLeft.gain.setTargetAtTime(depthSec, now, tc);
+      this.lfoGainRight.gain.setTargetAtTime(-depthSec, now, tc);
     } else if (paramId === 'eLevel') {
       const wetLevel = (clampedVal / 10) * 0.707;
       this.wetGain.gain.setTargetAtTime(wetLevel, now, tc);
@@ -198,15 +218,19 @@ export class BossCh1Node implements AudioPedalNode {
     try {
       this.lfoNode.stop();
       this.lfoNode.disconnect();
-      this.lfoGainNode.disconnect();
+      this.lfoGainLeft.disconnect();
+      this.lfoGainRight.disconnect();
 
       this.inputNode.disconnect();
       this.outputNode.disconnect();
       this.bypassDry.disconnect();
       this.bypassWet.disconnect();
 
+      this.monoSum.disconnect();
       this.preHighpass.disconnect();
-      this.delayNode.disconnect();
+      this.delayLeft.disconnect();
+      this.delayRight.disconnect();
+      this.merger.disconnect();
       this.eqFilter.disconnect();
       this.postLowpass.disconnect();
 
