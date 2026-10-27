@@ -59,6 +59,10 @@ import { EhxElectricMistressPedal } from './flanger/EhxElectricMistressPedal';
 import { MxrFlangerPedal } from './flanger/MxrFlangerPedal';
 import { EhxSmallStonePedal } from './phaser/EhxSmallStonePedal';
 import { MxrPhase90Pedal } from './phaser/MxrPhase90Pedal';
+import { BossOc5Pedal } from './pitch/BossOc5Pedal';
+import { EhxPitchForkPedal } from './pitch/EhxPitchForkPedal';
+import { BossTr2Pedal } from './tremolo/BossTr2Pedal';
+import { FulltoneSupaTremPedal } from './tremolo/FulltoneSupaTremPedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -203,6 +207,18 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <EhxSmallStonePedal {...props} />;
     case 'phaser-mxr-phase90':
       return <MxrPhase90Pedal {...props} />;
+
+    // Category 17: Pitch / Octave
+    case 'pitch-boss-oc5':
+      return <BossOc5Pedal {...props} />;
+    case 'pitch-ehx-pitchfork':
+      return <EhxPitchForkPedal {...props} />;
+
+    // Category 18: Tremolo
+    case 'tremolo-boss-tr2':
+      return <BossTr2Pedal {...props} />;
+    case 'tremolo-fulltone-supatrem':
+      return <FulltoneSupaTremPedal {...props} />;
   }
 
   // Fallback for standard analog enclosure

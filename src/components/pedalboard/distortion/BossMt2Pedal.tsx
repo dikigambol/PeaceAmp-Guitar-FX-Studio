@@ -78,6 +78,7 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
       {/* 1/4" Side Patch Jacks */}
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
@@ -87,6 +88,7 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
 
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
@@ -138,6 +140,7 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
           {/* Column 1: LEVEL */}
           <div className="boss-mt2-knob-col">
             <div className="boss-mt2-dial-wrap">
+              <span className="boss-mt2-dot dot-min" />
               <Knob
                 label="LEVEL"
                 value={levelVal}
@@ -150,11 +153,7 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
                 showValue={false}
                 onChange={(v) => onChangeParam(instance.id, 'level', v)}
               />
-            </div>
-            {/* Markings below LEVEL */}
-            <div className="boss-mt2-dots-pair">
-              <div className="boss-mt2-white-dot" />
-              <div className="boss-mt2-white-dot" />
+              <span className="boss-mt2-dot dot-max" />
             </div>
             <div className="boss-mt2-minmax-row">
               <span>MIN</span>
@@ -164,7 +163,9 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
 
           {/* Column 2: EQUALIZER - HIGH (Inner) & LOW (Outer) Dual-Concentric */}
           <div className="boss-mt2-knob-col">
-            <div className="boss-mt2-dial-wrap">
+            <div className="boss-mt2-dial-wrap dial-concentric">
+              <span className="boss-mt2-dot dot-min" />
+              <span className="boss-mt2-dot dot-center" />
               <BossDualConcentricKnob
                 innerLabel="HIGH"
                 innerValue={highVal}
@@ -176,11 +177,7 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
                 outerFormat={formatDb}
                 size={38}
               />
-            </div>
-            {/* Markings below HIGH / LOW */}
-            <div className="boss-mt2-dots-pair">
-              <div className="boss-mt2-white-dot" />
-              <div className="boss-mt2-white-dot" />
+              <span className="boss-mt2-dot dot-max" />
             </div>
             <div className="boss-mt2-scale-row">
               <span>-15</span>
@@ -209,7 +206,9 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
 
           {/* Column 3: EQUALIZER - MIDDLE (Inner) & MID FREQ (Outer) Dual-Concentric */}
           <div className="boss-mt2-knob-col">
-            <div className="boss-mt2-dial-wrap">
+            <div className="boss-mt2-dial-wrap dial-concentric">
+              <span className="boss-mt2-dot dot-min" />
+              <span className="boss-mt2-dot dot-center" />
               <BossDualConcentricKnob
                 innerLabel="MIDDLE"
                 innerValue={middleVal}
@@ -221,11 +220,7 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
                 outerFormat={formatHz}
                 size={38}
               />
-            </div>
-            {/* Markings below MIDDLE / MID FREQ */}
-            <div className="boss-mt2-dots-pair">
-              <div className="boss-mt2-white-dot" />
-              <div className="boss-mt2-white-dot" />
+              <span className="boss-mt2-dot dot-max" />
             </div>
             <div className="boss-mt2-scale-row">
               <span>200</span>
@@ -257,6 +252,7 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
           {/* Column 4: DIST */}
           <div className="boss-mt2-knob-col">
             <div className="boss-mt2-dial-wrap">
+              <span className="boss-mt2-dot dot-min" />
               <Knob
                 label="DIST"
                 value={distVal}
@@ -269,11 +265,7 @@ export const BossMt2Pedal: React.FC<PedalProps> = ({
                 showValue={false}
                 onChange={(v) => onChangeParam(instance.id, 'dist', v)}
               />
-            </div>
-            {/* Markings below DIST */}
-            <div className="boss-mt2-dots-pair">
-              <div className="boss-mt2-white-dot" />
-              <div className="boss-mt2-white-dot" />
+              <span className="boss-mt2-dot dot-max" />
             </div>
             <div className="boss-mt2-minmax-row">
               <span>MIN</span>

@@ -51,6 +51,7 @@ export const EhxElectricMistressPedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
         title="Main Output Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
@@ -59,14 +60,12 @@ export const EhxElectricMistressPedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         title="Audio Input Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
         }}
       />
-
-      {/* Decorative Secondary Jack on Left (STEREO OUT visual plug) */}
-      <div className="ehx-deco-jack deco-stereo-out" title="Stereo Out Jack" />
 
       {/* Top Header Toolstrip with Remove Button */}
       <div className="pedal-top-bar ehx-top-bar">
@@ -226,8 +225,7 @@ export const EhxElectricMistressPedal: React.FC<PedalProps> = ({
 
         {/* Side Jack Indicators inside Faceplate Graphic */}
         <div className="ehx-sm-jack-labels">
-          <span className="ehx-sm-jack-lbl lbl-main-out">MAIN OUT</span>
-          <span className="ehx-sm-jack-lbl lbl-stereo-out">STEREO OUT</span>
+          <span className="ehx-sm-jack-lbl lbl-main-out">OUTPUT</span>
           <span className="ehx-sm-jack-lbl lbl-input">INPUT</span>
         </div>
 

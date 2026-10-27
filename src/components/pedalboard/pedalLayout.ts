@@ -13,8 +13,10 @@ export function getPedalDimensions(type: string): { w: number; h: number } {
   const isHoof = type === 'fuzz-hoof';
   const isGe7 = type === 'eq-boss-ge7' || type === 'boss-ge7';
   const isMxrFlanger = type === 'flanger-mxr';
-  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : isGe7 ? 248 : isMxrFlanger ? 256 : PEDAL_WIDTH;
-  const h = isMini ? 290 : isFuzzFactory ? 176 : isMxrFlanger ? 195 : 360;
+  const isSupaTrem = type === 'tremolo-fulltone-supatrem';
+  const isAw3 = type === 'wah-boss-aw3' || type === 'boss-aw3';
+  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : isGe7 ? 248 : isSupaTrem ? 360 : isMxrFlanger ? 256 : isAw3 ? 228 : PEDAL_WIDTH;
+  const h = isMini ? 290 : isFuzzFactory ? 176 : isSupaTrem ? 232 : isMxrFlanger ? 195 : 360;
   return { w, h };
 }
 

@@ -56,6 +56,7 @@ export const EhxSmallStonePedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
         title="Amp Output Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
@@ -64,6 +65,7 @@ export const EhxSmallStonePedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         title="Audio Input Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
@@ -107,6 +109,7 @@ export const EhxSmallStonePedal: React.FC<PedalProps> = ({
             {/* Status Pilot LED */}
             <div
               className="smallstone-status-col"
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleEnabled(instance.id);
@@ -143,6 +146,7 @@ export const EhxSmallStonePedal: React.FC<PedalProps> = ({
           {/* COLOR Mini Toggle Switch */}
           <div
             className="smallstone-color-wrap"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={toggleColor}
             title={`Color Mode: ${isColorOn ? 'Deep Resonance (Click to switch to Warm)' : 'Warm Vintage (Click to switch to Deep)'}`}
           >

@@ -605,11 +605,264 @@ class FeedbackClipperProcessor extends AudioWorkletProcessor {
   }
 }
 
+class PitchShifterProcessor extends AudioWorkletProcessor {
+  static get parameterDescriptors() {
+    return [
+      { name: 'ratio1', defaultValue: 1.0, minValue: 0.1, maxValue: 8.0 },
+      { name: 'gain1', defaultValue: 0.0, minValue: 0.0, maxValue: 3.0 },
+      { name: 'ratio2', defaultValue: 1.0, minValue: 0.1, maxValue: 8.0 },
+      { name: 'gain2', defaultValue: 0.0, minValue: 0.0, maxValue: 3.0 },
+      { name: 'ratio3', defaultValue: 1.0, minValue: 0.1, maxValue: 8.0 },
+      { name: 'gain3', defaultValue: 0.0, minValue: 0.0, maxValue: 3.0 },
+      { name: 'directGain', defaultValue: 1.0, minValue: 0.0, maxValue: 2.0 },
+      { name: 'vintage', defaultValue: 0.0, minValue: 0.0, maxValue: 1.0 },
+      { name: 'rangeCutoff', defaultValue: 10000.0, minValue: 40.0, maxValue: 20000.0 },
+    ];
+  }
+
+  constructor() {
+    super();
+    // 8192 samples (~170ms at 48kHz) circular delay buffer
+    this.bufferSize = 8192;
+    this.bufferMask = this.bufferSize - 1;
+    this.bufL = new Float32Array(this.bufferSize);
+    this.bufR = new Float32Array(this.bufferSize);
+    this.writeIndex = 0;
+
+    // Window size for pitch grains (~38ms at 44.1k/48k)
+    this.grainSize = 1800;
+
+    // Phase counters for 3 independent pitch-shifted voices (0.0 to 1.0)
+    this.phase1 = 0;
+    this.phase2 = 0;
+    this.phase3 = 0;
+
+    // Vintage flip-flop state for OC-2 sub-octave emulation
+    this.prevSample = 0;
+    this.ff1 = 1;
+    this.ff2 = 1;
+    this.ff1Count = 0;
+    this.env = 0;
+    this.lpState1 = 0;
+    this.lpState2 = 0;
+    this.rangeLpStateL = 0;
+    this.rangeLpStateR = 0;
+  }
+
+  process(inputs, outputs, parameters) {
+    const input = inputs[0];
+    const output = outputs[0];
+    if (!input || input.length === 0 || !output || output.length === 0) return true;
+
+    const inL = input[0];
+    const inR = input.length > 1 ? input[1] : inL;
+    const outL = output[0];
+    const outR = output.length > 1 ? output[1] : outL;
+    const len = inL.length;
+
+    const r1 = parameters.ratio1[0];
+    const g1 = parameters.gain1[0];
+    const r2 = parameters.ratio2[0];
+    const g2 = parameters.gain2[0];
+    const r3 = parameters.ratio3[0];
+    const g3 = parameters.gain3[0];
+    const directGain = parameters.directGain[0];
+    const isVintage = parameters.vintage[0] >= 0.5;
+    const rangeCutoff = parameters.rangeCutoff[0];
+
+    const grainLen = this.grainSize;
+    const invGrain = 1.0 / grainLen;
+    const twoPi = 2.0 * Math.PI;
+
+    // Phase delta per sample for each ratio
+    const delta1 = (1.0 - r1) * invGrain;
+    const delta2 = (1.0 - r2) * invGrain;
+    const delta3 = (1.0 - r3) * invGrain;
+
+    // One-pole smoothing filter coefficient for range filtering
+    const rangeAlpha = 1.0 - Math.exp((-twoPi * Math.min(rangeCutoff, sampleRate * 0.45)) / sampleRate);
+    const envDecay = Math.exp(-1.0 / (0.045 * sampleRate)); // ~45ms envelope decay
+
+    for (let i = 0; i < len; i++) {
+      const sL = inL[i];
+      const sR = inR[i];
+
+      // Write into circular delay buffer
+      const wIdx = this.writeIndex;
+      this.bufL[wIdx] = sL;
+      this.bufR[wIdx] = sR;
+      this.writeIndex = (wIdx + 1) & this.bufferMask;
+
+      // Track peak envelope for vintage synthesizer / gate dynamics
+      const absS = Math.abs(sL);
+      this.env = Math.max(absS, this.env * envDecay);
+
+      let voice1L = 0, voice1R = 0;
+      let voice2L = 0, voice2R = 0;
+      let voice3L = 0, voice3R = 0;
+
+      // ---- Voice 1 (e.g. -1 Octave or Primary Shift) ----
+      if (g1 > 0.001) {
+        if (isVintage && Math.abs(r1 - 0.5) < 0.05) {
+          // Vintage OC-2 style analog flip-flop divider (-1 OCT)
+          if (this.prevSample <= 0 && sL > 0.015 && this.env > 0.02) {
+            this.ff1 = -this.ff1;
+          }
+          const rawSqu = this.ff1 * this.env;
+          // 2-pole lowpass filter (~380Hz) to produce deep, fat vintage sub-octave bass tone
+          const lpAlpha = 0.055;
+          this.lpState1 += lpAlpha * (rawSqu - this.lpState1);
+          const octTone = this.lpState1;
+          voice1L = octTone * g1;
+          voice1R = octTone * g1;
+        } else {
+          // High-precision polyphonic granular pitch shift
+          const pA = this.phase1;
+          const pB = pA >= 0.5 ? pA - 0.5 : pA + 0.5;
+
+          const wA = 0.5 * (1.0 - Math.cos(twoPi * pA));
+          const wB = 0.5 * (1.0 - Math.cos(twoPi * pB));
+
+          const dA = pA * grainLen;
+          const dB = pB * grainLen;
+
+          const posA = (wIdx - dA + this.bufferSize) & this.bufferMask;
+          const posB = (wIdx - dB + this.bufferSize) & this.bufferMask;
+
+          const idxA0 = Math.floor(posA);
+          const fracA = posA - idxA0;
+          const idxA1 = (idxA0 + 1) & this.bufferMask;
+
+          const idxB0 = Math.floor(posB);
+          const fracB = posB - idxB0;
+          const idxB1 = (idxB0 + 1) & this.bufferMask;
+
+          const sigAL = this.bufL[idxA0] + fracA * (this.bufL[idxA1] - this.bufL[idxA0]);
+          const sigBL = this.bufL[idxB0] + fracB * (this.bufL[idxB1] - this.bufL[idxB0]);
+          voice1L = (sigAL * wA + sigBL * wB) * g1;
+
+          const sigAR = this.bufR[idxA0] + fracA * (this.bufR[idxA1] - this.bufR[idxA0]);
+          const sigBR = this.bufR[idxB0] + fracB * (this.bufR[idxB1] - this.bufR[idxB0]);
+          voice1R = (sigAR * wA + sigBR * wB) * g1;
+        }
+      }
+
+      // ---- Voice 2 (e.g. -2 Octave or Dual Down Shift) ----
+      if (g2 > 0.001) {
+        if (isVintage && Math.abs(r2 - 0.25) < 0.05) {
+          // Vintage OC-2 style analog flip-flop divider (-2 OCT)
+          if (this.prevSample <= 0 && sL > 0.015 && this.env > 0.02) {
+            this.ff1Count++;
+            if ((this.ff1Count & 1) === 0) {
+              this.ff2 = -this.ff2;
+            }
+          }
+          const rawSqu2 = this.ff2 * this.env;
+          const lpAlpha2 = 0.035;
+          this.lpState2 += lpAlpha2 * (rawSqu2 - this.lpState2);
+          voice2L = this.lpState2 * g2;
+          voice2R = this.lpState2 * g2;
+        } else {
+          // Polyphonic pitch shift
+          const pA = this.phase2;
+          const pB = pA >= 0.5 ? pA - 0.5 : pA + 0.5;
+
+          const wA = 0.5 * (1.0 - Math.cos(twoPi * pA));
+          const wB = 0.5 * (1.0 - Math.cos(twoPi * pB));
+
+          const dA = pA * grainLen;
+          const dB = pB * grainLen;
+
+          const posA = (wIdx - dA + this.bufferSize) & this.bufferMask;
+          const posB = (wIdx - dB + this.bufferSize) & this.bufferMask;
+
+          const idxA0 = Math.floor(posA);
+          const fracA = posA - idxA0;
+          const idxA1 = (idxA0 + 1) & this.bufferMask;
+
+          const idxB0 = Math.floor(posB);
+          const fracB = posB - idxB0;
+          const idxB1 = (idxB0 + 1) & this.bufferMask;
+
+          const sigAL = this.bufL[idxA0] + fracA * (this.bufL[idxA1] - this.bufL[idxA0]);
+          const sigBL = this.bufL[idxB0] + fracB * (this.bufL[idxB1] - this.bufL[idxB0]);
+          voice2L = (sigAL * wA + sigBL * wB) * g2;
+
+          const sigAR = this.bufR[idxA0] + fracA * (this.bufR[idxA1] - this.bufR[idxA0]);
+          const sigBR = this.bufR[idxB0] + fracB * (this.bufR[idxB1] - this.bufR[idxB0]);
+          voice2R = (sigAR * wA + sigBR * wB) * g2;
+        }
+      }
+
+      // ---- Voice 3 (e.g. +1 Octave) ----
+      if (g3 > 0.001) {
+        const pA = this.phase3;
+        const pB = pA >= 0.5 ? pA - 0.5 : pA + 0.5;
+
+        const wA = 0.5 * (1.0 - Math.cos(twoPi * pA));
+        const wB = 0.5 * (1.0 - Math.cos(twoPi * pB));
+
+        const dA = pA * grainLen;
+        const dB = pB * grainLen;
+
+        const posA = (wIdx - dA + this.bufferSize) & this.bufferMask;
+        const posB = (wIdx - dB + this.bufferSize) & this.bufferMask;
+
+        const idxA0 = Math.floor(posA);
+        const fracA = posA - idxA0;
+        const idxA1 = (idxA0 + 1) & this.bufferMask;
+
+        const idxB0 = Math.floor(posB);
+        const fracB = posB - idxB0;
+        const idxB1 = (idxB0 + 1) & this.bufferMask;
+
+        const sigAL = this.bufL[idxA0] + fracA * (this.bufL[idxA1] - this.bufL[idxA0]);
+        const sigBL = this.bufL[idxB0] + fracB * (this.bufL[idxB1] - this.bufL[idxB0]);
+        voice3L = (sigAL * wA + sigBL * wB) * g3;
+
+        const sigAR = this.bufR[idxA0] + fracA * (this.bufR[idxA1] - this.bufR[idxA0]);
+        const sigBR = this.bufR[idxB0] + fracB * (this.bufR[idxB1] - this.bufR[idxB0]);
+        voice3R = (sigAR * wA + sigBR * wB) * g3;
+      }
+
+      // Range filtering (for Boss OC-5 Poly Range parameter: gates/lowpasses the -1 OCT on high notes)
+      if (rangeCutoff < 15000 && !isVintage) {
+        this.rangeLpStateL += rangeAlpha * (voice1L - this.rangeLpStateL);
+        voice1L = this.rangeLpStateL;
+        this.rangeLpStateR += rangeAlpha * (voice1R - this.rangeLpStateR);
+        voice1R = this.rangeLpStateR;
+      }
+
+      // Summing dry + voices
+      const totalL = sL * directGain + voice1L + voice2L + voice3L;
+      const totalR = sR * directGain + voice1R + voice2R + voice3R;
+
+      outL[i] = totalL;
+      if (outR !== outL) outR[i] = totalR;
+
+      this.prevSample = sL;
+
+      // Advance phases with modulo 1.0 wrap
+      this.phase1 = (this.phase1 + delta1) % 1.0;
+      if (this.phase1 < 0) this.phase1 += 1.0;
+
+      this.phase2 = (this.phase2 + delta2) % 1.0;
+      if (this.phase2 < 0) this.phase2 += 1.0;
+
+      this.phase3 = (this.phase3 + delta3) % 1.0;
+      if (this.phase3 < 0) this.phase3 += 1.0;
+    }
+
+    return true;
+  }
+}
+
 registerProcessor('noise-gate-processor', NoiseGateProcessor);
 registerProcessor('looper-processor', LooperProcessor);
 registerProcessor('compressor-processor', CompressorProcessor);
 registerProcessor('phaser-processor', PhaserProcessor);
 registerProcessor('feedback-clipper-processor', FeedbackClipperProcessor);
+registerProcessor('pitch-shifter-processor', PitchShifterProcessor);
 `;
 
 let workletModuleUrl: string | null = null;

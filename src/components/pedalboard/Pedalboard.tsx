@@ -51,7 +51,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState<
-    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus' | 'delay' | 'flanger' | 'phaser'
+    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus' | 'delay' | 'flanger' | 'phaser' | 'pitch' | 'tremolo'
   >('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
@@ -333,8 +333,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       const isFlatiron = pedal?.type === 'fuzz-flatiron';
       const isHoof = pedal?.type === 'fuzz-hoof';
       const isMxrFlanger = pedal?.type === 'flanger-mxr';
+      const isSupaTrem = pedal?.type === 'tremolo-fulltone-supatrem';
       const curWidth = curDims.w;
-      const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isMxrFlanger ? 88 : isFlatiron ? 114 : isHoof ? 104 : JACK_Y_OFFSET;
+      const curJackY = isFuzzFace ? 86 : isToneBender ? 68 : isFuzzFactory ? 88 : isMxrFlanger ? 88 : isFlatiron ? 114 : isHoof ? 104 : isSupaTrem ? 116 : JACK_Y_OFFSET;
       if (port === 'in') {
         // Right side jack (pedal input is on the right)
         return { x: pos.x + curWidth + 2, y: pos.y + curJackY };
@@ -741,7 +742,11 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           ? 'delay echo analog bbd boss dm2 mn3005 mxr carbon copy m169 regen mix mod modulation shimmer repeats tape ambient space tc electronic gauss tape echo delay-boss-dm2 delay-mxr-carbon-copy delay-tce-gauss'
           : def.category === 'flanger'
           ? 'flanger bbd analog boss bf2 ehx electro harmonix stereo electric mistress mxr m117r van halen evh unchained chorus depth flanger rate manual width speed regen gilmour pink floyd police whoosh sweep comb filter resonance flanger-boss-bf2 flanger-ehx-electric-mistress flanger-mxr'
-          : 'phaser 4-stage ota jfet ehx small stone nano mxr phase 90 speed color van halen eruption pink floyd rotary swirl modulation phaser-ehx-smallstone phaser-mxr-phase90';
+          : def.category === 'phaser'
+          ? 'phaser 4-stage ota jfet ehx small stone nano mxr phase 90 speed color van halen eruption pink floyd rotary swirl modulation phaser-ehx-smallstone phaser-mxr-phase90'
+          : def.category === 'pitch'
+          ? 'pitch octave octave divider boss oc5 oc-5 ehx pitch fork detune polyphonic harmony 12-string sub-octave pitch-boss-oc5 pitch-ehx-pitchfork'
+          : 'tremolo boss tr2 tr-2 fulltone supa trem supa-trem st1 optical optocoupler photocell rate depth wave speed mix hard soft half speed tremolo-boss-tr2 tremolo-fulltone-supatrem';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -792,6 +797,14 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const phasers = useMemo(
     () => filteredPedals.filter((p) => p.category === 'phaser'),
+    [filteredPedals]
+  );
+  const pitches = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'pitch'),
+    [filteredPedals]
+  );
+  const tremolos = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'tremolo'),
     [filteredPedals]
   );
 
@@ -984,6 +997,18 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                     onClick={() => setActiveCategoryTab('phaser')}
                   >
                     Phaser ({availablePedals.filter((p) => p.category === 'phaser').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'pitch' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('pitch')}
+                  >
+                    Pitch / Octave ({availablePedals.filter((p) => p.category === 'pitch').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'tremolo' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('tremolo')}
+                  >
+                    Tremolo ({availablePedals.filter((p) => p.category === 'tremolo').length})
                   </button>
                 </div>
 
@@ -1305,8 +1330,66 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                               />
                               <div className="dropdown-item-info">
                                 <div className="item-title-row">
-                                  <strong className="item-name">{def.name}</strong>
+                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge phaser">PHASER</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Pitch / Octave */}
+                      {pitches.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag pitch-tag">PITCH / OCTAVE</span>
+                            <span className="group-count">{pitches.length} pedals</span>
+                          </div>
+                          {pitches.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge pitch">PITCH</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Tremolo */}
+                      {tremolos.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag tremolo-tag">TREMOLO</span>
+                            <span className="group-count">{tremolos.length} pedals</span>
+                          </div>
+                          {tremolos.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge tremolo">TREMOLO</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>

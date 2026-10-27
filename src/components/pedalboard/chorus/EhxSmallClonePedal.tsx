@@ -48,8 +48,8 @@ export const EhxSmallClonePedal: React.FC<PedalProps> = ({
     onChangeParam(instance.id, 'depth', isDeep ? 0 : 1);
   };
 
-  // 11 ticks spaced 30 degrees apart, from -150 to +150 (with 0 pointing straight up at 9V)
-  const dialTicks = [-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150];
+  // 11 ticks spanning the 270° knob sweep from -135° to +135° (values 0 to 10 in 27° steps)
+  const dialTicks = [-135, -108, -81, -54, -27, 0, 27, 54, 81, 108, 135];
 
   return (
     <div
@@ -61,6 +61,7 @@ export const EhxSmallClonePedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
         title="Audio Output Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
@@ -69,6 +70,7 @@ export const EhxSmallClonePedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         title="Audio Input Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
@@ -104,10 +106,14 @@ export const EhxSmallClonePedal: React.FC<PedalProps> = ({
           {/* Controls Row: DEPTH Switch (left), RATE Knob (center), STATUS LED (right) */}
           <div className="small-clone-controls-row">
             {/* DEPTH Slide Switch Column */}
-            <div className="small-clone-depth-col">
+            <div
+              className="small-clone-depth-col"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
               <div className="ehx-bracket-screw top-bracket-screw" />
               <div
                 className={`small-clone-switch-slot ${isDeep ? 'switch-up' : 'switch-down'}`}
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={toggleDepth}
                 title={`DEPTH Switch: ${isDeep ? 'UP (DEEP)' : 'DOWN (SUBTLE)'}`}
               >
@@ -148,6 +154,7 @@ export const EhxSmallClonePedal: React.FC<PedalProps> = ({
             {/* STATUS LED Column */}
             <div
               className="small-clone-status-col"
+              onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleEnabled(instance.id);
@@ -162,7 +169,15 @@ export const EhxSmallClonePedal: React.FC<PedalProps> = ({
 
           {/* Shared Labels Row: Exactly centered under each respective control and aligned on one baseline */}
           <div className="small-clone-labels-row">
-            <span className="control-name lbl-depth">DEPTH</span>
+            <span
+              className="control-name lbl-depth"
+              style={{ cursor: 'pointer' }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={toggleDepth}
+              title={`Toggle DEPTH: ${isDeep ? 'Switch to SUBTLE' : 'Switch to DEEP'}`}
+            >
+              DEPTH
+            </span>
             <span className="control-name lbl-rate">RATE</span>
             <span className="control-name lbl-status">STATUS</span>
           </div>

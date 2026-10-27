@@ -45,10 +45,11 @@ export const MxrPhase90Pedal: React.FC<PedalProps> = ({
       style={style}
       onPointerDown={onPointerDown}
     >
-      {/* 1/4" Side Phone Jacks (Aligned to standard JACK_Y_OFFSET = 57, top: 46px) */}
+      {/* 1/4" Side Phone Jacks */}
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
         title="Audio Output Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
@@ -57,14 +58,15 @@ export const MxrPhase90Pedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         title="Audio Input Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
         }}
       />
 
-      {/* Top Header Toolstrip with Remove Button */}
-      <div className="pedal-top-bar mxr-top-bar">
+      {/* Top Header Toolstrip */}
+      <div className="pedal-top-bar">
         <button
           className="pedal-mini-btn pedal-close-btn"
           onPointerDown={(e) => e.stopPropagation()}
@@ -74,68 +76,67 @@ export const MxrPhase90Pedal: React.FC<PedalProps> = ({
           }}
           title="Remove pedal from board"
         >
-          <X size={11} />
+          <X size={12} strokeWidth={1.5} />
         </button>
       </div>
 
-      {/* Side Labels on Orange Chassis */}
-      <div className="phase90-side-lbl lbl-output">OUTPUT</div>
-      <div className="phase90-side-lbl lbl-input">INPUT</div>
+      {/* Stamped Side Port Labels */}
+      <div className="mxr-side-label-left">OUTPUT</div>
+      <div className="mxr-side-label-right">INPUT</div>
 
-      {/* Main Face Container */}
-      <div className="phase90-face-content">
-        {/* Single Center Large SPEED Knob */}
-        <div className="phase90-knob-section">
-          <div className="phase90-knob-wrap">
-            <Knob
-              label=""
-              value={speedVal}
-              min={0}
-              max={10}
-              step={0.1}
-              defaultValue={4.0}
-              onChange={(val) => onChangeParam(instance.id, 'speed', val)}
-              size={54}
-              variant="mxr"
-              showLabel={false}
-              showValue={false}
-            />
-          </div>
-          <span className="phase90-speed-lbl">SPEED</span>
-        </div>
-
-        {/* Iconic [ MXR ] Block Logo */}
-        <div className="phase90-logo-badge">
-          <span className="phase90-logo-text">MXR</span>
-        </div>
-
-        {/* Center Red Pilot LED */}
-        <div
-          className="phase90-led-wrap"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleEnabled(instance.id);
-          }}
-          title={isEnabled ? 'Active (Click to bypass)' : 'Bypassed (Click to engage)'}
-        >
-          <div className={`phase90-led ${isEnabled ? 'lit' : ''}`}>
-            <div className="phase90-led-core" />
-          </div>
-        </div>
-
-        {/* Chrome Footswitch */}
-        <div className="phase90-stomp-wrap">
-          <ClassicStompSwitch
-            isEnabled={isEnabled}
-            onToggle={() => onToggleEnabled(instance.id)}
-            size={46}
+      {/* Single Large Fluted Knob: SPEED */}
+      <div className="mxr-single-knob-row">
+        <div className="mxr-knob-col">
+          <Knob
+            label="SPEED"
+            value={speedVal}
+            min={0}
+            max={10}
+            step={0.1}
+            defaultValue={4.0}
+            formatValue={(v) => v.toFixed(1)}
+            onChange={(val) => onChangeParam(instance.id, 'speed', val)}
+            variant="mxr"
+            size={48}
+            showLabel={false}
+            showValue={false}
           />
+          <span className="mxr-knob-title">SPEED</span>
         </div>
+      </div>
 
-        {/* Lowercase Title: phase 90 */}
-        <div className="phase90-title-wrap">
-          <span className="phase90-title-text">phase 90</span>
+      {/* Iconic MXR Logo Box */}
+      <div className="mxr-logo-box">
+        <span className="mxr-logo-text">MXR</span>
+      </div>
+
+      {/* Central Red Bezel LED */}
+      <div
+        className="mxr-led-mount"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleEnabled(instance.id);
+        }}
+        title="Status LED (Click to toggle bypass)"
+      >
+        <div className={`mxr-bezel-led ${isEnabled ? 'lit' : 'off'}`}>
+          <div className="mxr-led-core" />
         </div>
+      </div>
+
+      {/* Classic 3PDT Chrome Footswitch */}
+      <ClassicStompSwitch
+        isEnabled={isEnabled}
+        onToggle={() => onToggleEnabled(instance.id)}
+        title="Toggle MXR Phase 90 Bypass"
+        idPrefix="mxr-phase90"
+        size={46}
+      />
+
+      {/* Bottom Lowercase Script */}
+      <div className="mxr-bottom-title">
+        <span>phase 90</span>
       </div>
     </div>
   );

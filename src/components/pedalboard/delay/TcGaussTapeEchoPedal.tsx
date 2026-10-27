@@ -24,7 +24,9 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
   onToggleEnabled,
   onChangeParam,
   onRemove,
-  isDragging,
+  onPointerDown,
+  style,
+  isDragging = false,
   onJackClick,
   isJackPending,
   hasJackCable,
@@ -49,16 +51,19 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
   return (
     <div
       className={`pedal-custom-enclosure pedal-tc-gauss ${isEnabled ? 'pedal-active' : 'pedal-bypassed'} ${isDragging ? 'is-dragging' : ''}`}
+      style={style}
+      onPointerDown={onPointerDown}
       data-pedal-id={instance.id}
     >
       {/* Outer brushed aluminum side bezels */}
       <div className="tc-gauss-bezel-left" />
       <div className="tc-gauss-bezel-right" />
 
-      {/* 1/4" Side Phone Jacks (Aligned to JACK_Y_OFFSET = 57, top: 46px) */}
+      {/* 1/4" Side Phone Jacks */}
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
         title="Audio Output Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
@@ -67,6 +72,7 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         title="Audio Input Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
@@ -76,6 +82,7 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
       {/* Top Header Toolstrip */}
       <div className="pedal-top-bar">
         <button
+          type="button"
           className="pedal-mini-btn pedal-close-btn"
           onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
@@ -95,6 +102,7 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
           <span className="tc-gauss-brand">tc electronic</span>
           <div
             className="tc-gauss-led-wrap"
+            onPointerDown={(e) => e.stopPropagation()}
             onClick={(e) => {
               e.stopPropagation();
               onToggleEnabled(instance.id);
@@ -105,7 +113,7 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
           </div>
         </div>
 
-        {/* 1. TOP ROW: DELAY (Left) and VOLUME (Right) */}
+        {/* 1. TOP ROW: DELAY (Left) and VOLUME (Right) symmetrically mirrored */}
         <div className="tc-gauss-top-knobs">
           <div className="tc-gauss-knob-col">
             <span className="tc-gauss-knob-title">DELAY</span>
@@ -144,11 +152,9 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
           </div>
         </div>
 
-        {/* 2. MIDDLE ROW: SUSTAIN (Center) and MOD Slide Switch (Right) */}
+        {/* 2. MIDDLE ROW: SUSTAIN (Dead Center) and MOD Slide Switch (Right, aligned under Volume) */}
         <div className="tc-gauss-mid-row">
-          <div className="tc-gauss-mid-spacer" />
-
-          {/* SUSTAIN Knob */}
+          {/* SUSTAIN Knob - Dead Center at 50% */}
           <div className="tc-gauss-knob-col tc-gauss-sustain-col">
             <span className="tc-gauss-knob-title">SUSTAIN</span>
             <Knob
@@ -167,27 +173,30 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
             />
           </div>
 
-          {/* MOD Vertical Slide Switch */}
+          {/* MOD Vertical Slide Switch - Aligned beneath Volume knob */}
           <div
             className="tc-gauss-mod-switch-wrap"
             onClick={handleToggleMod}
             onPointerDown={(e) => e.stopPropagation()}
             title="Click to toggle Tape Modulation (Wow & Flutter)"
           >
-            <span className={`mod-pos-label ${isModOn ? 'active' : ''}`}>MOD ON</span>
+            <span className="tc-gauss-knob-title mod-title">MOD</span>
             <div className={`tc-gauss-slider-slot ${isModOn ? 'pos-on' : 'pos-off'}`}>
               <div className="tc-gauss-slider-knob" />
             </div>
-            <span className={`mod-pos-label ${!isModOn ? 'active' : ''}`}>MOD OFF</span>
+            <div className="mod-state-tags">
+              <span className={`mod-pos-label ${isModOn ? 'active' : ''}`}>ON</span>
+              <span className="mod-pos-divider">/</span>
+              <span className={`mod-pos-label ${!isModOn ? 'active' : ''}`}>OFF</span>
+            </div>
           </div>
         </div>
 
-        {/* 3. GAUSS TAPE ECHO BADGE */}
+        {/* 3. GAUSS TAPE ECHO BADGE - Dead Center */}
         <div className="tc-gauss-badge-wrap">
           <svg viewBox="0 0 100 100" className="tc-gauss-badge-svg">
             <defs>
-              {/* Arc purely confined to the bottom region (y between 70 and 85) */}
-              <path id="tc-gauss-tape-arc" d="M 24,70 A 35 35 0 0 0 76,70" fill="none" />
+              <path id="tc-gauss-tape-arc" d="M 20,68 A 36 36 0 0 0 80,68" fill="none" />
             </defs>
 
             {/* Concentric Circles */}
@@ -195,39 +204,38 @@ export const TcGaussTapeEchoPedal: React.FC<PedalProps> = ({
             <circle cx="50" cy="50" r="42" fill="none" stroke="#688478" strokeWidth="0.8" opacity="0.6" />
 
             {/* Acoustic Ray Lines above GAUSS */}
-            <line x1="42" y1="30" x2="38" y2="26" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
-            <line x1="50" y1="28" x2="50" y2="24" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
-            <line x1="58" y1="30" x2="62" y2="26" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="42" y1="28" x2="38" y2="24" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="50" y1="26" x2="50" y2="21" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="58" y1="28" x2="62" y2="24" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
 
-            {/* Acoustic Ray Lines below GAUSS (between GAUSS and TAPE ECHO) */}
-            <line x1="42" y1="58" x2="38" y2="62" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
-            <line x1="50" y1="60" x2="50" y2="64" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
-            <line x1="58" y1="58" x2="62" y2="62" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
-
-            {/* Stylized GAUSS Center Text - Placed at y=45, never overlaps lower text */}
+            {/* Stylized GAUSS Center Text */}
             <text
               x="50"
-              y="45"
+              y="44"
+              dx="1.25"
               textAnchor="middle"
               dominantBaseline="central"
-              fill="#c8d6ce"
-              fontSize="21"
+              fill="#dbe6e0"
+              fontSize="20"
               fontWeight="900"
-              fontFamily="'Oswald', 'Impact', 'Arial Narrow', sans-serif"
-              letterSpacing="2"
-              textLength="54"
-              lengthAdjust="spacingAndGlyphs"
+              fontFamily="'Impact', 'Arial Black', sans-serif"
+              letterSpacing="2.5"
             >
               GAUSS
             </text>
 
-            {/* Curved Lower Banner Text: TAPE ECHO - Strictly positioned along bottom arc */}
+            {/* Acoustic Ray Lines below GAUSS */}
+            <line x1="42" y1="59" x2="38" y2="63" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="50" y1="61" x2="50" y2="66" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
+            <line x1="58" y1="59" x2="62" y2="63" stroke="#688478" strokeWidth="1.2" strokeLinecap="round" />
+
+            {/* Curved Lower Banner Text: TAPE ECHO */}
             <text
-              fill="#88a397"
-              fontSize="7"
+              fill="#8da89c"
+              fontSize="6.8"
               fontWeight="800"
-              fontFamily="var(--font-ui), sans-serif"
-              letterSpacing="2"
+              fontFamily="'Michroma', sans-serif"
+              letterSpacing="1.5"
             >
               <textPath href="#tc-gauss-tape-arc" startOffset="50%" textAnchor="middle">
                 TAPE ECHO

@@ -311,22 +311,26 @@ export const MarshallShredMasterPedal: React.FC<PedalProps> = ({
 
         {/* Embossed Marshall Script Logo */}
         <div className="shredmaster-logo-container">
-          <svg viewBox="0 0 200 60" className="shredmaster-marshall-logo-svg">
+          <svg
+            viewBox="0 0 240 70"
+            className="shredmaster-marshall-logo-svg"
+            style={{ overflow: 'visible' }}
+          >
             <defs>
-              <filter id="marshall-emboss-filter" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="1.5" stdDeviation="0.8" floodColor="rgba(255,255,255,0.25)" />
-                <feDropShadow dx="0" dy="-2" stdDeviation="1.5" floodColor="rgba(0,0,0,0.95)" />
+              <filter id="marshall-emboss-filter" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="1.2" stdDeviation="0.8" floodColor="rgba(255,255,255,0.25)" />
+                <feDropShadow dx="0" dy="-1.5" stdDeviation="1.2" floodColor="rgba(0,0,0,0.95)" />
               </filter>
             </defs>
             <text
               x="50%"
-              y="44"
+              y="46"
               textAnchor="middle"
-              fontFamily="'Brush Script MT', 'Lucida Calligraphy', cursive, serif"
+              fontFamily="'Brush Script MT', 'Segoe Script', 'Lucida Calligraphy', cursive, serif"
               fontStyle="italic"
               fontWeight="bold"
-              fontSize="48"
-              letterSpacing="1"
+              fontSize="36"
+              letterSpacing="0.2"
               fill="#22252a"
               stroke="#0f1114"
               strokeWidth="1.2"

@@ -46,6 +46,7 @@ export const BossDm2Pedal: React.FC<PedalProps> = ({
       {/* 1/4" Side Patch Jacks (Aligned to JACK_Y_OFFSET = 57) */}
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
@@ -55,6 +56,7 @@ export const BossDm2Pedal: React.FC<PedalProps> = ({
 
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
@@ -94,7 +96,7 @@ export const BossDm2Pedal: React.FC<PedalProps> = ({
           <div className={`boss-check-led ${isEnabled ? 'lit' : 'off'}`} />
         </div>
 
-        {/* 3 Knobs Formation: REPEAT RATE (top-L), INTENSITY (top-R), ECHO (mid-bottom) */}
+        {/* 3 Knobs Formation: REPEAT RATE (top-L), INTENSITY (top-R), ECHO (mid-bottom) - Samakan persis dengan Boss DS-1 */}
         <div className="boss-3knobs-layout">
           {/* Top Row: REPEAT RATE (left) and INTENSITY (right) */}
           <div className="boss-top-knobs-row">
@@ -113,7 +115,13 @@ export const BossDm2Pedal: React.FC<PedalProps> = ({
                   onChange={(v) => onChangeParam(instance.id, 'repeatRate', v)}
                 />
               </div>
-              <span className="boss-knob-label-bot">REPEAT RATE</span>
+              <div className="boss-ds1-knob-sub">
+                <div className="boss-knob-dot" />
+                <span className="boss-knob-label-bot boss-dm2-stacked-label">
+                  <span>REPEAT</span>
+                  <span>RATE</span>
+                </span>
+              </div>
             </div>
 
             <div className="boss-knob-unit">
@@ -131,7 +139,13 @@ export const BossDm2Pedal: React.FC<PedalProps> = ({
                   onChange={(v) => onChangeParam(instance.id, 'intensity', v)}
                 />
               </div>
-              <span className="boss-knob-label-bot">INTENSITY</span>
+              <div className="boss-ds1-knob-sub">
+                <div className="boss-knob-dot" />
+                <span className="boss-knob-label-bot boss-dm2-stacked-label">
+                  <span>INTEN</span>
+                  <span>SITY</span>
+                </span>
+              </div>
             </div>
           </div>
 

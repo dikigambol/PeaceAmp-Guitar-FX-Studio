@@ -56,6 +56,7 @@ export const BossCh1Pedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-left ${isLeftPending ? 'is-jack-pending' : ''} ${hasLeftCable ? 'has-cable' : ''}`}
         title="Audio Output Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'out', e);
@@ -64,6 +65,7 @@ export const BossCh1Pedal: React.FC<PedalProps> = ({
       <div
         className={`stompbox-side-jack jack-right ${isRightPending ? 'is-jack-pending' : ''} ${hasRightCable ? 'has-cable' : ''}`}
         title="Audio Input Jack - Click to patch cable"
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           onJackClick?.(instance.id, 'in', e);
@@ -90,6 +92,7 @@ export const BossCh1Pedal: React.FC<PedalProps> = ({
         {/* CHECK LED with Label */}
         <div
           className="boss-ch1-check-wrap"
+          onPointerDown={(e) => e.stopPropagation()}
           onClick={(e) => {
             e.stopPropagation();
             onToggleEnabled(instance.id);
@@ -105,100 +108,109 @@ export const BossCh1Pedal: React.FC<PedalProps> = ({
           {/* Knob 1: E. LEVEL */}
           <div className="boss-ch1-knob-col">
             <span className="boss-ch1-knob-name">E. LEVEL</span>
-            <Knob
-              label="E. LEVEL"
-              value={eLevelVal}
-              min={0}
-              max={10}
-              step={0.1}
-              defaultValue={5.0}
-              formatValue={() => eLevelPctFormatted}
-              onChange={(val) => onChangeParam(instance.id, 'eLevel', val)}
-              variant="boss-silver"
-              size={34}
-              showLabel={false}
-              showValue={false}
-            />
+            <div className="boss-ch1-dial-wrap">
+              <span className="boss-ch1-dot dot-min" />
+              <Knob
+                label="E. LEVEL"
+                value={eLevelVal}
+                min={0}
+                max={10}
+                step={0.1}
+                defaultValue={5.0}
+                formatValue={() => eLevelPctFormatted}
+                onChange={(val) => onChangeParam(instance.id, 'eLevel', val)}
+                variant="boss-silver"
+                size={34}
+                showLabel={false}
+                showValue={false}
+              />
+              <span className="boss-ch1-dot dot-max" />
+            </div>
             <div className="boss-ch1-ticks-row">
-              <span className="tick-dot" />
               <span className="tick-text">MIN</span>
               <span className="tick-text">MAX</span>
-              <span className="tick-dot" />
             </div>
           </div>
 
           {/* Knob 2: EQ */}
           <div className="boss-ch1-knob-col">
             <span className="boss-ch1-knob-name">EQ</span>
-            <Knob
-              label="EQ"
-              value={eqVal}
-              min={0}
-              max={10}
-              step={0.1}
-              defaultValue={5.0}
-              formatValue={() => eqFormatted}
-              onChange={(val) => onChangeParam(instance.id, 'eq', val)}
-              variant="boss-silver"
-              size={34}
-              showLabel={false}
-              showValue={false}
-            />
+            <div className="boss-ch1-dial-wrap">
+              <span className="boss-ch1-dot dot-min" />
+              <span className="boss-ch1-dot dot-center" />
+              <Knob
+                label="EQ"
+                value={eqVal}
+                min={0}
+                max={10}
+                step={0.1}
+                defaultValue={5.0}
+                formatValue={() => eqFormatted}
+                onChange={(val) => onChangeParam(instance.id, 'eq', val)}
+                variant="boss-silver"
+                size={34}
+                showLabel={false}
+                showValue={false}
+              />
+              <span className="boss-ch1-dot dot-max" />
+            </div>
             <div className="boss-ch1-ticks-row">
-              <span className="tick-dot" />
               <span className="tick-text">LO</span>
               <span className="tick-text">HI</span>
-              <span className="tick-dot" />
             </div>
           </div>
 
           {/* Knob 3: RATE */}
           <div className="boss-ch1-knob-col">
             <span className="boss-ch1-knob-name">RATE</span>
-            <Knob
-              label="RATE"
-              value={rateVal}
-              min={0}
-              max={10}
-              step={0.1}
-              defaultValue={5.0}
-              formatValue={() => rateHzFormatted}
-              onChange={(val) => onChangeParam(instance.id, 'rate', val)}
-              variant="boss-silver"
-              size={34}
-              showLabel={false}
-              showValue={false}
-            />
+            <div className="boss-ch1-dial-wrap">
+              <span className="boss-ch1-dot dot-min" />
+              <Knob
+                label="RATE"
+                value={rateVal}
+                min={0}
+                max={10}
+                step={0.1}
+                defaultValue={5.0}
+                formatValue={() => rateHzFormatted}
+                onChange={(val) => onChangeParam(instance.id, 'rate', val)}
+                variant="boss-silver"
+                size={34}
+                showLabel={false}
+                showValue={false}
+              />
+              <span className="boss-ch1-dot dot-max" />
+            </div>
             <div className="boss-ch1-ticks-row">
-              <span className="tick-dot" />
               <span className="tick-text">MIN</span>
               <span className="tick-text">MAX</span>
-              <span className="tick-dot" />
             </div>
           </div>
 
           {/* Knob 4: DEPTH */}
           <div className="boss-ch1-knob-col">
             <span className="boss-ch1-knob-name">DEPTH</span>
-            <Knob
-              label="DEPTH"
-              value={depthVal}
-              min={0}
-              max={10}
-              step={0.1}
-              defaultValue={6.0}
-              formatValue={() => depthPctFormatted}
-              onChange={(val) => onChangeParam(instance.id, 'depth', val)}
-              variant="boss-silver"
-              size={34}
-              showLabel={false}
-              showValue={false}
-            />
+            <div className="boss-ch1-dial-wrap">
+              <span className="boss-ch1-dot dot-min" />
+              <Knob
+                label="DEPTH"
+                value={depthVal}
+                min={0}
+                max={10}
+                step={0.1}
+                defaultValue={6.0}
+                formatValue={() => depthPctFormatted}
+                onChange={(val) => onChangeParam(instance.id, 'depth', val)}
+                variant="boss-silver"
+                size={34}
+                showLabel={false}
+                showValue={false}
+              />
+              <span className="boss-ch1-dot dot-max" />
+            </div>
             <div className="boss-ch1-ticks-row">
-              <span className="tick-dot" />
               <span className="tick-text">MIN</span>
               <span className="tick-text">MAX</span>
-              <span className="tick-dot" />
             </div>
           </div>
         </div>

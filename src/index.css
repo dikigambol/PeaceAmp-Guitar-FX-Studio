@@ -2735,7 +2735,8 @@ body {
 .item-pill-badge.chorus,
 .item-pill-badge.delay,
 .item-pill-badge.flanger,
-.item-pill-badge.phaser {
+.item-pill-badge.phaser,
+.item-pill-badge.pitch {
   background: rgba(200, 166, 101, 0.18);
   color: #d4b476;
   border: 1px solid rgba(200, 166, 101, 0.4);
@@ -4981,10 +4982,10 @@ body {
   padding-bottom: 8px;
 }
 
-/* BOSS AW-3 DYNAMIC WAH ENCLOSURE (Standardized Boss SD-1 Form Factor) */
+/* BOSS AW-3 DYNAMIC WAH ENCLOSURE (Slightly widened 228px for roomy 4-knob control layout) */
 .pedal-boss-aw3 {
-  width: 204px !important;
-  max-width: 204px !important;
+  width: 228px !important;
+  max-width: 228px !important;
   min-height: 330px !important;
   background: linear-gradient(180deg, #dfd3ac 0%, #cfbf92 40%, #baaa79 80%, #9e8e60 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.45) !important;
@@ -5019,7 +5020,7 @@ body {
   border-radius: 5px !important;
   border: 1.5px solid #232936 !important;
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95), 0 1px 1px rgba(255, 255, 255, 0.2) !important;
-  padding: 6px 6px 8px !important;
+  padding: 6px 8px 8px !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -5042,10 +5043,10 @@ body {
   display: grid !important;
   grid-template-columns: repeat(4, 1fr) !important;
   width: 100% !important;
-  gap: 0 !important;
+  gap: 3px !important;
   align-items: start !important;
   justify-items: center !important;
-  padding: 0 4px !important;
+  padding: 0 2px !important;
   box-sizing: border-box !important;
 }
 
@@ -5062,9 +5063,9 @@ body {
 
 .pedal-boss-aw3 .boss-knob-name {
   font-family: 'Michroma', sans-serif !important;
-  font-size: 7px !important;
+  font-size: 6.8px !important;
   font-weight: 700 !important;
-  letter-spacing: 0.3px !important;
+  letter-spacing: 0.2px !important;
   color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
   line-height: 1.1 !important;
@@ -5105,11 +5106,12 @@ body {
   font-family: 'Michroma', sans-serif !important;
   font-size: 6.5px !important;
   font-weight: 700 !important;
-  letter-spacing: 1.5px !important;
+  letter-spacing: 0.8px !important;
   color: #94a3b8 !important;
   border-top: 1px solid #334155 !important;
-  padding-top: 2px !important;
-  width: 48% !important;
+  padding: 2px 8px 0 !important;
+  width: auto !important;
+  max-width: 95% !important;
   text-align: center !important;
   display: flex !important;
   justify-content: center !important;
@@ -5585,24 +5587,29 @@ body {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  width: 58px !important;
+  height: 58px !important;
 }
 
 .boss-ce2-knob-wrapper .boss-dot-tick {
   position: absolute !important;
-  width: 3.5px !important;
-  height: 3.5px !important;
+  width: 4px !important;
+  height: 4px !important;
   border-radius: 50% !important;
   background: #0f1c24 !important;
+  top: 50% !important;
+  left: 50% !important;
+  margin-top: -2px !important;
+  margin-left: -2px !important;
+  pointer-events: none !important;
 }
 
 .boss-ce2-knob-wrapper .dot-min {
-  left: -2px !important;
-  bottom: 6px !important;
+  transform: rotate(-135deg) translateY(-26.5px) !important;
 }
 
 .boss-ce2-knob-wrapper .dot-max {
-  right: -2px !important;
-  bottom: 6px !important;
+  transform: rotate(135deg) translateY(-26.5px) !important;
 }
 
 .boss-ce2-knob-label {
@@ -5762,20 +5769,47 @@ body {
   margin-bottom: 2px !important;
 }
 
-.boss-ch1-ticks-row {
+.boss-ch1-dial-wrap {
+  width: 44px !important;
+  height: 42px !important;
+  position: relative !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 2.5px !important;
-  width: 100% !important;
-  margin-top: 1px !important;
 }
 
-.boss-ch1-ticks-row .tick-dot {
-  width: 2.5px !important;
-  height: 2.5px !important;
+.boss-ch1-dot {
+  position: absolute !important;
+  width: 3px !important;
+  height: 3px !important;
   border-radius: 50% !important;
-  background: #94a3b8 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.7) !important;
+  top: 50% !important;
+  left: 50% !important;
+  margin-top: -1.5px !important;
+  margin-left: -1.5px !important;
+  pointer-events: none !important;
+}
+
+.boss-ch1-dial-wrap .dot-min {
+  transform: rotate(-135deg) translateY(-21px) !important;
+}
+
+.boss-ch1-dial-wrap .dot-max {
+  transform: rotate(135deg) translateY(-21px) !important;
+}
+
+.boss-ch1-dial-wrap .dot-center {
+  transform: rotate(0deg) translateY(-21px) !important;
+}
+
+.boss-ch1-ticks-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 30px !important;
+  margin-top: 1px !important;
 }
 
 .boss-ch1-ticks-row .tick-text {
@@ -6703,7 +6737,7 @@ body {
 .boss-deck {
   width: 100%;
   border-radius: 6px;
-  padding: 6px 6px 8px;
+  padding: 6px 4px 8px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -6781,10 +6815,12 @@ body {
 }
 
 .boss-top-knobs-row {
-  width: 96%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  padding: 0 2px;
+  box-sizing: border-box;
 }
 
 .boss-knob-unit {
@@ -6832,7 +6868,8 @@ body {
 .pedal-boss-ch1,
 .pedal-boss-dm2,
 .pedal-boss-cs3,
-.pedal-boss-aw3 {
+.pedal-boss-oc5,
+.pedal-boss-tr2 {
   width: 204px !important;
   max-width: 204px !important;
   min-height: 330px !important;
@@ -6859,7 +6896,9 @@ body {
 .pedal-boss-dm2 .stompbox-side-jack,
 .pedal-boss-cs3 .stompbox-side-jack,
 .pedal-boss-ge7 .stompbox-side-jack,
-.pedal-boss-aw3 .stompbox-side-jack {
+.pedal-boss-aw3 .stompbox-side-jack,
+.pedal-boss-oc5 .stompbox-side-jack,
+.pedal-boss-tr2 .stompbox-side-jack {
   top: 46px !important;
 }
 
@@ -6876,7 +6915,9 @@ body {
 .pedal-boss-dm2 .boss-treadle-plate,
 .pedal-boss-cs3 .boss-treadle-plate,
 .pedal-boss-ge7 .boss-treadle-plate,
-.pedal-boss-aw3 .boss-treadle-plate {
+.pedal-boss-aw3 .boss-treadle-plate,
+.pedal-boss-oc5 .boss-treadle-plate,
+.pedal-boss-tr2 .boss-treadle-plate {
   width: 100% !important;
   height: 85px !important;
   margin-top: auto !important;
@@ -7008,60 +7049,24 @@ body {
   border: 2px solid #5c1414 !important;
 }
 
-/* Symmetrical 3-knob triangular layout for Boss DM-2 (matching Boss SD-1 outer-edge alignment) */
-.pedal-boss-dm2 .boss-top-knobs-row {
-  width: 95% !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: flex-start !important;
-  padding: 0 4px !important;
-  box-sizing: border-box !important;
-}
-
-.pedal-boss-dm2 .boss-knob-unit {
-  width: 62px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: flex-start !important;
-}
-
-.pedal-boss-dm2 .boss-knob-dial-wrap {
+/* Boss DM-2 Knob layout inherits unified Boss 3-knob layout (identical to Boss DS-1) */
+.pedal-boss-dm2 .boss-top-knobs-row .boss-knob-unit {
   width: 36px !important;
-  height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
 }
 
 .pedal-boss-dm2 .boss-knob-label-bot {
-  font-family: 'Michroma', sans-serif !important;
-  font-size: 6.8px !important;
-  font-weight: 700 !important;
+  font-size: 6px !important;
   letter-spacing: 0.25px !important;
-  color: #111827 !important;
-  text-align: center !important;
   white-space: nowrap !important;
-  margin-top: 2px !important;
-  line-height: 1 !important;
 }
 
-.pedal-boss-dm2 .boss-bottom-knob-unit {
+.boss-dm2-stacked-label {
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  justify-content: center !important;
-  margin-top: -4px !important;
-  width: 100% !important;
-}
-
-.pedal-boss-dm2 .boss-bottom-knob-unit .boss-knob-label-top {
-  font-family: 'Michroma', sans-serif !important;
-  font-size: 7.5px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.8px !important;
-  color: #111827 !important;
-  margin-bottom: 2px !important;
+  line-height: 1.05 !important;
+  font-size: 6px !important;
+  letter-spacing: 0.25px !important;
   text-align: center !important;
 }
 
@@ -7443,32 +7448,51 @@ body {
 }
 
 .boss-mt2-dial-wrap {
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 42px;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.boss-mt2-dots-pair {
-  width: 26px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 2px;
-}
-
-.boss-mt2-white-dot {
+.boss-mt2-dot {
+  position: absolute;
   width: 3px;
   height: 3px;
   border-radius: 50%;
   background: #ffffff;
-  box-shadow: 0 0 2px rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+  top: 50%;
+  left: 50%;
+  margin-top: -1.5px;
+  margin-left: -1.5px;
+  pointer-events: none;
+}
+
+.boss-mt2-dial-wrap .dot-min {
+  transform: rotate(-135deg) translateY(-21px);
+}
+
+.boss-mt2-dial-wrap .dot-max {
+  transform: rotate(135deg) translateY(-21px);
+}
+
+.boss-mt2-dial-wrap.dial-concentric .dot-min {
+  transform: rotate(-135deg) translateY(-23.5px);
+}
+
+.boss-mt2-dial-wrap.dial-concentric .dot-max {
+  transform: rotate(135deg) translateY(-23.5px);
+}
+
+.boss-mt2-dial-wrap.dial-concentric .dot-center {
+  transform: rotate(0deg) translateY(-23.5px);
 }
 
 .boss-mt2-minmax-row,
 .boss-mt2-scale-row {
-  width: 28px;
+  width: 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8324,12 +8348,14 @@ body {
   align-items: center;
   justify-content: center;
   margin-top: 4px;
+  overflow: visible;
 }
 
 .shredmaster-marshall-logo-svg {
   width: 100%;
   height: 100%;
   display: block;
+  overflow: visible;
 }
 
 /* 6. KLON CENTAUR (LANDSCAPE ORIENTED ENCLOSURE) */
@@ -12701,7 +12727,7 @@ body {
 
 .small-clone-radial-dials {
   width: 72px !important;
-  height: 68px !important;
+  height: 72px !important;
   position: relative !important;
   display: flex !important;
   align-items: center !important;
@@ -12942,28 +12968,27 @@ body {
 .pedal-mxr-analog-chorus {
   width: 204px !important;
   max-width: 204px !important;
-  min-height: 350px !important;
+  min-height: 330px !important;
   background: radial-gradient(circle at 50% 20%, #38bdf8 0%, #0284c7 45%, #0369a1 80%, #075985 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.35) !important;
-  border-radius: 8px !important;
+  border-radius: 9px !important;
   box-shadow:
-    0 14px 32px rgba(0, 0, 0, 0.85),
+    0 14px 34px rgba(0, 0, 0, 0.85),
     inset 0 1px 2px rgba(255, 255, 255, 0.45),
-    inset 0 -3px 8px rgba(0, 0, 0, 0.8) !important;
+    inset 0 -3px 8px rgba(0, 0, 0, 0.75) !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   box-sizing: border-box !important;
   padding: 8px 12px 14px !important;
   position: relative !important;
-  user-select: none !important;
 }
 
 /* Stamped Side Port Labels */
 .pedal-mxr-analog-chorus .mxr-side-label-left,
 .pedal-mxr-analog-chorus .mxr-side-label-right {
   color: #082f49 !important;
-  top: 180px !important;
+  top: 175px !important;
 }
 
 /* Row 1: LOW & HIGH DUAL EQ */
@@ -13325,28 +13350,36 @@ body {
 }
 
 /* Header Bar: tc electronic logo + Red LED */
+/* Header Bar: tc electronic logo + Red LED */
 .tc-gauss-header {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 1px;
-  margin-bottom: 2px;
-  gap: 2px;
+  justify-content: center;
+  margin-top: 2px;
+  margin-bottom: 4px;
+  gap: 3px;
+  text-align: center;
 }
 
 .tc-gauss-brand {
-  font-family: var(--font-ui), sans-serif;
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: -0.4px;
+  font-family: 'Michroma', var(--font-ui), sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
   color: #d1ded7;
   text-transform: lowercase;
+  text-align: center;
+  line-height: 1;
 }
 
 .tc-gauss-led-wrap {
   cursor: pointer;
-  padding: 1px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tc-gauss-led {
@@ -13364,74 +13397,79 @@ body {
   box-shadow: 0 0 8px #ef4444, 0 0 16px rgba(239, 68, 68, 0.85);
 }
 
-/* Row 1: DELAY (L) & VOLUME (R) */
+/* Row 1: DELAY (L) & VOLUME (R) - Symmetrically mirrored */
 .tc-gauss-top-knobs {
+  width: 100%;
   display: flex;
   justify-content: space-between;
-  width: 94%;
+  align-items: flex-start;
+  padding: 0 14px;
+  box-sizing: border-box;
   margin-top: 2px;
 }
 
 .tc-gauss-knob-col {
+  width: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
 }
 
 .tc-gauss-knob-title {
-  font-family: var(--font-ui), sans-serif;
-  font-size: 8px;
+  font-family: 'Michroma', var(--font-ui), sans-serif;
+  font-size: 7.5px;
   font-weight: 800;
   letter-spacing: 0.8px;
   color: #a4bab0;
-  margin-bottom: 2px;
+  margin-bottom: 3px;
   text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
 }
 
-/* Row 2: SUSTAIN (Center) & MOD Slide Switch (Right) */
+/* Row 2: SUSTAIN (Dead Center) & MOD Slide Switch (Right, aligned under Volume) */
 .tc-gauss-mid-row {
+  position: relative;
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 96%;
-  margin-top: 2px;
-}
-
-.tc-gauss-mid-spacer {
-  width: 28px;
+  justify-content: center;
+  margin-top: 4px;
+  min-height: 60px;
 }
 
 .tc-gauss-sustain-col {
-  margin-left: 10px;
-}
-
-/* MOD Slide Switch */
-.tc-gauss-mod-switch-wrap {
+  width: 52px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5px;
+  text-align: center;
+}
+
+/* MOD Slide Switch diposisikan lebih ke kanan agar berjarak lega dari knob SUSTAIN */
+.tc-gauss-mod-switch-wrap {
+  position: absolute;
+  right: 8px;
+  width: 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  padding: 2px;
-  width: 32px;
+  padding: 0;
+  user-select: none;
 }
 
-.mod-pos-label {
-  font-family: var(--font-ui), sans-serif;
-  font-size: 6px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  color: #6b8277;
-  transition: color 0.15s ease;
-}
-
-.mod-pos-label.active {
-  color: #f1f5f9;
+.tc-gauss-mod-switch-wrap .mod-title {
+  font-size: 7px;
+  letter-spacing: 0.8px;
+  margin-bottom: 2px;
 }
 
 .tc-gauss-slider-slot {
   width: 14px;
-  height: 26px;
+  height: 24px;
   background: #0f1814;
   border: 1px solid #2f4339;
   border-radius: 3px;
@@ -13441,9 +13479,9 @@ body {
 
 .tc-gauss-slider-knob {
   width: 12px;
-  height: 11px;
-  background: linear-gradient(180deg, #374740 0%, #1a2420 100%);
-  border: 1px solid #587064;
+  height: 10px;
+  background: linear-gradient(180deg, #4d6056 0%, #24352e 100%);
+  border: 1px solid #6b8277;
   border-radius: 2px;
   position: absolute;
   left: 0px;
@@ -13456,20 +13494,52 @@ body {
 }
 
 .tc-gauss-slider-slot.pos-off .tc-gauss-slider-knob {
-  top: 12px;
+  top: 11px;
 }
 
-/* GAUSS Tape Echo Circle Badge */
+.mod-state-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.mod-pos-label {
+  font-family: 'Michroma', var(--font-ui), sans-serif;
+  font-size: 6px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  color: #4d6358;
+  transition: color 0.15s ease;
+}
+
+.mod-pos-label.active {
+  color: #d1ded7;
+  font-weight: 800;
+}
+
+.mod-pos-divider {
+  font-family: 'Michroma', var(--font-ui), sans-serif;
+  font-size: 5.5px;
+  color: #36483f;
+}
+
+/* GAUSS Tape Echo Circle Badge - Centered */
 .tc-gauss-badge-wrap {
-  width: 82px;
-  height: 82px;
-  margin: 2px auto 2px;
+  width: 86px;
+  height: 86px;
+  margin: 6px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .tc-gauss-badge-svg {
   width: 100%;
   height: 100%;
   overflow: visible;
+  display: block;
 }
 
 /* Bottom Footswitch Section with Speed Stripes */
@@ -13480,7 +13550,7 @@ body {
   align-items: center;
   justify-content: center;
   margin-top: auto;
-  padding-top: 4px;
+  padding: 6px 0 4px;
 }
 
 .tc-gauss-stripes {
@@ -13692,31 +13762,7 @@ body {
   right: -8px !important;
 }
 
-/* Authentic Decorative Secondary Left Jack (STEREO OUT) */
-.pedal-ehx-stereo-mistress .ehx-deco-jack.deco-stereo-out {
-  position: absolute !important;
-  left: -8px !important;
-  top: 102px !important;
-  width: 14px !important;
-  height: 22px !important;
-  border-radius: 3px !important;
-  background: linear-gradient(90deg, #64748b 0%, #94a3b8 50%, #475569 100%) !important;
-  border: 1px solid #1e293b !important;
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.4), 0 2px 4px rgba(0, 0, 0, 0.6) !important;
-  pointer-events: none !important;
-}
 
-.pedal-ehx-stereo-mistress .ehx-deco-jack.deco-stereo-out::after {
-  content: '' !important;
-  position: absolute !important;
-  top: 4px !important;
-  left: 2px !important;
-  width: 8px !important;
-  height: 12px !important;
-  background: #0f172a !important;
-  border-radius: 2px !important;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9) !important;
-}
 
 /* Top bar with close button */
 .pedal-ehx-stereo-mistress .ehx-top-bar {
@@ -13910,31 +13956,24 @@ body {
 .ehx-sm-jack-lbl {
   position: absolute !important;
   font-family: 'Montserrat', sans-serif !important;
-  font-size: 5.8px !important;
+  font-size: 6px !important;
   font-weight: 800 !important;
   color: #ffffff !important;
-  letter-spacing: 0.5px !important;
+  letter-spacing: 0.8px !important;
+  white-space: nowrap !important;
+  top: 28px !important;
 }
 
 .ehx-sm-jack-lbl.lbl-main-out {
-  top: 48px !important;
-  left: 9px !important;
-  transform: rotate(-90deg) !important;
-  transform-origin: left top !important;
-}
-
-.ehx-sm-jack-lbl.lbl-stereo-out {
-  top: 106px !important;
-  left: 9px !important;
-  transform: rotate(-90deg) !important;
-  transform-origin: left top !important;
+  left: 10px !important;
+  transform: translate(-50%, -50%) rotate(-90deg) !important;
+  transform-origin: center center !important;
 }
 
 .ehx-sm-jack-lbl.lbl-input {
-  top: 56px !important;
-  right: 9px !important;
-  transform: rotate(90deg) !important;
-  transform-origin: right top !important;
+  right: 10px !important;
+  transform: translate(50%, -50%) rotate(90deg) !important;
+  transform-origin: center center !important;
 }
 
 /* 3PDT Stomp Switch Section */
@@ -14539,24 +14578,20 @@ body {
 
 /* ==========================================================================
    2. MXR M101 PHASE 90 (Classic Safety Orange Block Logo Enclosure)
+   Standardized to MXR Dyna Comp design system
    ========================================================================== */
 .pedal-mxr-phase90 {
-  width: 204px !important;
-  max-width: 204px !important;
-  min-height: 330px !important;
-  border-radius: 10px !important;
-  background: linear-gradient(165deg, #fb923c 0%, #f97316 40%, #ea580c 100%) !important;
-  border: 1.5px solid #c2410c !important;
+  background: radial-gradient(circle at 50% 20%, #fb923c 0%, #f97316 60%, #ea580c 100%) !important;
+  border: 1px solid rgba(255, 200, 150, 0.35) !important;
   box-shadow:
-    0 18px 40px rgba(0, 0, 0, 0.9),
-    inset 0 1px 2px rgba(255, 255, 255, 0.45),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.5) !important;
-  padding: 6px 10px 14px !important;
-  box-sizing: border-box !important;
+    0 14px 32px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(255, 230, 200, 0.4),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.8) !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  position: relative !important;
+  box-sizing: border-box !important;
+  padding: 8px 12px 14px !important;
 }
 
 /* Symmetrical Side 1/4" Phone Jacks aligned to JACK_Y_OFFSET = 57, top: 46px */
@@ -14570,157 +14605,1251 @@ body {
   right: -8px !important;
 }
 
-.pedal-mxr-phase90 .mxr-top-bar {
+/* Single Knob Row for 1-knob MXR pedals */
+.mxr-single-knob-row {
+  display: flex !important;
+  justify-content: center !important;
+  width: 100% !important;
+  margin-top: 4px !important;
+}
+
+/* ==========================================================================
+   CATEGORY 17: PITCH & OCTAVE PEDALS
+   - Boss OC-5 Octave
+   - Electro-Harmonix Pitch Fork
+   ========================================================================== */
+
+/* Group tag in dropdown */
+.group-tag.pitch-tag {
+  background: rgba(220, 38, 38, 0.16) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(220, 38, 38, 0.4) !important;
+}
+
+/* --------------------------------------------------------------------------
+   BOSS OC-5 OCTAVE PEDAL
+   Authentic metallic copper-brown enclosure, recessed cavity, 4 knobs,
+   Vintage/Poly slide switch, white silk-screened typography, treadle pad.
+   -------------------------------------------------------------------------- */
+.pedal-boss-oc5 {
+  background: linear-gradient(180deg, #64321c 0%, #502513 45%, #3f1b0c 85%, #2e1206 100%) !important;
+  border: 2px solid #240c03 !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.94),
+    inset 0 1px 1px rgba(255, 180, 135, 0.45),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.85) !important;
+}
+
+.boss-deck-oc5 {
+  width: 100% !important;
+  background: #0d0f12 !important;
+  border-radius: 5px !important;
+  border: 1.5px solid #231c17 !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95), 0 1px 1px rgba(255, 255, 255, 0.18) !important;
+  padding: 5px 3px 6px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* CHECK LED centered at top */
+.boss-oc5-check-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 1.5px !important;
+  margin-bottom: 2px !important;
+  cursor: pointer !important;
+}
+
+.boss-oc5-check-label {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  color: #ffffff !important;
+}
+
+/* 4 Knobs Deck: All labels stacked ABOVE knobs */
+.boss-oc5-knobs-deck {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  width: 100% !important;
+  gap: 1px !important;
+  align-items: start !important;
+  justify-items: center !important;
+  margin-top: 1px !important;
+}
+
+.boss-oc5-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+}
+
+.boss-oc5-knob-title {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  min-height: 20px !important;
+  margin-bottom: 2px !important;
+}
+
+.boss-oc5-knob-title span {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.2px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.3px !important;
+  line-height: 1.15 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95) !important;
+}
+
+.boss-oc5-dial-container {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.boss-oc5-dot {
+  position: absolute !important;
+  width: 3px !important;
+  height: 3px !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.7) !important;
+  top: 50% !important;
+  left: 50% !important;
+  margin-top: -1.5px !important;
+  margin-left: -1.5px !important;
+  pointer-events: none !important;
+}
+
+.boss-oc5-dial-container .dot-min {
+  transform: rotate(-135deg) translateY(-20.5px) !important;
+}
+
+.boss-oc5-dial-container .dot-max {
+  transform: rotate(135deg) translateY(-20.5px) !important;
+}
+
+/* Lower Controls Row: VINTAGE | SLIDER | [POLY] */
+.boss-oc5-bottom-controls-row {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 3px 4px 1px !important;
+  box-sizing: border-box !important;
+  margin-top: 4px !important;
+}
+
+.boss-oc5-switch-subdeck {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  cursor: pointer !important;
+  user-select: none !important;
+}
+
+.boss-mode-text {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.4px !important;
+  transition: opacity 0.15s ease !important;
+}
+
+.boss-mode-text:not(.active) {
+  opacity: 0.6 !important;
+}
+
+.boss-switch-slot {
+  width: 22px !important;
+  height: 8px !important;
+  background: #000000 !important;
+  border-radius: 4px !important;
+  border: 1px solid #334155 !important;
+  position: relative !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.95) !important;
+}
+
+.boss-switch-lever {
+  width: 9px !important;
+  height: 6px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%) !important;
+  border-radius: 2px !important;
+  position: absolute !important;
+  top: 0px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+  transition: left 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.boss-switch-lever.lever-vintage {
+  left: 1px !important;
+}
+
+.boss-switch-lever.lever-poly {
+  left: 10px !important;
+}
+
+/* POLY white bordered badge */
+.boss-mode-badge {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 5.8px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  border: 1.2px solid #ffffff !important;
+  padding: 0.5px 3px !important;
+  border-radius: 2px !important;
+  letter-spacing: 0.5px !important;
+  line-height: 1 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+.boss-mode-badge.active {
+  background: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Middle Stepped Section */
+.boss-oc5-mid {
+  width: 100% !important;
+  margin: 5px 0 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-oc5-io-row {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  padding: 0 6px !important;
+  box-sizing: border-box !important;
+}
+
+.boss-oc5-left-labels,
+.boss-oc5-right-labels {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1.5px !important;
+}
+
+.boss-oc5-io-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 2.5px !important;
+}
+
+.boss-io-arrow {
+  color: #ffffff !important;
+  font-size: 7.5px !important;
+  font-weight: 900 !important;
+}
+
+.boss-io-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.8px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.5px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+.boss-oc5-typography {
+  text-align: center !important;
+  margin: 4px 0 8px !important;
+  line-height: 1.1 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-oc5-title {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+.boss-oc5-model {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 1.2px !important;
+  margin-left: 44px !important;
+  margin-top: 1px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* --------------------------------------------------------------------------
+   ELECTRO-HARMONIX PITCH FORK PEDAL
+   White enclosure, metallic silver top plate with 11-position Shift dial,
+   Toggle switch, Latch button, pitch fork trident graphics, 3PDT stomp.
+   -------------------------------------------------------------------------- */
+.pedal-ehx-pitchfork {
+  width: 204px !important;
+  max-width: 204px !important;
+  min-height: 305px !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 60%, #e2e8f0 100%) !important;
+  border-radius: 8px !important;
+  border: 2px solid #cbd5e1 !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.92),
+    inset 0 1px 2px #ffffff !important;
+  padding: 4px 6px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+  user-select: none !important;
+}
+
+.pedal-ehx-pitchfork .stompbox-side-jack {
+  top: 48px !important;
+}
+
+.pedal-ehx-pitchfork .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+
+.pedal-ehx-pitchfork .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+.pitchfork-top-bar {
   width: 100% !important;
   display: flex !important;
   justify-content: flex-end !important;
+  align-items: center !important;
+  height: 14px !important;
   padding: 0 2px !important;
   margin-bottom: 2px !important;
   z-index: 10 !important;
 }
 
-/* Side Labels */
-.phase90-side-lbl {
+.pitchfork-faceplate {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 5px !important;
+  overflow: hidden !important;
+  border: 1px solid #1e293b !important;
+}
+
+/* Silver Upper Control Zone */
+.pitchfork-silver-top {
+  width: 100% !important;
+  background: linear-gradient(180deg, #f8fafc 0%, #cbd5e1 50%, #94a3b8 100%) !important;
+  padding: 4px 6px 6px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+  border-bottom: 2px solid #0f172a !important;
+}
+
+.pitchfork-power-label {
+  font-family: var(--font-mono) !important;
+  font-size: 7px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  letter-spacing: 0.5px !important;
+  margin-bottom: 2px !important;
+}
+
+.pitchfork-knobs-row {
+  display: flex !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 2px !important;
+}
+
+.pitchfork-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+.pitchfork-knob-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+  color: #0f172a !important;
+  margin-top: 2px !important;
+}
+
+/* Blend Wrap matching dial dimensions */
+.pitchfork-blend-wrap {
+  width: 76px !important;
+  height: 76px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Shift Dial with 11 position marks */
+.pitchfork-shift-dial-wrap {
+  position: relative !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 76px !important;
+  height: 76px !important;
+}
+
+.pitchfork-dial-labels {
   position: absolute !important;
-  font-family: 'Montserrat', sans-serif !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 76px !important;
+  height: 76px !important;
+  pointer-events: auto !important;
+}
+
+.pitchfork-dial-labels .dial-pos {
+  position: absolute !important;
+  font-family: var(--font-mono) !important;
   font-size: 6.5px !important;
   font-weight: 800 !important;
-  color: #000000 !important;
-  letter-spacing: 0.6px !important;
-  pointer-events: none !important;
-  z-index: 2 !important;
+  color: #1e293b !important;
+  line-height: 1 !important;
+  transform: translate(-50%, -50%) !important;
+  transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease !important;
+  cursor: pointer !important;
+  user-select: none !important;
+  z-index: 5 !important;
 }
 
-.phase90-side-lbl.lbl-output {
-  left: 3px !important;
-  top: 50px !important;
-  transform: rotate(-90deg) !important;
-  transform-origin: left top !important;
+.pitchfork-dial-labels .dial-pos:hover {
+  color: #ef4444 !important;
 }
 
-.phase90-side-lbl.lbl-input {
-  right: 3px !important;
-  top: 58px !important;
-  transform: rotate(90deg) !important;
-  transform-origin: right top !important;
-}
-
-/* Face Content */
-.phase90-face-content {
-  width: 100% !important;
-  flex: 1 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  padding: 4px 0 2px !important;
-}
-
-.phase90-knob-section {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  gap: 4px !important;
-  margin-top: 4px !important;
-}
-
-.phase90-knob-wrap {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.phase90-speed-lbl {
-  font-family: 'Montserrat', sans-serif !important;
-  font-size: 7.5px !important;
+.pitchfork-dial-labels .dial-pos.active {
+  color: #dc2626 !important;
   font-weight: 900 !important;
-  color: #000000 !important;
-  letter-spacing: 0.8px !important;
+  text-shadow: 0 0 3px rgba(220, 38, 38, 0.4) !important;
 }
 
-.phase90-logo-badge {
-  border: 2.2px solid #000000 !important;
-  border-radius: 8px !important;
-  padding: 3px 14px !important;
-  display: inline-flex !important;
+.pitchfork-dial-labels .dial-pos.is-octave {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: #0f172a !important;
+  color: #ffffff !important;
+  display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  font-size: 6px !important;
+  font-weight: 900 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.pitchfork-dial-labels .dial-pos.is-octave:hover {
+  background: #334155 !important;
+  color: #ffffff !important;
+}
+
+.pitchfork-dial-labels .dial-pos.is-octave.active {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 6px rgba(220, 38, 38, 0.8) !important;
+}
+
+/* 3-way Toggle Switch */
+.pitchfork-toggle-wrap {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+  margin-bottom: 2px !important;
+  cursor: pointer !important;
+  background: rgba(0, 0, 0, 0.12) !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+.pitchfork-toggle-labels {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+
+.pitchfork-toggle-labels .toggle-lbl {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  color: #475569 !important;
+  transition: color 0.15s ease !important;
+}
+
+.pitchfork-toggle-labels .toggle-lbl.active {
+  color: #dc2626 !important;
+  text-shadow: 0 0 4px rgba(220, 38, 38, 0.4) !important;
+}
+
+.pitchfork-mini-toggle {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #f1f5f9 0%, #475569 100%) !important;
+  border: 1px solid #1e293b !important;
+  position: relative !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.pitchfork-mini-toggle .toggle-bat {
+  width: 4px !important;
+  height: 8px !important;
+  background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%) !important;
+  border-radius: 2px !important;
+  position: absolute !important;
+  left: 4px !important;
+  transition: top 0.15s ease !important;
+}
+
+.pitchfork-mini-toggle.pos-up .toggle-bat   { top: 0px !important; }
+.pitchfork-mini-toggle.pos-mid .toggle-bat  { top: 3px !important; }
+.pitchfork-mini-toggle.pos-down .toggle-bat { top: 6px !important; }
+
+/* Latch Section: Text on the left, Button on the right */
+.pitchfork-latch-wrap {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  margin-top: 4px !important;
+  margin-bottom: 2px !important;
+  cursor: pointer !important;
+}
+
+.pitchfork-latch-text {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  letter-spacing: 0.8px !important;
+  line-height: 1 !important;
+}
+
+.pitchfork-latch-btn {
+  width: 16px !important;
+  height: 16px !important;
+  box-sizing: border-box !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 50% 50%, #4b5563 0%, #18181b 100%) !important;
+  border: 2px solid #52525b !important;
+  display: grid !important;
+  place-items: center !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7), inset 0 0 1px rgba(255, 255, 255, 0.25) !important;
+  transition: transform 0.1s ease, border-color 0.15s ease !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.pitchfork-latch-btn:active {
+  transform: scale(0.92) !important;
+}
+
+.pitchfork-latch-btn.is-latched {
+  border-color: #22c55e !important;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.4), inset 0 0 1px rgba(255, 255, 255, 0.25) !important;
+}
+
+.pitchfork-latch-led {
+  width: 6px !important;
+  height: 6px !important;
+  box-sizing: border-box !important;
+  border-radius: 50% !important;
+  background: #27272a !important;
+  border: 1px solid rgba(0, 0, 0, 0.8) !important;
+  box-shadow: 0 0 1px rgba(0, 0, 0, 0.8) !important;
+  transition: all 0.15s ease !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.pitchfork-latch-led.lit {
+  background: #22c55e !important;
+  border-color: #86efac !important;
+  box-shadow: 0 0 8px #22c55e, inset 0 0 2px #ffffff !important;
+}
+
+/* Black Lower Zone */
+.pitchfork-black-bottom {
+  width: 100% !important;
+  background: #09090b !important;
+  padding: 6px 8px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+  min-height: 135px !important;
+}
+
+.pf-side-lbl {
+  position: absolute !important;
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6px !important;
+  font-weight: 700 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.pf-side-lbl.lbl-output {
+  left: 6px !important;
+  top: 10px !important;
+  writing-mode: vertical-rl !important;
+  transform: rotate(180deg) !important;
+}
+
+.pf-side-lbl.lbl-input {
+  right: 6px !important;
+  top: 10px !important;
+  writing-mode: vertical-rl !important;
+}
+
+.pitchfork-branding {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  padding-left: 0 !important;
+  margin-top: 6px !important;
+  margin-bottom: 6px !important;
+}
+
+.pf-title-pitch {
+  font-family: 'Times New Roman', Georgia, serif !important;
+  font-size: 21px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 1.5px !important;
+  line-height: 0.9 !important;
+  margin: 0 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+.pf-title-fork {
+  font-family: 'Times New Roman', Georgia, serif !important;
+  font-size: 24px !important;
+  font-weight: 900 !important;
+  color: #ef4444 !important;
+  letter-spacing: 1.5px !important;
+  line-height: 0.9 !important;
+  margin: 0 !important;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.5) !important;
+}
+
+.pitchfork-stomp-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  position: relative !important;
   margin-top: 4px !important;
   margin-bottom: 4px !important;
 }
 
-.phase90-logo-text {
-  font-family: 'Arial Black', Impact, sans-serif !important;
-  font-size: 15px !important;
-  font-weight: 900 !important;
-  color: #000000 !important;
-  letter-spacing: 1.2px !important;
-  line-height: 1 !important;
-}
-
-/* Pilot LED */
-.phase90-led-wrap {
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 2px !important;
-  margin: 2px auto !important;
-}
-
-.phase90-led {
-  width: 13px !important;
-  height: 13px !important;
+.pitchfork-status-led {
+  width: 10px !important;
+  height: 10px !important;
   border-radius: 50% !important;
-  background: radial-gradient(circle at 35% 35%, #551508 0%, #290802 70%, #0f0200 100%) !important;
-  border: 1.5px solid #1a0502 !important;
-  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.9), 0 1px 2px rgba(0, 0, 0, 0.5) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  position: absolute !important;
+  left: 22px !important;
+  border: 1px solid #7f1d1d !important;
+  background: radial-gradient(circle at 40% 40%, #7f1d1d 0%, #450a0a 100%) !important;
+  cursor: pointer !important;
   transition: all 0.2s ease !important;
 }
 
-.phase90-led-core {
-  width: 6.5px !important;
-  height: 6.5px !important;
+.pitchfork-status-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 50%, #b91c1c 80%, #7f1d1d 100%) !important;
+  border-color: #fca5a5 !important;
+  box-shadow: 0 0 12px #ef4444, 0 0 22px rgba(239, 68, 68, 0.8), inset 0 1px 2px #fff !important;
+}
+
+.pitchfork-footer-brand {
+  margin-top: 3px !important;
+}
+
+.ehx-script-logo {
+  font-family: 'Times New Roman', Georgia, serif !important;
+  font-size: 11px !important;
+  font-style: italic !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.5px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* --------------------------------------------------------------------------
+   BOSS TR-2 TREMOLO PEDAL
+   Classic Seafoam/Teal Green Enclosure, 3 Knobs (Rate, Wave, Depth),
+   Waveform icon graphics, Check LED, and rubber treadle.
+   -------------------------------------------------------------------------- */
+.pedal-boss-tr2 {
+  background: linear-gradient(180deg, #2a8f81 0%, #1d7e72 45%, #15665c 85%, #0e4b43 100%) !important;
+  border: 2px solid #08322c !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.94),
+    inset 0 1px 1px rgba(160, 240, 230, 0.45),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.85) !important;
+}
+
+.boss-deck-tr2 {
+  width: 100% !important;
+  background: #0d0f12 !important;
+  border-radius: 5px !important;
+  border: 1.5px solid #132420 !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95), 0 1px 1px rgba(255, 255, 255, 0.18) !important;
+  padding: 5px 6px 6px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-tr2-check-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 1.5px !important;
+  margin-bottom: 2px !important;
+  cursor: pointer !important;
+}
+
+.boss-tr2-check-label {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  color: #ffffff !important;
+}
+
+.boss-tr2-check-led {
+  width: 7px !important;
+  height: 7px !important;
   border-radius: 50% !important;
   background: radial-gradient(circle at 40% 40%, #7f1d1d 0%, #450a0a 100%) !important;
-  transition: all 0.2s ease !important;
+  border: 1px solid #991b1b !important;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.8) !important;
+  transition: all 0.15s ease !important;
 }
 
-.phase90-led.lit {
-  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 40%, #b91c1c 75%, #450a0a 100%) !important;
+.boss-tr2-check-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 50%, #b91c1c 80%, #7f1d1d 100%) !important;
   border-color: #fca5a5 !important;
-  box-shadow: 0 0 10px #ef4444, 0 0 20px rgba(239, 68, 68, 0.8), inset 0 1px 2px #fff !important;
+  box-shadow: 0 0 10px #ef4444, 0 0 18px rgba(239, 68, 68, 0.8), inset 0 1px 2px #ffffff !important;
 }
 
-.phase90-led.lit .phase90-led-core {
-  background: radial-gradient(circle at 40% 40%, #ffffff 0%, #ef4444 80%) !important;
+.boss-tr2-knobs-deck {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
 }
 
-.phase90-stomp-wrap {
+.boss-tr2-top-knobs-row {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+}
+
+.boss-tr2-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-tr2-dot {
+  position: absolute !important;
+  width: 3px !important;
+  height: 3px !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 2px rgba(255, 255, 255, 0.7) !important;
+  top: 50% !important;
+  left: 50% !important;
+  margin-top: -1.5px !important;
+  margin-left: -1.5px !important;
+  pointer-events: none !important;
+}
+
+.boss-tr2-dial-wrap {
+  position: relative !important;
+  width: 36px !important;
+  height: 36px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  margin-top: 4px !important;
-  margin-bottom: 6px !important;
 }
 
-.phase90-title-wrap {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+.boss-tr2-dial-wrap .dot-min {
+  transform: rotate(-135deg) translateY(-21.5px) !important;
 }
 
-.phase90-title-text {
-  font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif !important;
-  font-size: 16px !important;
-  font-weight: 500 !important;
-  color: #000000 !important;
+.boss-tr2-dial-wrap .dot-max {
+  transform: rotate(135deg) translateY(-21.5px) !important;
+}
+
+.boss-tr2-knob-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
   letter-spacing: 0.6px !important;
-  line-height: 1 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+  margin-top: 1px !important;
 }
+
+.boss-tr2-bottom-knob-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin-top: -2px !important;
+}
+
+.boss-tr2-wave-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.6px !important;
+  margin-bottom: 2px !important;
+}
+
+.boss-tr2-wave-control-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+}
+
+.boss-tr2-wave-icon {
+  width: 16px !important;
+  height: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.tr2-wave-svg {
+  width: 100% !important;
+  height: 100% !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9)) !important;
+}
+
+.boss-tr2-dial-wrap-small {
+  position: relative !important;
+  width: 30px !important;
+  height: 30px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.boss-tr2-dial-wrap-small .dot-min {
+  transform: rotate(-135deg) translateY(-18.5px) !important;
+}
+
+.boss-tr2-dial-wrap-small .dot-max {
+  transform: rotate(135deg) translateY(-18.5px) !important;
+}
+
+/* Boss TR-2 Mid Section */
+.boss-tr2-mid {
+  width: 100% !important;
+  margin: 6px 0 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-tr2-io-row {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0 8px !important;
+  box-sizing: border-box !important;
+}
+
+.boss-tr2-io-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+.boss-tr2-typography {
+  text-align: center !important;
+  margin: 4px 0 8px !important;
+  line-height: 1.1 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-tr2-title {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+.boss-tr2-model {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 1.2px !important;
+  margin-left: 44px !important;
+  margin-top: 1px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* --------------------------------------------------------------------------
+   FULLTONE SUPA-TREM ST-1
+   Landscape orientation black textured chassis, dual oversized knobs,
+   Volume boost trim, Half-Speed, Hard/Soft & Bypass switches.
+   -------------------------------------------------------------------------- */
+.pedal-fulltone-supatrem {
+  width: 360px !important;
+  max-width: 360px !important;
+  min-height: 232px !important;
+  height: 232px !important;
+  background: linear-gradient(145deg, #27272a 0%, #18181b 60%, #09090b 100%) !important;
+  border: 2px solid #3f3f46 !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.94),
+    inset 0 1px 1px rgba(255, 255, 255, 0.22),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.85) !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  position: relative !important;
+  user-select: none !important;
+  overflow: visible !important;
+}
+
+.supatrem-close-btn {
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  z-index: 30 !important;
+}
+
+.pedal-fulltone-supatrem .stompbox-side-jack {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+.pedal-fulltone-supatrem .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+
+.pedal-fulltone-supatrem .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Decorative knurled side screws matching original Fulltone enclosure hardware */
+.supatrem-knurled-screw {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 5px !important;
+  height: 14px !important;
+  background: linear-gradient(180deg, #94a3b8 0%, #475569 30%, #cbd5e1 50%, #334155 70%, #64748b 100%) !important;
+  border: 1px solid #1e293b !important;
+  border-radius: 2px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.7) !important;
+  z-index: 5 !important;
+  pointer-events: none !important;
+}
+
+.supatrem-knurled-screw.screw-left {
+  left: -4px !important;
+}
+
+.supatrem-knurled-screw.screw-right {
+  right: -4px !important;
+}
+
+/* Top Deck: SPEED and MIX Knob Pair Centered Horizontally */
+.supatrem-main-knobs-wrap {
+  position: absolute !important;
+  top: 14px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 52px !important;
+  z-index: 5 !important;
+}
+
+.supatrem-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.supatrem-knob-lbl {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  margin-bottom: 3px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Top Deck: VOLUME Trim Pot Cluster (Aligned Directly with HARD / SOFT Switch) */
+.supatrem-vol-cluster {
+  position: absolute !important;
+  top: 24px !important;
+  right: 24px !important;
+  width: 68px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  z-index: 5 !important;
+}
+
+.supatrem-vol-arc-wrap {
+  position: relative !important;
+  width: 34px !important;
+  height: 34px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.supatrem-vol-arc {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  opacity: 0.9 !important;
+}
+
+.supatrem-vol-lbl {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  margin-top: 2px !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Middle Deck: Left HALF SPEED Switch */
+.supatrem-left-switch-col {
+  position: absolute !important;
+  top: 104px !important;
+  left: 24px !important;
+  width: 68px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  z-index: 10 !important;
+}
+
+/* Middle Deck: Right HARD / SOFT Switch */
+.supatrem-right-switch-col {
+  position: absolute !important;
+  top: 104px !important;
+  right: 24px !important;
+  width: 68px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  z-index: 10 !important;
+}
+
+/* Middle Deck: Center Branding */
+.supatrem-branding-center {
+  position: absolute !important;
+  top: 100px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 5 !important;
+}
+
+.supatrem-title-block {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.supatrem-title-main {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-size: 25px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: -0.5px !important;
+  line-height: 0.9 !important;
+  margin: 0 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9) !important;
+}
+
+.supatrem-reg {
+  font-size: 10px !important;
+  vertical-align: super !important;
+  margin-left: 2px !important;
+}
+
+.supatrem-sub-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 3px !important;
+}
+
+.supatrem-script-author {
+  font-family: 'Times New Roman', Georgia, serif !important;
+  font-size: 13px !important;
+  font-style: italic !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.5px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.fulltone-cursive {
+  font-family: 'Brush Script MT', 'Dancing Script', 'Caveat', cursive, sans-serif !important;
+  font-size: 15px !important;
+  font-style: italic !important;
+  letter-spacing: 0.5px !important;
+  margin: 0 2px !important;
+}
+
+.supatrem-reg-small {
+  font-size: 7px !important;
+  vertical-align: super !important;
+}
+
+.supatrem-model-tag {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 1px !important;
+}
+
+/* Bottom Deck: Dead-Center BYPASS Footswitch Cluster */
+.supatrem-bypass-wrap {
+  position: absolute !important;
+  bottom: 14px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10 !important;
+}
+
+.supatrem-bypass-led {
+  position: absolute !important;
+  right: calc(100% + 10px) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 40% 40%, #1e3a8a 0%, #0f172a 100%) !important;
+  border: 1.5px solid #94a3b8 !important;
+  box-shadow: 0 0 2px 1px #334155, inset 0 1px 1px rgba(0, 0, 0, 0.8) !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.supatrem-bypass-led.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #38bdf8 50%, #2563eb 80%, #1e3a8a 100%) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 0 10px #38bdf8, 0 0 20px rgba(56, 189, 248, 0.85), inset 0 1px 2px #ffffff !important;
+}
+
+.supatrem-bypass-tag {
+  position: absolute !important;
+  left: calc(100% + 10px) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+  letter-spacing: 0.8px !important;
+  white-space: nowrap !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+}
+
+.supatrem-switch-lbl {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  color: #94a3b8 !important;
+  letter-spacing: 0.5px !important;
+  margin-top: 4px !important;
+  white-space: nowrap !important;
+  transition: color 0.15s ease !important;
+}
+
+.supatrem-switch-lbl.active {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Dropdown Pill Badge for Tremolo */
+.group-tag.tremolo-tag,
+.item-pill-badge.tremolo {
+  background: rgba(20, 184, 166, 0.2) !important;
+  color: #2dd4bf !important;
+  border: 1px solid rgba(20, 184, 166, 0.4) !important;
+}
+
+
 
 
 

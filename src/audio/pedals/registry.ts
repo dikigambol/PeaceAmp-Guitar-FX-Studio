@@ -63,6 +63,14 @@ import { MxrFlangerNode } from './flanger/MxrFlangerNode';
 import { EhxSmallStoneNode } from './phaser/EhxSmallStoneNode';
 import { MxrPhase90Node } from './phaser/MxrPhase90Node';
 
+// Pitch Nodes
+import { BossOc5Node } from './pitch/BossOc5Node';
+import { EhxPitchForkNode } from './pitch/EhxPitchForkNode';
+
+// Tremolo Nodes
+import { BossTr2Node } from './tremolo/BossTr2Node';
+import { FulltoneSupaTremNode } from './tremolo/FulltoneSupaTremNode';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -1058,6 +1066,209 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       },
     ],
   },
+
+  // Category: Pitch / Octave
+  'pitch-boss-oc5': {
+    type: 'pitch-boss-oc5',
+    name: 'Boss OC-5',
+    subtitle: 'Octave Divider & Polyphonic Shifter',
+    category: 'pitch',
+    chassisColor: '#5c3621',
+    accentColor: '#ffffff',
+    parameters: [
+      {
+        id: 'direct',
+        name: 'DIRECT LEVEL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'octUp',
+        name: '+1OCT LEVEL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 0.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'octDown',
+        name: '-1OCT LEVEL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'oct2DownRange',
+        name: '-2OCT / RANGE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'mode',
+        name: 'MODE',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v >= 0.5 ? 'VINTAGE' : 'POLY'),
+      },
+    ],
+  },
+  'pitch-ehx-pitchfork': {
+    type: 'pitch-ehx-pitchfork',
+    name: 'EHX Pitch Fork',
+    subtitle: 'Polyphonic Pitch Shifter / Harmony',
+    category: 'pitch',
+    chassisColor: '#f3f4f6',
+    accentColor: '#dc2626',
+    parameters: [
+      {
+        id: 'blend',
+        name: 'BLEND',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}% WET`,
+      },
+      {
+        id: 'shift',
+        name: 'SHIFT',
+        min: 0,
+        max: 10,
+        step: 1,
+        defaultValue: 8,
+        formatValue: (v) => {
+          const names = ['D (Detune)', 'm2 (+1)', 'M2 (+2)', 'M3 (+4)', 'P4 (+5)', 'P5 (+7)', 'M6 (+9)', 'm7 (+10)', '1 OCT (+12)', '2 OCT (+24)', '3 OCT (+36)'];
+          return names[Math.round(v)] || '1 OCT';
+        },
+      },
+      {
+        id: 'direction',
+        name: 'DIRECTION',
+        min: 0,
+        max: 2,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => {
+          const dirs = ['UP (▲)', 'DUAL', 'DOWN (▼)'];
+          return dirs[Math.round(v)] || 'UP (▲)';
+        },
+      },
+      {
+        id: 'latch',
+        name: 'LATCH',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 1,
+        formatValue: (v) => (v >= 0.5 ? 'LATCH' : 'MOMENTARY'),
+      },
+    ],
+  },
+
+  // Category: Tremolo
+  'tremolo-boss-tr2': {
+    type: 'tremolo-boss-tr2',
+    name: 'BOSS TR-2',
+    subtitle: 'Wave-Morphing Tremolo',
+    category: 'tremolo',
+    chassisColor: '#1d8376',
+    accentColor: '#ffffff',
+    parameters: [
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `${(0.9 * Math.pow(22.0 / 0.9, v / 10)).toFixed(1)} Hz`,
+      },
+      {
+        id: 'wave',
+        name: 'WAVE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => (v < 3.5 ? 'TRIANGLE' : v > 6.5 ? 'SQUARE' : 'TRAPEZOID'),
+      },
+      {
+        id: 'depth',
+        name: 'DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 7,
+        formatValue: (v) => `${Math.round(v * 10)}%`,
+      },
+    ],
+  },
+  'tremolo-fulltone-supatrem': {
+    type: 'tremolo-fulltone-supatrem',
+    name: 'Fulltone Supa-Trem',
+    subtitle: 'Photocell Tremolo ST-1',
+    category: 'tremolo',
+    chassisColor: '#18181b',
+    accentColor: '#38bdf8',
+    parameters: [
+      {
+        id: 'speed',
+        name: 'SPEED',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `${(0.7 * Math.pow(14.5 / 0.7, v / 10)).toFixed(1)} Hz`,
+      },
+      {
+        id: 'mix',
+        name: 'MIX',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 7,
+        formatValue: (v) => `${Math.round(v * 10)}%`,
+      },
+      {
+        id: 'volume',
+        name: 'VOLUME',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => (v <= 5 ? `${Math.round((v / 5) * 100)}%` : `+${(((v - 5) / 5) * 12).toFixed(1)} dB`),
+      },
+      {
+        id: 'hardSoft',
+        name: 'HARD / SOFT',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v >= 0.5 ? 'HARD' : 'SOFT'),
+      },
+      {
+        id: 'halfSpeed',
+        name: 'HALF SPEED',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v >= 0.5 ? 'HALF SPEED' : 'NORMAL'),
+      },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -1068,6 +1279,16 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Tremolo
+    case 'tremolo-boss-tr2':
+      return new BossTr2Node(ctx, id, initialParams, enabled);
+    case 'tremolo-fulltone-supatrem':
+      return new FulltoneSupaTremNode(ctx, id, initialParams, enabled);
+    // Pitch / Octave
+    case 'pitch-boss-oc5':
+      return new BossOc5Node(ctx, id, initialParams, enabled);
+    case 'pitch-ehx-pitchfork':
+      return new EhxPitchForkNode(ctx, id, initialParams, enabled);
     // Flanger
     case 'flanger-boss-bf2':
       return new BossBf2Node(ctx, id, initialParams, enabled);
