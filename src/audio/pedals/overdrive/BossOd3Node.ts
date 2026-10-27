@@ -2,7 +2,7 @@ import type { AudioPedalNode } from '../../../types/pedal';
 import { createDcBlocker, levelToGain, applyBypassCrossfade } from '../dspUtils';
 
 /** Output trim (dB) calibrated so Level=5 is ~unity loudness. */
-const OUTPUT_TRIM_DB = -17.2;
+const OUTPUT_TRIM_DB = -2.5;
 
 /**
  * Boss OD-3 OverDrive (Dual-Stage Overdrive Circuit)

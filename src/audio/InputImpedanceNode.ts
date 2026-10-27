@@ -84,26 +84,29 @@ export class InputImpedanceNode {
     // Resonant frequency: fr = 1 / (2π * sqrt(Lp * Ctotal))
     const fr = 1 / (2 * Math.PI * Math.sqrt(preset.Lp * totalC));
 
-    // Q factor: Q = Rtotal * sqrt(Ctotal / Lp) where Rtotal = Rp || Rload
-    const Rtotal = (preset.Rp * effectiveRload) / (preset.Rp + effectiveRload);
-    const Q = Rtotal * Math.sqrt(totalC / preset.Lp);
+    // Correct electrical RLC Q for pickup coil with series Rp and parallel Rload:
+    // Q = omega0 / (1 / (Rload * Ctotal) + Rp / Lp)
+    const omega0 = 2 * Math.PI * fr;
+    const damping = (1 / (effectiveRload * totalC)) + (preset.Rp / preset.Lp);
+    const Q = damping > 0 ? omega0 / damping : 2.5;
 
     // Clamp to safe audio range
-    const safeFr = Math.max(500, Math.min(8000, fr));
-    const safeQ = Math.max(0.3, Math.min(15, Q));
+    const safeFr = Math.max(1200, Math.min(6500, fr));
+    const safeQ = Math.max(1.0, Math.min(6.0, Q));
 
-    // Build filter chain: resonant peak (bandpass) + cable lowpass + load highpass (DC block)
+    // Build filter chain: resonant peak + cable lowpass + load highpass
     this.resonantFilter = this.ctx.createBiquadFilter();
     this.resonantFilter.type = 'peaking';
     this.resonantFilter.frequency.setValueAtTime(safeFr, this.ctx.currentTime);
     this.resonantFilter.Q.setValueAtTime(safeQ, this.ctx.currentTime);
-    // Gain at resonance ≈ 20*log10(Q * Rload/(Rp+Rload)) dB
-    const peakGainDb = 20 * Math.log10(safeQ * (effectiveRload / (preset.Rp + effectiveRload)));
-    this.resonantFilter.gain.setValueAtTime(Math.max(-6, Math.min(12, peakGainDb)), this.ctx.currentTime);
+    // Real resonance peak boost (typically +2.5dB to +6dB for real guitar pickups)
+    const peakGainDb = Math.min(6.5, Math.max(1.5, 20 * Math.log10(safeQ * 0.75)));
+    this.resonantFilter.gain.setValueAtTime(peakGainDb, this.ctx.currentTime);
 
     // Cable capacitance adds additional low-pass above resonance
     // fc = 1 / (2π * (Rp||Rload) * Ccable)
-    const cableFc = 1 / (2 * Math.PI * Rtotal * (cableLengthM * CABLE_CAP_PER_METER));
+    const rParallel = (preset.Rp * effectiveRload) / (preset.Rp + effectiveRload);
+    const cableFc = 1 / (2 * Math.PI * rParallel * (cableLengthM * CABLE_CAP_PER_METER));
     this.cableLowpass = this.ctx.createBiquadFilter();
     this.cableLowpass.type = 'lowpass';
     this.cableLowpass.frequency.setValueAtTime(Math.max(2000, Math.min(20000, cableFc)), this.ctx.currentTime);
@@ -141,13 +144,15 @@ export class InputImpedanceNode {
     const effectiveRload = loadResistance * potFactor;
     const totalC = preset.Cp + cableLengthM * CABLE_CAP_PER_METER + loadCapacitancePf * 1e-12;
     const fr = 1 / (2 * Math.PI * Math.sqrt(preset.Lp * totalC));
-    const Rtotal = (preset.Rp * effectiveRload) / (preset.Rp + effectiveRload);
-    const Q = Rtotal * Math.sqrt(totalC / preset.Lp);
+    const omega0 = 2 * Math.PI * fr;
+    const damping = (1 / (effectiveRload * totalC)) + (preset.Rp / preset.Lp);
+    const Q = damping > 0 ? omega0 / damping : 2.5;
 
-    const safeFr = Math.max(500, Math.min(8000, fr));
-    const safeQ = Math.max(0.3, Math.min(15, Q));
-    const peakGainDb = 20 * Math.log10(safeQ * (effectiveRload / (preset.Rp + effectiveRload)));
-    const cableFc = 1 / (2 * Math.PI * Rtotal * (cableLengthM * CABLE_CAP_PER_METER));
+    const safeFr = Math.max(1200, Math.min(6500, fr));
+    const safeQ = Math.max(1.0, Math.min(6.0, Q));
+    const peakGainDb = Math.min(6.5, Math.max(1.5, 20 * Math.log10(safeQ * 0.75)));
+    const rParallel = (preset.Rp * effectiveRload) / (preset.Rp + effectiveRload);
+    const cableFc = 1 / (2 * Math.PI * rParallel * (cableLengthM * CABLE_CAP_PER_METER));
     const loadFc = 1 / (2 * Math.PI * effectiveRload * loadCapacitancePf * 1e-12);
     const dcGain = effectiveRload / (preset.Rp + effectiveRload);
 
@@ -158,7 +163,7 @@ export class InputImpedanceNode {
       try {
         this.resonantFilter.frequency.setTargetAtTime(safeFr, now, tc);
         this.resonantFilter.Q.setTargetAtTime(safeQ, now, tc);
-        this.resonantFilter.gain.setTargetAtTime(Math.max(-6, Math.min(12, peakGainDb)), now, tc);
+        this.resonantFilter.gain.setTargetAtTime(peakGainDb, now, tc);
         this.cableLowpass.frequency.setTargetAtTime(Math.max(2000, Math.min(20000, cableFc)), now, tc);
         this.loadHighpass.frequency.setTargetAtTime(Math.max(1, Math.min(50, loadFc)), now, tc);
         this.gainComp.gain.setTargetAtTime(1 / dcGain, now, tc);

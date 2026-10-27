@@ -3,8 +3,8 @@ import { createDcBlocker, levelToGain, applyBypassCrossfade, driveDependentTrimD
 
 /** Output trim (dB) calibrated so Volume=5 is ~unity loudness. */
 /** Output trim (dB): ~unity at low drive, fully saturated trim at high drive. */
-const TRIM_UNITY_DB = -1.6;
-const TRIM_SAT_DB = -16.0;
+const TRIM_UNITY_DB = 1.0;
+const TRIM_SAT_DB = -3.5;
 
 /**
  * Fulltone OCD (Obsessive Compulsive Drive)

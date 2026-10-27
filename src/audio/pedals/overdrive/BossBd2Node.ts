@@ -2,8 +2,8 @@ import type { AudioPedalNode } from '../../../types/pedal';
 import { levelToGain, applyBypassCrossfade, driveDependentTrimDb, createDcBlocker } from '../dspUtils';
 
 /** Output trim (dB) calibrated so Level=5 is ~unity loudness. */
-const TRIM_UNITY_DB = -1.0;
-const TRIM_SAT_DB = -12.0;
+const TRIM_UNITY_DB = 1.0;
+const TRIM_SAT_DB = -3.5;
 
 /**
  * Boss BD-2 Blues Driver (1995)
@@ -124,9 +124,9 @@ export class BossBd2Node implements AudioPedalNode {
     const gainNorm = Math.max(0, Math.min(10, this.gainVal)) / 10;
     const toneNorm = Math.max(0, Math.min(10, this.toneVal)) / 10;
 
-    // Gain: clean boost (1x) up to ~25 dB of crunch (about 3x * 6x)
-    const stage1 = 1.0 + Math.pow(gainNorm, 1.4) * 2.0;
-    const stage2 = 1.0 + Math.pow(gainNorm, 1.6) * 5.0;
+    // Gain: clean boost (1.2x) up to ~30 dB of crunch (about 6x * 11x)
+    const stage1 = 1.2 + Math.pow(gainNorm, 1.3) * 5.0;
+    const stage2 = 1.5 + Math.pow(gainNorm, 1.5) * 10.0;
     this.fetStage1.gain.setTargetAtTime(stage1, now, 0.02);
     this.fetStage2.gain.setTargetAtTime(stage2, now, 0.02);
 
