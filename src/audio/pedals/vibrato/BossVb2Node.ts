@@ -40,7 +40,6 @@ export class BossVb2Node implements AudioPedalNode {
   private delayOffset: ConstantSourceNode;
 
   private isDisposed = false;
-  private isMomentaryPressed = false;
 
   private params: Record<string, number> = {
     rate: 5.0,     // 0 to 10 (~1.5 Hz to ~14.0 Hz)
@@ -190,7 +189,6 @@ export class BossVb2Node implements AudioPedalNode {
    * Handle Unlatch (Momentary) Press / Release with Rise Time Envelope Swell
    */
   public setMomentaryPressed(pressed: boolean): void {
-    this.isMomentaryPressed = pressed;
     const now = this.ctx.currentTime;
     const mode = Math.round(this.params.mode ?? 0);
 

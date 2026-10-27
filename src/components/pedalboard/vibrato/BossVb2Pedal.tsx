@@ -49,9 +49,6 @@ export const BossVb2Pedal: React.FC<PedalProps> = ({
   const rateHz = 1.5 * Math.pow(14.0 / 1.5, rateVal / 10);
   const riseTimeSec = 0.05 + (riseTimeVal / 10) * 3.45;
 
-  const isBypassMode = currentModeIndex === 1;
-  const isUnlatchMode = currentModeIndex === 2;
-
   // LED is lit when active
   const isLedLit = isEnabled;
 
