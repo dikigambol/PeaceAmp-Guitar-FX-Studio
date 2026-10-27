@@ -71,6 +71,10 @@ import { EhxPitchForkNode } from './pitch/EhxPitchForkNode';
 import { BossTr2Node } from './tremolo/BossTr2Node';
 import { FulltoneSupaTremNode } from './tremolo/FulltoneSupaTremNode';
 
+// Vibrato Nodes
+import { BossVb2Node } from './vibrato/BossVb2Node';
+import { MxrUniVibeNode } from './vibrato/MxrUniVibeNode';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -1269,6 +1273,98 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       },
     ],
   },
+  'vibrato-boss-vb2': {
+    type: 'vibrato-boss-vb2',
+    name: 'Boss VB-2 Vibrato',
+    subtitle: 'BBD Analog Pitch Vibrato',
+    category: 'vibrato',
+    chassisColor: '#388be0',
+    accentColor: '#93c5fd',
+    parameters: [
+      {
+        id: 'rate',
+        name: 'RATE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `${(1.5 * Math.pow(14.0 / 1.5, v / 10)).toFixed(1)} Hz`,
+      },
+      {
+        id: 'depth',
+        name: 'DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 7,
+        formatValue: (v) => `${Math.round(v * 10)}%`,
+      },
+      {
+        id: 'riseTime',
+        name: 'RISE TIME',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 3,
+        formatValue: (v) => `${(0.05 + (v / 10) * 3.45).toFixed(1)}s`,
+      },
+      {
+        id: 'mode',
+        name: 'MODE',
+        min: 0,
+        max: 2,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v === 2 ? 'UNLATCH' : v === 1 ? 'BYPASS' : 'LATCH'),
+      },
+    ],
+  },
+  'vibrato-mxr-univibe': {
+    type: 'vibrato-mxr-univibe',
+    name: 'MXR M68 Uni-Vibe',
+    subtitle: 'Chorus / Vibrato',
+    category: 'vibrato',
+    chassisColor: '#ffffff',
+    accentColor: '#ffffff',
+    parameters: [
+      {
+        id: 'level',
+        name: 'LEVEL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'speed',
+        name: 'SPEED',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.5,
+        formatValue: (v) => `${(0.5 * Math.pow(9.2 / 0.5, v / 10)).toFixed(1)} Hz`,
+      },
+      {
+        id: 'depth',
+        name: 'DEPTH',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 7,
+        formatValue: (v) => `${Math.round(v * 10)}%`,
+      },
+      {
+        id: 'vibe',
+        name: 'VIBE',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v >= 0.5 ? 'VIBRATO' : 'CHORUS'),
+      },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -1279,6 +1375,11 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Vibrato
+    case 'vibrato-boss-vb2':
+      return new BossVb2Node(ctx, id, initialParams, enabled);
+    case 'vibrato-mxr-univibe':
+      return new MxrUniVibeNode(ctx, id, initialParams, enabled);
     // Tremolo
     case 'tremolo-boss-tr2':
       return new BossTr2Node(ctx, id, initialParams, enabled);

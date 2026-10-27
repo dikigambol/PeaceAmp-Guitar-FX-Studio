@@ -51,7 +51,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [pedalSearch, setPedalSearch] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState<
-    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus' | 'delay' | 'flanger' | 'phaser' | 'pitch' | 'tremolo'
+    'all' | 'dynamics' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'wah' | 'eq' | 'chorus' | 'delay' | 'flanger' | 'phaser' | 'pitch' | 'tremolo' | 'vibrato'
   >('all');
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [showCables, setShowCables] = useState(true);
@@ -746,7 +746,9 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           ? 'phaser 4-stage ota jfet ehx small stone nano mxr phase 90 speed color van halen eruption pink floyd rotary swirl modulation phaser-ehx-smallstone phaser-mxr-phase90'
           : def.category === 'pitch'
           ? 'pitch octave octave divider boss oc5 oc-5 ehx pitch fork detune polyphonic harmony 12-string sub-octave pitch-boss-oc5 pitch-ehx-pitchfork'
-          : 'tremolo boss tr2 tr-2 fulltone supa trem supa-trem st1 optical optocoupler photocell rate depth wave speed mix hard soft half speed tremolo-boss-tr2 tremolo-fulltone-supatrem';
+          : def.category === 'tremolo'
+          ? 'tremolo boss tr2 tr-2 fulltone supa trem supa-trem st1 optical optocoupler photocell rate depth wave speed mix hard soft half speed tremolo-boss-tr2 tremolo-fulltone-supatrem'
+          : 'vibrato pitch bbd boss vb2 vb-2 unlatch latch rise time rate depth pitch modulation vibrato-boss-vb2 mxr univibe uni-vibe m68 chorus rotary hendrix trower gilmour vibrato-mxr-univibe';
       return (
         def.name.toLowerCase().includes(q) ||
         def.subtitle.toLowerCase().includes(q) ||
@@ -805,6 +807,10 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
   );
   const tremolos = useMemo(
     () => filteredPedals.filter((p) => p.category === 'tremolo'),
+    [filteredPedals]
+  );
+  const vibratos = useMemo(
+    () => filteredPedals.filter((p) => p.category === 'vibrato'),
     [filteredPedals]
   );
 
@@ -1009,6 +1015,12 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                     onClick={() => setActiveCategoryTab('tremolo')}
                   >
                     Tremolo ({availablePedals.filter((p) => p.category === 'tremolo').length})
+                  </button>
+                  <button
+                    className={`cat-tab-btn ${activeCategoryTab === 'vibrato' ? 'active' : ''}`}
+                    onClick={() => setActiveCategoryTab('vibrato')}
+                  >
+                    Vibrato ({availablePedals.filter((p) => p.category === 'vibrato').length})
                   </button>
                 </div>
 
@@ -1390,6 +1402,35 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
                                 <div className="item-title-row">
                                   <strong className="item-name">{def.name}</strong>
                                   <span className="item-pill-badge tremolo">TREMOLO</span>
+                                </div>
+                                <span className="item-desc">{def.subtitle}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Category: Vibrato */}
+                      {vibratos.length > 0 && (
+                        <div className="dropdown-category-group">
+                          <div className="group-header">
+                            <span className="group-tag vibrato-tag">VIBRATO</span>
+                            <span className="group-count">{vibratos.length} pedals</span>
+                          </div>
+                          {vibratos.map((def) => (
+                            <button
+                              key={def.type}
+                              className="dropdown-item"
+                              onClick={() => handleSelectAdd(def.type)}
+                            >
+                              <div
+                                className="dropdown-color-dot"
+                                style={{ backgroundColor: def.chassisColor || def.accentColor }}
+                              />
+                              <div className="dropdown-item-info">
+                                <div className="item-title-row">
+                                  <strong className="item-name">{def.name}</strong>
+                                  <span className="item-pill-badge vibrato">VIBRATO</span>
                                 </div>
                                 <span className="item-desc">{def.subtitle}</span>
                               </div>
