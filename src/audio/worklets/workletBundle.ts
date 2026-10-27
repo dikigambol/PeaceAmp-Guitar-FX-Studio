@@ -415,25 +415,29 @@ class PhaserProcessor extends AudioWorkletProcessor {
     const sweep = parameters.sweep[0];
     const feedback = parameters.feedback[0];
     const inc = rate / sampleRate;
-    const coeffs = [0, 0, 0, 0];
+
+    // Logarithmic / exponential octave bounds for musical, symmetric swirl:
+    const fMin = Math.max(30, center - sweep);
+    const fMax = Math.min(sampleRate * 0.45, center + sweep);
+    const fRatio = fMax / fMin;
 
     for (let i = 0; i < len; i++) {
       const lfo = Math.sin(2 * Math.PI * this.phase);
       this.phase += inc;
       if (this.phase >= 1) this.phase -= 1;
 
-      // First-order all-pass coefficient a = (tan(pi*fc/fs) - 1) / (tan(pi*fc/fs) + 1)
-      for (let s = 0; s < 4; s++) {
-        const f = Math.max(20, Math.min(sampleRate * 0.45, center + sweep * lfo));
-        const t = Math.tan((Math.PI * f) / sampleRate);
-        coeffs[s] = (t - 1) / (t + 1);
-      }
+      // Exponential frequency interpolation across octaves:
+      // When lfo = -1: f = fMin; lfo = 0: f = geometric center; lfo = +1: f = fMax
+      const normLfo = 0.5 * (lfo + 1.0);
+      const f = fMin * Math.pow(fRatio, normLfo);
+      const t = Math.tan((Math.PI * f) / sampleRate);
+      const a = (t - 1) / (t + 1);
 
       for (let ch = 0; ch < channels; ch++) {
-        let x = input[ch][i] + feedback * this.fb[ch];
+        // Differential pair tanh saturation in feedback loop simulates OTA / JFET analog compression
+        let x = input[ch][i] + feedback * Math.tanh(this.fb[ch]);
         for (let s = 0; s < 4; s++) {
           const h = this.hist[s];
-          const a = coeffs[s];
           const y = a * x + h.x[ch] - a * h.y[ch];
           h.x[ch] = x;
           h.y[ch] = y;
@@ -643,10 +647,14 @@ class PitchShifterProcessor extends AudioWorkletProcessor {
     this.ff2 = 1;
     this.ff1Count = 0;
     this.env = 0;
-    this.lpState1 = 0;
-    this.lpState2 = 0;
-    this.rangeLpStateL = 0;
-    this.rangeLpStateR = 0;
+    this.lpState1A = 0;
+    this.lpState1B = 0;
+    this.lpState2A = 0;
+    this.lpState2B = 0;
+    this.rangeLp1L = 0;
+    this.rangeLp2L = 0;
+    this.rangeLp1R = 0;
+    this.rangeLp2R = 0;
   }
 
   process(inputs, outputs, parameters) {
@@ -704,15 +712,16 @@ class PitchShifterProcessor extends AudioWorkletProcessor {
       // ---- Voice 1 (e.g. -1 Octave or Primary Shift) ----
       if (g1 > 0.001) {
         if (isVintage && Math.abs(r1 - 0.5) < 0.05) {
-          // Vintage OC-2 style analog flip-flop divider (-1 OCT)
-          if (this.prevSample <= 0 && sL > 0.015 && this.env > 0.02) {
+          // Vintage OC-2 style analog flip-flop divider (-1 OCT) with low-hysteresis Schmitt trigger
+          if (this.prevSample <= 0 && sL > 0.005 && this.env > 0.006) {
             this.ff1 = -this.ff1;
           }
           const rawSqu = this.ff1 * this.env;
-          // 2-pole lowpass filter (~380Hz) to produce deep, fat vintage sub-octave bass tone
-          const lpAlpha = 0.055;
-          this.lpState1 += lpAlpha * (rawSqu - this.lpState1);
-          const octTone = this.lpState1;
+          // Cascaded 2-pole Sallen-Key lowpass (~220Hz) creates authentic round, fat, warm OC-2 synth-bass growl
+          const lpAlpha1 = 0.028;
+          this.lpState1A += lpAlpha1 * (rawSqu - this.lpState1A);
+          this.lpState1B += lpAlpha1 * (this.lpState1A - this.lpState1B);
+          const octTone = this.lpState1B * 1.6;
           voice1L = octTone * g1;
           voice1R = octTone * g1;
         } else {
@@ -751,17 +760,19 @@ class PitchShifterProcessor extends AudioWorkletProcessor {
       if (g2 > 0.001) {
         if (isVintage && Math.abs(r2 - 0.25) < 0.05) {
           // Vintage OC-2 style analog flip-flop divider (-2 OCT)
-          if (this.prevSample <= 0 && sL > 0.015 && this.env > 0.02) {
+          if (this.prevSample <= 0 && sL > 0.005 && this.env > 0.006) {
             this.ff1Count++;
             if ((this.ff1Count & 1) === 0) {
               this.ff2 = -this.ff2;
             }
           }
           const rawSqu2 = this.ff2 * this.env;
-          const lpAlpha2 = 0.035;
-          this.lpState2 += lpAlpha2 * (rawSqu2 - this.lpState2);
-          voice2L = this.lpState2 * g2;
-          voice2R = this.lpState2 * g2;
+          // Cascaded 2-pole lowpass (~110Hz) for deep foundational sub-sub octave
+          const lpAlpha2 = 0.016;
+          this.lpState2A += lpAlpha2 * (rawSqu2 - this.lpState2A);
+          this.lpState2B += lpAlpha2 * (this.lpState2A - this.lpState2B);
+          voice2L = this.lpState2B * 1.8 * g2;
+          voice2R = this.lpState2B * 1.8 * g2;
         } else {
           // Polyphonic pitch shift
           const pA = this.phase2;
@@ -825,12 +836,15 @@ class PitchShifterProcessor extends AudioWorkletProcessor {
         voice3R = (sigAR * wA + sigBR * wB) * g3;
       }
 
-      // Range filtering (for Boss OC-5 Poly Range parameter: gates/lowpasses the -1 OCT on high notes)
+      // 2-pole Range filtering (for Boss OC-5 Poly Range parameter: cleanly isolates lowest root note on chords)
       if (rangeCutoff < 15000 && !isVintage) {
-        this.rangeLpStateL += rangeAlpha * (voice1L - this.rangeLpStateL);
-        voice1L = this.rangeLpStateL;
-        this.rangeLpStateR += rangeAlpha * (voice1R - this.rangeLpStateR);
-        voice1R = this.rangeLpStateR;
+        this.rangeLp1L += rangeAlpha * (voice1L - this.rangeLp1L);
+        this.rangeLp2L += rangeAlpha * (this.rangeLp1L - this.rangeLp2L);
+        voice1L = this.rangeLp2L;
+
+        this.rangeLp1R += rangeAlpha * (voice1R - this.rangeLp1R);
+        this.rangeLp2R += rangeAlpha * (this.rangeLp1R - this.rangeLp2R);
+        voice1R = this.rangeLp2R;
       }
 
       // Summing dry + voices

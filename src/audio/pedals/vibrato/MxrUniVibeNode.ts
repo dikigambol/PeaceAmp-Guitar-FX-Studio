@@ -245,7 +245,8 @@ export class MxrUniVibeNode implements AudioPedalNode {
     }
 
     // Level: 0 to 10 (unity at 5.0, +6 dB at 10)
-    const levelGain = levelToGain(levelParam, -1.0);
+    // +0.5dB trim offsets perceived notch dip in Chorus mode for true unity perceived loudness at noon
+    const levelGain = levelToGain(levelParam, 0.5);
     this.levelGainNode.gain.setTargetAtTime(levelGain, now, 0.02);
 
     // Always keep bypass state synchronized

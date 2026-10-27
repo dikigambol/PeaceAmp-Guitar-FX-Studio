@@ -103,12 +103,12 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
     this.lowCutFilter.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // 5. HIGH (High-Cut Filter on Wet Path)
-    // At 10 (FLAT): cutoff is ~7500 Hz (bright, full analog bandwidth)
+    // At 10 (FLAT): cutoff is ~12,000 Hz (bright, shimmering analog bandwidth)
     // At 0 (CUT): cutoff is ~1400 Hz (warm, dark, vintage bucket brigade sound)
     this.highCutFilter = ctx.createBiquadFilter();
     this.highCutFilter.type = 'lowpass';
     const highVal = Math.max(0, Math.min(10, this.params.high ?? 8.0));
-    const highFreq = 1400 + Math.pow(highVal / 10, 1.4) * 6100; // 1400Hz to 7500Hz
+    const highFreq = 1400 + Math.pow(highVal / 10, 1.3) * 10600; // 1400Hz to 12000Hz
     this.highCutFilter.frequency.setValueAtTime(highFreq, ctx.currentTime);
     this.highCutFilter.Q.setValueAtTime(0.707, ctx.currentTime);
 
@@ -136,7 +136,7 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
 
     // 8. Post-BBD Reconstruction Lowpass Filter (4-pole Sallen-Key cascade) & Compander Saturation
     this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
-      cutoffFreq: 7500,
+      cutoffFreq: Math.max(9000, highFreq * 1.05),
       saturationAmount: 0.35,
       oversample: '4x',
     });
@@ -147,13 +147,13 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
 
     this.wetGain = ctx.createGain();
     const levelVal = Math.max(0, Math.min(10, this.params.level ?? 6.0));
-    const wetLevel = (levelVal / 10) * 0.95; // 0 to 0.95
+    const wetLevel = (levelVal / 10) * 1.0; // 0 to 1.0
     this.wetGain.gain.setValueAtTime(wetLevel, ctx.currentTime);
 
     this.chorusMixer = ctx.createGain();
     this.dcBlocker = createDcBlocker(ctx, 15);
     this.makeupGain = ctx.createGain();
-    this.makeupGain.gain.setValueAtTime(0.78, ctx.currentTime);
+    this.makeupGain.gain.setValueAtTime(0.88, ctx.currentTime);
 
     // Audio Routing:
     // A) Direct dry path
@@ -189,7 +189,7 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
       case 'level': {
         const clamped = Math.max(0, Math.min(10, value));
         this.params[paramId] = clamped;
-        const wetLevel = (clamped / 10) * 0.95;
+        const wetLevel = (clamped / 10) * 1.0;
         this.wetGain.gain.setTargetAtTime(wetLevel, now, tc);
         break;
       }
@@ -218,9 +218,10 @@ export class MxrAnalogChorusNode implements AudioPedalNode {
       case 'high': {
         const clamped = Math.max(0, Math.min(10, value));
         this.params[paramId] = clamped;
-        // 0 (CUT) -> 1400 Hz, 10 (FLAT) -> 7500 Hz
-        const highFreq = 1400 + Math.pow(clamped / 10, 1.4) * 6100;
+        // 0 (CUT) -> 1400 Hz, 10 (FLAT) -> 12000 Hz
+        const highFreq = 1400 + Math.pow(clamped / 10, 1.3) * 10600;
         this.highCutFilter.frequency.setTargetAtTime(highFreq, now, tc);
+        this.bbdWarmth.setCutoff(Math.min(13000, highFreq * 1.15));
         break;
       }
     }

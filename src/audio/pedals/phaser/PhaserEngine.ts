@@ -81,6 +81,17 @@ export class PhaserEngine {
     }
   }
 
+  /** All-pass centre frequency in Hz. */
+  public setCenter(hz: number): void {
+    if (this.disposed) return;
+    if (this.worklet) {
+      this.writeWorkletParam(this.worklet, 'center', hz, false);
+    } else if (this.fallback) {
+      this.fallback.stage1.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.03);
+      this.fallback.stage2.frequency.setTargetAtTime(hz, this.ctx.currentTime, 0.03);
+    }
+  }
+
   /** Peak frequency excursion in Hz. */
   public setSweep(hz: number): void {
     if (this.disposed) return;

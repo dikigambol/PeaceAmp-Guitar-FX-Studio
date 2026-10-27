@@ -82,29 +82,29 @@ export class BossDm2Node implements AudioPedalNode {
     this.dryGain = ctx.createGain();
     this.dryGain.gain.setValueAtTime(1.0, ctx.currentTime);
 
-    // 4. Delay Line: 80 ms (slapback) to 330 ms (vintage DM-2 max)
+    // 4. Delay Line: 25 ms (tight slapback) to 330 ms (vintage DM-2 max)
     this.delayNode = ctx.createDelay(0.6);
     const initialRate = Math.max(0, Math.min(10, this.params.repeatRate ?? 4.5));
-    const delaySec = 0.080 + (initialRate / 10) * 0.250;
+    const delaySec = 0.025 + (initialRate / 10) * 0.305;
     this.delayNode.delayTime.setValueAtTime(delaySec, ctx.currentTime);
 
-    // 5. Dual Cascaded BBD Tone Filtering (24 dB/oct steep analog roll-off):
-    // Stage 1: 2.2 kHz lowpass
+    // 5. Dual Cascaded BBD Tone Filtering (Warm analog roll-off with pick chirp definition):
+    // Stage 1: 3.8 kHz lowpass with slight resonance peak
     this.feedbackFilter1 = ctx.createBiquadFilter();
     this.feedbackFilter1.type = 'lowpass';
-    this.feedbackFilter1.frequency.setValueAtTime(2200, ctx.currentTime);
-    this.feedbackFilter1.Q.setValueAtTime(0.707, ctx.currentTime);
+    this.feedbackFilter1.frequency.setValueAtTime(3800, ctx.currentTime);
+    this.feedbackFilter1.Q.setValueAtTime(0.85, ctx.currentTime);
 
-    // Stage 2: 2.4 kHz lowpass
+    // Stage 2: 4.6 kHz lowpass
     this.feedbackFilter2 = ctx.createBiquadFilter();
     this.feedbackFilter2.type = 'lowpass';
-    this.feedbackFilter2.frequency.setValueAtTime(2400, ctx.currentTime);
+    this.feedbackFilter2.frequency.setValueAtTime(4600, ctx.currentTime);
     this.feedbackFilter2.Q.setValueAtTime(0.707, ctx.currentTime);
 
-    // Highpass at 140 Hz: prevents low-end boom / mud accumulation on feedback
+    // Highpass at 90 Hz: prevents low-end boom while keeping notes full-bodied
     this.feedbackHighpass = ctx.createBiquadFilter();
     this.feedbackHighpass.type = 'highpass';
-    this.feedbackHighpass.frequency.setValueAtTime(140, ctx.currentTime);
+    this.feedbackHighpass.frequency.setValueAtTime(90, ctx.currentTime);
     this.feedbackHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // 6. Feedback Gain with Musical Taper:
@@ -119,10 +119,10 @@ export class BossDm2Node implements AudioPedalNode {
     this.feedbackLimiter.curve = this.createSoftLimitCurve(4096);
     this.feedbackLimiter.oversample = '4x';
 
-    // 8. Wet Mix Gain
+    // 8. Wet Mix Gain: 85% at noon for authoritative, clear repeats
     this.wetGain = ctx.createGain();
     const initialEcho = Math.max(0, Math.min(10, this.params.echo ?? 5.0));
-    const wetLevel = (initialEcho / 10) * 1.0;
+    const wetLevel = initialEcho <= 5.0 ? (initialEcho / 5.0) * 0.85 : 0.85 + ((initialEcho - 5.0) / 5.0) * 0.35;
     this.wetGain.gain.setValueAtTime(wetLevel, ctx.currentTime);
 
     this.inputBuffer = ctx.createGain();
@@ -180,25 +180,21 @@ export class BossDm2Node implements AudioPedalNode {
 
     switch (paramId) {
       case 'repeatRate': {
-        // 80 ms to 330 ms with well-damped slew (0.10s time constant)
-        // cancelScheduledValues prevents stacked Doppler events and metallic FM robot artifacts
-        const delaySec = 0.080 + (clamped / 10) * 0.250;
-        this.delayNode.delayTime.cancelScheduledValues(now);
-        this.delayNode.delayTime.setTargetAtTime(delaySec, now, 0.10);
+        // 25 ms to 330 ms with smooth analog Doppler slew (0.045s time constant)
+        const delaySec = 0.025 + (clamped / 10) * 0.305;
+        this.delayNode.delayTime.setTargetAtTime(delaySec, now, 0.045);
         break;
       }
       case 'intensity': {
         // Musical feedback taper with smooth ramp:
         const norm = clamped / 10;
         const fbGain = Math.pow(norm, 1.25) * 1.02;
-        this.feedbackGain.gain.cancelScheduledValues(now);
-        this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.05);
+        this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.03);
         break;
       }
       case 'echo': {
-        // Wet mix: 0 to 1.0
-        const wetLevel = (clamped / 10) * 1.0;
-        this.wetGain.gain.cancelScheduledValues(now);
+        // Wet mix: 85% at noon, 120% at 10
+        const wetLevel = clamped <= 5.0 ? (clamped / 5.0) * 0.85 : 0.85 + ((clamped - 5.0) / 5.0) * 0.35;
         this.wetGain.gain.setTargetAtTime(wetLevel, now, 0.02);
         break;
       }

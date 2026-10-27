@@ -146,12 +146,15 @@ export class BossVb2Node implements AudioPedalNode {
     const rateHz = 1.5 * Math.pow(14.0 / 1.5, rateParam / 10);
     this.lfoOsc.frequency.setTargetAtTime(rateHz, now, 0.02);
 
-    // Depth:
-    // Mode 0 (LATCH) & Mode 2 (UNLATCH): standard depth up to ±3.5ms
-    // Mode 1 (WARM BBD): subtle vintage depth up to ±2.5ms
+    // Rate-compensated Doppler pitch vibrato depth:
+    // In analog BBD hardware, pitch deviation is set by VCO voltage swing and remains constant
+    // regardless of LFO rate. Since Web Audio modulates delay time (dtau/dt = 2*pi*f*A),
+    // scaling delay swing inversely with rateHz ensures consistent musical pitch vibrato (±75 cents max)
+    // rather than exploding into an unmusical 500-cent laser wobble at fast rates.
     const depthNorm = Math.max(0, Math.min(10, depthParam)) / 10;
-    const maxDelaySwing = (mode === 1 ? depthNorm * 0.0025 : depthNorm * 0.0035);
-    this.lfoDepthGain.gain.setTargetAtTime(maxDelaySwing, now, 0.02);
+    const maxPitchRatio = mode === 1 ? 0.030 : 0.045; // ±50 cents in Warm mode, ±75 cents in Latch/Unlatch
+    const delaySwingSec = (maxPitchRatio / (2 * Math.PI * rateHz)) * depthNorm;
+    this.lfoDepthGain.gain.setTargetAtTime(delaySwingSec, now, 0.02);
 
     // Filter coloring:
     // Mode 1: Warmer vintage BBD lowpass (5.5 kHz)

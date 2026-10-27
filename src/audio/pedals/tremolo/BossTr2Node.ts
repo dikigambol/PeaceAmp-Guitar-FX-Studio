@@ -33,6 +33,7 @@ export class BossTr2Node implements AudioPedalNode {
   // LFO Engine
   private lfoTriangle: OscillatorNode;
   private lfoSquare: OscillatorNode;
+  private lfoSquareSlew: BiquadFilterNode;
   private lfoTriGain: GainNode;
   private lfoSquareGain: GainNode;
   private lfoMixer: GainNode;
@@ -80,8 +81,8 @@ export class BossTr2Node implements AudioPedalNode {
 
     this.dcBlocker = createDcBlocker(ctx, 15);
     this.makeupGain = ctx.createGain();
-    // Modern TR-2 internal trim (+1.5 dB compensation)
-    this.makeupGain.gain.setValueAtTime(1.18, ctx.currentTime);
+    // Modern TR-2 / Keeley mod makeup gain (+2.3 dB) completely eliminates vintage volume drop
+    this.makeupGain.gain.setValueAtTime(1.30, ctx.currentTime);
 
     this.bypassWet.connect(this.tremoloGain);
     this.tremoloGain.connect(this.dcBlocker);
@@ -95,6 +96,12 @@ export class BossTr2Node implements AudioPedalNode {
     this.lfoSquare = ctx.createOscillator();
     this.lfoSquare.type = 'square';
 
+    // Model optical optocoupler / VCA transition slew (~2.0ms) to eliminate harsh digital edge clicks on square chop
+    this.lfoSquareSlew = ctx.createBiquadFilter();
+    this.lfoSquareSlew.type = 'lowpass';
+    this.lfoSquareSlew.frequency.setValueAtTime(95, ctx.currentTime);
+    this.lfoSquareSlew.Q.setValueAtTime(0.5, ctx.currentTime);
+
     this.lfoTriGain = ctx.createGain();
     this.lfoSquareGain = ctx.createGain();
     this.lfoMixer = ctx.createGain();
@@ -106,7 +113,8 @@ export class BossTr2Node implements AudioPedalNode {
 
     // Connect LFO mixer
     this.lfoTriangle.connect(this.lfoTriGain);
-    this.lfoSquare.connect(this.lfoSquareGain);
+    this.lfoSquare.connect(this.lfoSquareSlew);
+    this.lfoSquareSlew.connect(this.lfoSquareGain);
     this.lfoTriGain.connect(this.lfoMixer);
     this.lfoSquareGain.connect(this.lfoMixer);
 
@@ -146,8 +154,8 @@ export class BossTr2Node implements AudioPedalNode {
     const sqWeight = Math.sin(waveNorm * 0.5 * Math.PI);
 
     this.lfoTriGain.gain.setTargetAtTime(triWeight, now, 0.02);
-    // Square wave scaled to prevent harsh clipping spikes
-    this.lfoSquareGain.gain.setTargetAtTime(sqWeight * 0.85, now, 0.02);
+    // Square wave scaled smoothly by optical slew filter for click-free full chop
+    this.lfoSquareGain.gain.setTargetAtTime(sqWeight, now, 0.02);
 
     // Depth: 0 to 10 -> 0.0 to 0.5 peak amplitude around center offset
     const depthNorm = Math.max(0, Math.min(10, depthParam)) / 10;
@@ -179,6 +187,7 @@ export class BossTr2Node implements AudioPedalNode {
 
       this.lfoTriangle.disconnect();
       this.lfoSquare.disconnect();
+      this.lfoSquareSlew.disconnect();
       this.lfoTriGain.disconnect();
       this.lfoSquareGain.disconnect();
       this.lfoMixer.disconnect();

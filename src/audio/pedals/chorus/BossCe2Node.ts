@@ -120,7 +120,7 @@ export class BossCe2Node implements AudioPedalNode {
     // 6. Post-BBD Reconstruction & Analog Anti-Aliasing Filters:
     // Authentic 4-pole (24 dB/oct) Sallen-Key lowpass cascade & compander saturation
     this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
-      cutoffFreq: 7200,
+      cutoffFreq: 8800,
       saturationAmount: 0.35,
       oversample: '4x',
     });

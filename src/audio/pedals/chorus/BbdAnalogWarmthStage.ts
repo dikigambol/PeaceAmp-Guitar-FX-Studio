@@ -32,7 +32,7 @@ export class BbdAnalogWarmthStage {
 
   constructor(ctx: AudioContext, config: BbdWarmthConfig = {}) {
     this.ctx = ctx;
-    const cutoff = config.cutoffFreq ?? 7200;
+    const cutoff = config.cutoffFreq ?? 9200;
     const satAmt = config.saturationAmount ?? 0.35;
     const oversample = config.oversample ?? '4x';
 

@@ -86,11 +86,13 @@ export class MxrPhase90Node implements AudioPedalNode {
     this.preHighpass.connect(this.warmBodyFilter);
 
     // 5. 4 x first-order all-pass stages with JFET-style modulation
+    // Base 950Hz with 750Hz sweep provides an authentic 3.1 octave log range (200Hz to 1700Hz)
+    // Feedback 0.44 delivers the iconic chewy Block Logo midrange bite
     this.engine = new PhaserEngine(ctx, {
-      baseFreq: 920,
-      sweepHz: 680,
+      baseFreq: 950,
+      sweepHz: 750,
       rateHz: this.calcSpeedHz(this.params.speed),
-      feedback: 0.36,
+      feedback: 0.44,
     });
     this.warmBodyFilter.connect(this.engine.inputNode);
 
@@ -107,9 +109,10 @@ export class MxrPhase90Node implements AudioPedalNode {
     this.dryGain.connect(this.mixer);
     this.wetGain.connect(this.mixer);
 
-    // Output level compensation (-3.0 dB)
+    // Output level compensation: 1.05 maintains perceived unity loudness when engaged,
+    // offsetting the natural perceived volume dip caused by the moving phase notches
     this.levelComp = ctx.createGain();
-    this.levelComp.gain.setValueAtTime(0.72, ctx.currentTime);
+    this.levelComp.gain.setValueAtTime(1.05, ctx.currentTime);
     this.mixer.connect(this.levelComp);
 
     // 7. DC blocker

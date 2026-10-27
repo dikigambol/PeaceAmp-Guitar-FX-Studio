@@ -88,7 +88,7 @@ export class EhxSmallCloneNode implements AudioPedalNode {
 
     this.preEmphasis = ctx.createBiquadFilter();
     this.preEmphasis.type = 'lowpass';
-    this.preEmphasis.frequency.setValueAtTime(7500, ctx.currentTime);
+    this.preEmphasis.frequency.setValueAtTime(8500, ctx.currentTime);
     this.preEmphasis.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // 4. MN3007 Bucket-Brigade Delay Line
@@ -118,10 +118,10 @@ export class EhxSmallCloneNode implements AudioPedalNode {
     this.lfoGainNode.connect(this.delayNode.delayTime);
 
     // 6. Post-BBD Reconstruction & Analog Anti-Aliasing Filters:
-    // Authentic 4-pole Sallen-Key lowpass cascade (~5.8 kHz) and BBD compander non-linearity
+    // Authentic 4-pole Sallen-Key lowpass cascade (~7.8 kHz) and BBD compander non-linearity
     this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
-      cutoffFreq: 5800,
-      saturationAmount: 0.38,
+      cutoffFreq: 7800,
+      saturationAmount: 0.35,
       oversample: '4x',
     });
 

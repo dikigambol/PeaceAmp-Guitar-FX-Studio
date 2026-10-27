@@ -94,46 +94,45 @@ export class BossBf2Node implements AudioPedalNode {
     this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
     this.bypassWet.connect(this.preHighpass);
 
-    // 4. Analog input buffer warmth & round body EQ (280Hz peaking, +2.0dB)
-    // Preserves guitar low-mid fundamental weight and prevents hollow/tinny phase cancellations
+    // 4. Analog input buffer warmth & round body EQ (280Hz peaking, +1.0dB)
     this.warmBodyFilter = ctx.createBiquadFilter();
     this.warmBodyFilter.type = 'peaking';
     this.warmBodyFilter.frequency.setValueAtTime(280, ctx.currentTime);
-    this.warmBodyFilter.Q.setValueAtTime(0.7, ctx.currentTime);
-    this.warmBodyFilter.gain.setValueAtTime(2.0, ctx.currentTime);
+    this.warmBodyFilter.Q.setValueAtTime(0.6, ctx.currentTime);
+    this.warmBodyFilter.gain.setValueAtTime(1.0, ctx.currentTime);
     this.preHighpass.connect(this.warmBodyFilter);
 
     // 5. Delay Input Summing Node (merges incoming signal with feedback)
     this.delayInputSum = ctx.createGain();
     this.warmBodyFilter.connect(this.delayInputSum);
 
-    // 6. Analog BBD Delay Line (Warm musical range: 2.2ms - 8.0ms)
+    // 6. Analog BBD Delay Line (Matsushita MN3207 authentic range: ~1.0ms to ~8.0ms)
     this.delayNode = ctx.createDelay(0.05);
     const initialDelay = this.calcBaseDelay(this.params.manual);
     this.delayNode.delayTime.setValueAtTime(initialDelay, ctx.currentTime);
     this.delayInputSum.connect(this.delayNode);
 
-    // 7. Analog BBD 4-Pole Sallen-Key Reconstruction Filter & Compander Saturation (~4.5 kHz)
+    // 7. Analog BBD 4-Pole Sallen-Key Reconstruction Filter & Compander Saturation (~7.8 kHz)
     this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
-      cutoffFreq: 4500,
+      cutoffFreq: 7800,
       saturationAmount: 0.35,
       oversample: '4x',
     });
     this.delayNode.connect(this.bbdWarmth.inputNode);
 
-    // 8. Feedback (Resonance) loop: Bandpass filtered (200Hz - 2.8kHz) & pure tanh soft-clip
-    // Low-cut at 200Hz eliminates low hum/droning; high-cut at 2.8kHz prevents metallic whistling
+    // 8. Feedback (Resonance) loop: Bandpass filtered (160Hz - 6.5kHz) & pure tanh soft-clip
+    // 160Hz highpass removes subsonic mud; 6.5kHz lowpass allows authentic jet-whistle resonance to sizzle
     this.feedbackGain = ctx.createGain();
     this.feedbackGain.gain.setValueAtTime(this.calcFeedbackGain(this.params.res), ctx.currentTime);
 
     this.feedbackHighpass = ctx.createBiquadFilter();
     this.feedbackHighpass.type = 'highpass';
-    this.feedbackHighpass.frequency.setValueAtTime(200, ctx.currentTime);
+    this.feedbackHighpass.frequency.setValueAtTime(160, ctx.currentTime);
     this.feedbackHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.feedbackLowpass = ctx.createBiquadFilter();
     this.feedbackLowpass.type = 'lowpass';
-    this.feedbackLowpass.frequency.setValueAtTime(2800, ctx.currentTime);
+    this.feedbackLowpass.frequency.setValueAtTime(6500, ctx.currentTime);
     this.feedbackLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.feedbackLimiter = ctx.createWaveShaper();
@@ -159,13 +158,14 @@ export class BossBf2Node implements AudioPedalNode {
     this.lfoGainNode.connect(this.delayNode.delayTime);
     this.lfoNode.start();
 
-    // 10. Wet / Dry Mixer: 1.0 Dry + 0.75 Wet ensures guitar core tone is never hollowed out
+    // 10. Wet / Dry Mixer: Exact 1:1 ratio (0.85 Dry + 0.85 Wet) creates deep -inf dB comb notches
+    // for the iconic hollow, roaring jet-engine sweep
     this.dryGain = ctx.createGain();
-    this.dryGain.gain.setValueAtTime(1.0, ctx.currentTime);
+    this.dryGain.gain.setValueAtTime(0.85, ctx.currentTime);
     this.warmBodyFilter.connect(this.dryGain);
 
     this.wetGain = ctx.createGain();
-    this.wetGain.gain.setValueAtTime(0.75, ctx.currentTime);
+    this.wetGain.gain.setValueAtTime(0.85, ctx.currentTime);
     this.bbdWarmth.outputNode.connect(this.wetGain);
 
     this.mixer = ctx.createGain();
@@ -183,17 +183,16 @@ export class BossBf2Node implements AudioPedalNode {
   }
 
   private calcBaseDelay(manual: number): number {
-    // 0 -> 2.2 ms, 5 -> 5.1 ms, 10 -> 8.0 ms
-    // Keeps center frequency musical, vocal, and warm
+    // 0 -> 1.0 ms (sharp, screaming metallic presence), 5 -> 4.5 ms, 10 -> 8.0 ms (deep whoosh)
+    // Matches Matsushita MN3207 BBD clock frequency range (50 kHz to 500 kHz)
     const clamped = Math.max(0, Math.min(10, manual));
-    return 0.0022 + (clamped / 10) * 0.0058;
+    return 0.0010 + (clamped / 10) * 0.0070;
   }
 
   private calcDepthSec(depth: number, baseDelaySec: number): number {
-    // Musical sweep depth (0.2ms to ~1.8ms max)
-    // Guarantees delay variation never drops below safe 1.2ms boundary
+    // Dynamic sweep depth swinging down towards 0.4ms without dropping below safe 0.35ms threshold
     const clamped = Math.max(0, Math.min(10, depth));
-    const maxSafeSweep = Math.min(0.0018, Math.max(0.0004, baseDelaySec - 0.0012));
+    const maxSafeSweep = Math.min(0.0035, Math.max(0.0003, baseDelaySec - 0.00035));
     return (clamped / 10) * maxSafeSweep;
   }
 
@@ -205,13 +204,13 @@ export class BossBf2Node implements AudioPedalNode {
 
   private calcFeedbackGain(res: number): number {
     const clamped = Math.max(0, Math.min(10, res));
-    // Progressive curve:
+    // Progressive curve driving into tanh soft-clipping for screaming, burning jet resonance:
     // res = 0 -> 0.0
-    // res = 3.5 -> 0.15 (subtle warm body)
-    // res = 5 -> 0.25 (classic chewy BF-2 flanging)
-    // res = 7 -> 0.39 (noticeable jet swirl)
-    // res = 10 -> 0.62 (deep resonant sweep without runaway self-oscillation or hum)
-    return Math.pow(clamped / 10, 1.4) * 0.62;
+    // res = 3.5 -> 0.28 (warm metallic body)
+    // res = 5 -> 0.48 (classic chewy BF-2 flanging)
+    // res = 7 -> 0.68 (intense jet sweep)
+    // res = 10 -> 0.92 (screaming, burning jet roar saturated cleanly by tanh limiter)
+    return Math.pow(clamped / 10, 1.2) * 0.92;
   }
 
   private createSaturationCurve(samples: number): Float32Array {

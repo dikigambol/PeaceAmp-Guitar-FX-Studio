@@ -94,33 +94,34 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
     this.bypassWet.connect(this.preHighpass);
 
-    // 4. Analog input buffer warmth & round body EQ (320Hz peaking, +1.6dB)
+    // 4. Analog input buffer warmth & round body EQ (320Hz peaking, +0.8dB)
     this.warmBodyFilter = ctx.createBiquadFilter();
     this.warmBodyFilter.type = 'peaking';
     this.warmBodyFilter.frequency.setValueAtTime(320, ctx.currentTime);
     this.warmBodyFilter.Q.setValueAtTime(0.7, ctx.currentTime);
-    this.warmBodyFilter.gain.setValueAtTime(1.6, ctx.currentTime);
+    this.warmBodyFilter.gain.setValueAtTime(0.8, ctx.currentTime);
     this.preHighpass.connect(this.warmBodyFilter);
 
     // 5. Delay Input Summing Node
     this.delayInputSum = ctx.createGain();
     this.warmBodyFilter.connect(this.delayInputSum);
 
-    // 6. Analog BBD Delay Line (~0.4ms to ~4.2ms)
+    // 6. Analog BBD Delay Line (Reticon SAD1024 range: ~0.4ms to ~4.2ms)
     this.delayNode = ctx.createDelay(0.05);
     const initialDelay = this.calcBaseDelay(this.params.manual);
     this.delayNode.delayTime.setValueAtTime(initialDelay, ctx.currentTime);
     this.delayInputSum.connect(this.delayNode);
 
-    // 7. BBD Reconstruction & Anti-Aliasing (4-Pole Sallen-Key 4.2 kHz) & Compander Saturation
+    // 7. BBD Reconstruction & Anti-Aliasing (4-Pole Sallen-Key 8.0 kHz) & Compander Saturation
     this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
-      cutoffFreq: 4200,
+      cutoffFreq: 8000,
       saturationAmount: 0.35,
       oversample: '4x',
     });
     this.delayNode.connect(this.bbdWarmth.inputNode);
 
-    // 8. Feedback (REGEN) loop: Bandpass filtered (220Hz - 3.2kHz) + soft saturation limiter
+    // 8. Feedback (REGEN) loop: Bandpass filtered (160Hz - 7.0kHz) + pure tanh soft-clip limiter
+    // Allows EVH metallic jet harmonics to scream and sing at high REGEN settings
     this.feedbackGain = ctx.createGain();
     this.feedbackGain.gain.setValueAtTime(
       this.calcFeedbackGain(this.params.regen),
@@ -129,12 +130,12 @@ export class MxrFlangerNode implements AudioPedalNode {
 
     this.feedbackHighpass = ctx.createBiquadFilter();
     this.feedbackHighpass.type = 'highpass';
-    this.feedbackHighpass.frequency.setValueAtTime(220, ctx.currentTime);
+    this.feedbackHighpass.frequency.setValueAtTime(160, ctx.currentTime);
     this.feedbackHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.feedbackLowpass = ctx.createBiquadFilter();
     this.feedbackLowpass.type = 'lowpass';
-    this.feedbackLowpass.frequency.setValueAtTime(3200, ctx.currentTime);
+    this.feedbackLowpass.frequency.setValueAtTime(7000, ctx.currentTime);
     this.feedbackLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.feedbackLimiter = ctx.createWaveShaper();
@@ -160,13 +161,14 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.lfoGainNode.connect(this.delayNode.delayTime);
     this.lfoNode.start();
 
-    // 10. Wet / Dry Mixer: 1.0 Dry + 0.82 Wet preserves guitar attack and fullness
+    // 10. Wet / Dry Mixer: Exact 1:1 ratio (0.88 Dry + 0.88 Wet) creates razor-sharp -inf dB
+    // comb notches for iconic Van Halen "Unchained" jet sweeps
     this.dryGain = ctx.createGain();
-    this.dryGain.gain.setValueAtTime(1.0, ctx.currentTime);
+    this.dryGain.gain.setValueAtTime(0.88, ctx.currentTime);
     this.warmBodyFilter.connect(this.dryGain);
 
     this.wetGain = ctx.createGain();
-    this.wetGain.gain.setValueAtTime(0.82, ctx.currentTime);
+    this.wetGain.gain.setValueAtTime(0.88, ctx.currentTime);
     this.bbdWarmth.outputNode.connect(this.wetGain);
 
     this.mixer = ctx.createGain();
@@ -191,8 +193,8 @@ export class MxrFlangerNode implements AudioPedalNode {
 
   private calcWidthSec(width: number, baseDelaySec: number): number {
     const clamped = Math.max(0, Math.min(10, width));
-    // Safe sweep modulation width (never dropping delay below 0.25ms)
-    const maxSafeSweep = Math.min(0.0018, Math.max(0.0002, baseDelaySec - 0.00025));
+    // Dynamic sweep modulation width (allowing sweep down to 0.20ms without underflowing)
+    const maxSafeSweep = Math.min(0.0032, Math.max(0.0002, baseDelaySec - 0.0002));
     return (clamped / 10) * maxSafeSweep;
   }
 
@@ -204,8 +206,12 @@ export class MxrFlangerNode implements AudioPedalNode {
 
   private calcFeedbackGain(regen: number): number {
     const clamped = Math.max(0, Math.min(10, regen));
-    // Progressive feedback curve capped safely at 0.60 to avoid runaway self-oscillation
-    return Math.pow(clamped / 10, 1.35) * 0.60;
+    // Progressive feedback curve driving into tanh saturation for screaming Van Halen jet roar:
+    // regen = 0 -> 0.0
+    // regen = 5 -> 0.42 (musical flanger body)
+    // regen = 8 -> 0.72 (aggressive jet whoosh)
+    // regen = 10 -> 0.93 (singing, burning combustion howl safely compressed by tanh limiter)
+    return Math.pow(clamped / 10, 1.2) * 0.93;
   }
 
   private createSaturationCurve(samples: number): Float32Array {

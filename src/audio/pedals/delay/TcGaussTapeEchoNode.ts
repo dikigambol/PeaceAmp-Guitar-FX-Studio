@@ -85,23 +85,23 @@ export class TcGaussTapeEchoNode implements AudioPedalNode {
     this.dryGain = ctx.createGain();
     this.dryGain.gain.setValueAtTime(1.0, ctx.currentTime);
 
-    // 4. Delay Line: 50 ms to 500 ms (max 0.7s)
+    // 4. Delay Line: 25 ms (tight slapback) to 500 ms (vintage tape max)
     this.delayNode = ctx.createDelay(0.7);
     const initialDelay = Math.max(0, Math.min(10, this.params.delay ?? 4.5));
-    const delaySec = 0.050 + (initialDelay / 10) * 0.450;
+    const delaySec = 0.025 + (initialDelay / 10) * 0.475;
     this.delayNode.delayTime.setValueAtTime(delaySec, ctx.currentTime);
 
     // 5. Tape Frequency Profile Filtering:
-    // Tape LPF: 3.4 kHz (warm tape head roll-off)
+    // Tape LPF: 4.4 kHz with slight tape-head resonance (warm yet distinct tape repeats)
     this.tapeFilterLpf = ctx.createBiquadFilter();
     this.tapeFilterLpf.type = 'lowpass';
-    this.tapeFilterLpf.frequency.setValueAtTime(3400, ctx.currentTime);
-    this.tapeFilterLpf.Q.setValueAtTime(0.707, ctx.currentTime);
+    this.tapeFilterLpf.frequency.setValueAtTime(4400, ctx.currentTime);
+    this.tapeFilterLpf.Q.setValueAtTime(0.85, ctx.currentTime);
 
-    // Tape HPF: 95 Hz (magnetic head-gap bass roll-off, keeps repeats articulate)
+    // Tape HPF: 80 Hz (magnetic head-gap bass roll-off, keeps repeats articulate and defined)
     this.tapeFilterHpf = ctx.createBiquadFilter();
     this.tapeFilterHpf.type = 'highpass';
-    this.tapeFilterHpf.frequency.setValueAtTime(95, ctx.currentTime);
+    this.tapeFilterHpf.frequency.setValueAtTime(80, ctx.currentTime);
     this.tapeFilterHpf.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // 6. Feedback (SUSTAIN) Gain with Musical Taper:
@@ -151,10 +151,10 @@ export class TcGaussTapeEchoNode implements AudioPedalNode {
     this.wowOsc.start();
     this.flutterOsc.start();
 
-    // 9. VOLUME (Wet Mix Gain)
+    // 9. VOLUME (Wet Mix Gain: 85% at noon for present, lush tape echoes)
     this.wetGain = ctx.createGain();
     const initialVolume = Math.max(0, Math.min(10, this.params.volume ?? 5.0));
-    const wetLevel = (initialVolume / 10) * 1.0;
+    const wetLevel = initialVolume <= 5.0 ? (initialVolume / 5.0) * 0.85 : 0.85 + ((initialVolume - 5.0) / 5.0) * 0.35;
     this.wetGain.gain.setValueAtTime(wetLevel, ctx.currentTime);
 
     this.inputBuffer = ctx.createGain();
@@ -211,24 +211,21 @@ export class TcGaussTapeEchoNode implements AudioPedalNode {
 
     switch (paramId) {
       case 'delay': {
-        // 50 ms to 500 ms with smooth tape speed ramp
-        const delaySec = 0.050 + (clamped / 10) * 0.450;
-        this.delayNode.delayTime.cancelScheduledValues(now);
-        this.delayNode.delayTime.setTargetAtTime(delaySec, now, 0.10);
+        // 25 ms to 500 ms with smooth tape speed ramp
+        const delaySec = 0.025 + (clamped / 10) * 0.475;
+        this.delayNode.delayTime.setTargetAtTime(delaySec, now, 0.045);
         break;
       }
       case 'sustain': {
         // Musical feedback taper:
         const norm = clamped / 10;
         const fbGain = Math.pow(norm, 1.25) * 1.03;
-        this.feedbackGain.gain.cancelScheduledValues(now);
-        this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.04);
+        this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.03);
         break;
       }
       case 'volume': {
-        // Wet mix: 0 to 1.0
-        const wetLevel = (clamped / 10) * 1.0;
-        this.wetGain.gain.cancelScheduledValues(now);
+        // Wet mix: 85% at noon, 120% at 10
+        const wetLevel = clamped <= 5.0 ? (clamped / 5.0) * 0.85 : 0.85 + ((clamped - 5.0) / 5.0) * 0.35;
         this.wetGain.gain.setTargetAtTime(wetLevel, now, 0.02);
         break;
       }

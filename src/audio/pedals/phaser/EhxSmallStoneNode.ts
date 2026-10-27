@@ -87,12 +87,14 @@ export class EhxSmallStoneNode implements AudioPedalNode {
     this.preHighpass.connect(this.warmBodyFilter);
 
     // 5. 4 x first-order all-pass stages with OTA-style modulation
+    // Color OFF: pure, watery, liquid 4-stage sweep with 0 feedback
+    // Color ON: intense 0.80 regenerative feedback and wide 920Hz sweep creating vocal formant resonance
     const isColorActive = this.params.color >= 0.5;
     this.engine = new PhaserEngine(ctx, {
-      baseFreq: 800,
-      sweepHz: isColorActive ? 750 : 600,
+      baseFreq: isColorActive ? 1050 : 850,
+      sweepHz: isColorActive ? 920 : 700,
       rateHz: this.calcRateHz(this.params.rate),
-      feedback: isColorActive ? 0.62 : 0.0,
+      feedback: isColorActive ? 0.80 : 0.0,
     });
     this.warmBodyFilter.connect(this.engine.inputNode);
 
@@ -109,9 +111,10 @@ export class EhxSmallStoneNode implements AudioPedalNode {
     this.dryGain.connect(this.mixer);
     this.wetGain.connect(this.mixer);
 
-    // Output level compensation (-3.0 dB)
+    // Output level compensation: 1.05 maintains perceived unity loudness when engaged,
+    // eliminating the noticeable volume drop of the uncompensated vintage circuit
     this.levelComp = ctx.createGain();
-    this.levelComp.gain.setValueAtTime(0.72, ctx.currentTime);
+    this.levelComp.gain.setValueAtTime(1.05, ctx.currentTime);
     this.mixer.connect(this.levelComp);
 
     // 7. DC blocker
@@ -141,8 +144,9 @@ export class EhxSmallStoneNode implements AudioPedalNode {
 
       case 'color': {
         const isColor = value >= 0.5;
-        this.engine.setFeedback(isColor ? 0.62 : 0.0);
-        this.engine.setSweep(isColor ? 750 : 600);
+        this.engine.setFeedback(isColor ? 0.80 : 0.0);
+        this.engine.setSweep(isColor ? 920 : 700);
+        this.engine.setCenter(isColor ? 1050 : 850);
         break;
       }
     }

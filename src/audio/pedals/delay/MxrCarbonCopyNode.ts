@@ -89,21 +89,21 @@ export class MxrCarbonCopyNode implements AudioPedalNode {
     const delaySec = 0.040 + (initialDelay / 10) * 0.560; // 40 ms to 600 ms
     this.delayNode.delayTime.setValueAtTime(delaySec, ctx.currentTime);
 
-    // 5. Dual Cascaded BBD Tone Filtering (~1.9 kHz dark analog roll-off):
+    // 5. Dual Cascaded BBD Tone Filtering (Warm analog dark repeats with clear note definition):
     this.feedbackFilter1 = ctx.createBiquadFilter();
     this.feedbackFilter1.type = 'lowpass';
-    this.feedbackFilter1.frequency.setValueAtTime(1900, ctx.currentTime);
-    this.feedbackFilter1.Q.setValueAtTime(0.707, ctx.currentTime);
+    this.feedbackFilter1.frequency.setValueAtTime(3600, ctx.currentTime);
+    this.feedbackFilter1.Q.setValueAtTime(0.85, ctx.currentTime);
 
     this.feedbackFilter2 = ctx.createBiquadFilter();
     this.feedbackFilter2.type = 'lowpass';
-    this.feedbackFilter2.frequency.setValueAtTime(2100, ctx.currentTime);
+    this.feedbackFilter2.frequency.setValueAtTime(4400, ctx.currentTime);
     this.feedbackFilter2.Q.setValueAtTime(0.707, ctx.currentTime);
 
-    // Highpass at 130 Hz: Prevents low-end boom / mud accumulation on feedback
+    // Highpass at 85 Hz: Prevents low-end boom / mud accumulation on feedback
     this.feedbackHighpass = ctx.createBiquadFilter();
     this.feedbackHighpass.type = 'highpass';
-    this.feedbackHighpass.frequency.setValueAtTime(130, ctx.currentTime);
+    this.feedbackHighpass.frequency.setValueAtTime(85, ctx.currentTime);
     this.feedbackHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // 6. Feedback (REGEN) Gain with Musical Taper:
@@ -123,23 +123,23 @@ export class MxrCarbonCopyNode implements AudioPedalNode {
     this.feedbackLimiter.oversample = '4x';
 
     // 8. Analog Modulation Circuit (MOD switch)
-    // Sine LFO at ~1.2 Hz modulating delay time by ~0.0012s (1.2 ms)
+    // Sine LFO at ~0.85 Hz modulating delay time by ~1.8 ms for lush chorused shimmer
     this.modOsc = ctx.createOscillator();
     this.modOsc.type = 'sine';
-    this.modOsc.frequency.setValueAtTime(1.2, ctx.currentTime);
+    this.modOsc.frequency.setValueAtTime(0.85, ctx.currentTime);
 
     this.modGain = ctx.createGain();
     const isModOn = (this.params.mod ?? 0) >= 0.5;
-    this.modGain.gain.setValueAtTime(isModOn ? 0.0012 : 0.0, ctx.currentTime);
+    this.modGain.gain.setValueAtTime(isModOn ? 0.0018 : 0.0, ctx.currentTime);
 
     this.modOsc.connect(this.modGain);
     this.modGain.connect(this.delayNode.delayTime);
     this.modOsc.start();
 
-    // 9. Wet Mix Gain
+    // 9. Wet Mix Gain: 85% at noon for clear, present echoes
     this.wetGain = ctx.createGain();
     const initialMix = Math.max(0, Math.min(10, this.params.mix ?? 5.0));
-    const wetLevel = (initialMix / 10) * 1.0;
+    const wetLevel = initialMix <= 5.0 ? (initialMix / 5.0) * 0.85 : 0.85 + ((initialMix - 5.0) / 5.0) * 0.35;
     this.wetGain.gain.setValueAtTime(wetLevel, ctx.currentTime);
 
     this.inputBuffer = ctx.createGain();
@@ -197,32 +197,28 @@ export class MxrCarbonCopyNode implements AudioPedalNode {
 
     switch (paramId) {
       case 'delay': {
-        // 40 ms to 600 ms with well-damped slew (0.10s time constant)
+        // 40 ms to 600 ms with smooth analog Doppler slew (0.045s time constant)
         const delaySec = 0.040 + (clamped / 10) * 0.560;
-        this.delayNode.delayTime.cancelScheduledValues(now);
-        this.delayNode.delayTime.setTargetAtTime(delaySec, now, 0.10);
+        this.delayNode.delayTime.setTargetAtTime(delaySec, now, 0.045);
         break;
       }
       case 'regen': {
         // Regeneration feedback taper:
         const norm = clamped / 10;
         const fbGain = Math.pow(norm, 1.25) * 1.02;
-        this.feedbackGain.gain.cancelScheduledValues(now);
-        this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.04);
+        this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.03);
         break;
       }
       case 'mix': {
-        // Wet mix: 0 to 1.0
-        const wetLevel = (clamped / 10) * 1.0;
-        this.wetGain.gain.cancelScheduledValues(now);
+        // Wet mix: 85% at noon, 120% at 10
+        const wetLevel = clamped <= 5.0 ? (clamped / 5.0) * 0.85 : 0.85 + ((clamped - 5.0) / 5.0) * 0.35;
         this.wetGain.gain.setTargetAtTime(wetLevel, now, 0.02);
         break;
       }
       case 'mod': {
-        // MOD toggle: 0 = off, 1 = on
+        // MOD toggle: 0 = off, 1 = on (~1.8 ms lush chorused shimmer)
         const isModOn = clamped >= 0.5;
-        this.modGain.gain.cancelScheduledValues(now);
-        this.modGain.gain.setTargetAtTime(isModOn ? 0.0012 : 0.0, now, 0.03);
+        this.modGain.gain.setTargetAtTime(isModOn ? 0.0018 : 0.0, now, 0.03);
         break;
       }
     }

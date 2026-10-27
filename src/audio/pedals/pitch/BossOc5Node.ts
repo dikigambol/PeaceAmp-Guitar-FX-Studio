@@ -96,30 +96,30 @@ export class BossOc5Node implements AudioPedalNode {
     const oct2DownRange = this.params.oct2DownRange ?? 5.0;
     const isVintage = (this.params.mode ?? 0.0) >= 0.5;
 
-    // Direct level gain (0 to 10 -> smooth gain)
-    const directGain = direct <= 0 ? 0 : Math.pow(direct / 10, 1.4) * 1.0;
+    // Direct level gain: 5.0 is exact unity (1.0), 0 is muted, 10 is +3dB boost
+    const directGain = direct <= 0 ? 0 : direct <= 5.0 ? (direct / 5.0) * 1.0 : 1.0 + ((direct - 5.0) / 5.0) * 0.41;
     this.pitchEngine.setDirectGain(directGain);
 
-    // Voice 1: -1 OCT (ratio = 0.5)
-    const octDownGain = octDown <= 0 ? 0 : Math.pow(octDown / 10, 1.3) * 1.25;
+    // Voice 1: -1 OCT (ratio = 0.5): 5.0 is full balanced octave (1.0), up to 1.35 at max
+    const octDownGain = octDown <= 0 ? 0 : octDown <= 5.0 ? (octDown / 5.0) * 1.0 : 1.0 + ((octDown - 5.0) / 5.0) * 0.35;
     this.pitchEngine.setVoice1(0.5, octDownGain);
 
     // Voice 2: In Vintage mode, this is -2 OCT (ratio = 0.25).
     // In Poly mode, Voice 2 is muted, but oct2DownRange controls the RANGE cutoff!
     if (isVintage) {
-      const oct2DownGain = oct2DownRange <= 0 ? 0 : Math.pow(oct2DownRange / 10, 1.3) * 1.25;
+      const oct2DownGain = oct2DownRange <= 0 ? 0 : oct2DownRange <= 5.0 ? (oct2DownRange / 5.0) * 1.0 : 1.0 + ((oct2DownRange - 5.0) / 5.0) * 0.35;
       this.pitchEngine.setVoice2(0.25, oct2DownGain);
       this.pitchEngine.setRangeCutoff(20000); // Wide open in vintage mode
     } else {
       this.pitchEngine.setVoice2(0.25, 0.0);
-      // Poly RANGE control: 0 = LOWEST (~130 Hz cutoff, only low E/A strings sub-tracked),
+      // Poly RANGE control: 0 = LOWEST (~110 Hz cutoff, only low E/A strings sub-tracked),
       // 10 = FULL (~15000 Hz cutoff, full poly tracking across entire fretboard)
       const rangeHz = 110 * Math.pow(15000 / 110, oct2DownRange / 10);
       this.pitchEngine.setRangeCutoff(rangeHz);
     }
 
-    // Voice 3: +1 OCT (ratio = 2.0)
-    const octUpGain = octUp <= 0 ? 0 : Math.pow(octUp / 10, 1.3) * 1.1;
+    // Voice 3: +1 OCT (ratio = 2.0): 5.0 is full balanced octave (1.0)
+    const octUpGain = octUp <= 0 ? 0 : octUp <= 5.0 ? (octUp / 5.0) * 1.0 : 1.0 + ((octUp - 5.0) / 5.0) * 0.35;
     this.pitchEngine.setVoice3(2.0, octUpGain);
 
     // Vintage flip-flop circuit modeling flag

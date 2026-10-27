@@ -107,32 +107,32 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
     this.bypassWet.connect(this.preHighpass);
 
-    // 4. Subtle input buffer EQ (Gentle presence & body boost at 300Hz, +1.8dB)
+    // 4. Subtle input buffer EQ (Gentle presence & body boost at 300Hz, +0.8dB)
     this.warmBodyFilter = ctx.createBiquadFilter();
     this.warmBodyFilter.type = 'peaking';
     this.warmBodyFilter.frequency.setValueAtTime(300, ctx.currentTime);
     this.warmBodyFilter.Q.setValueAtTime(0.75, ctx.currentTime);
-    this.warmBodyFilter.gain.setValueAtTime(1.8, ctx.currentTime);
+    this.warmBodyFilter.gain.setValueAtTime(0.8, ctx.currentTime);
     this.preHighpass.connect(this.warmBodyFilter);
 
     // =========================================================================
-    // 5. FLANGER ENGINE (Reticon BBD style short delay ~2.8ms with feedback)
+    // 5. FLANGER ENGINE (Authentic Mistress BBD short delay ~1.5ms with feedback)
     // =========================================================================
     this.flangerInputSum = ctx.createGain();
     this.warmBodyFilter.connect(this.flangerInputSum);
 
     this.flangerDelayNode = ctx.createDelay(0.05);
-    this.flangerDelayNode.delayTime.setValueAtTime(0.0028, ctx.currentTime);
+    this.flangerDelayNode.delayTime.setValueAtTime(0.0015, ctx.currentTime);
     this.flangerInputSum.connect(this.flangerDelayNode);
 
     this.flangerBbdWarmth = new BbdAnalogWarmthStage(ctx, {
-      cutoffFreq: 4800,
+      cutoffFreq: 7600,
       saturationAmount: 0.35,
       oversample: '4x',
     });
     this.flangerDelayNode.connect(this.flangerBbdWarmth.inputNode);
 
-    // Feedback Loop (Bandpass 220Hz - 3.0kHz + pure tanh limiter)
+    // Feedback Loop (Bandpass 160Hz - 6.5kHz + pure tanh limiter for Gilmour chime/howl)
     this.flangerFeedbackGain = ctx.createGain();
     this.flangerFeedbackGain.gain.setValueAtTime(
       this.calcFlangerFeedback(this.params.flangerDepth),
@@ -141,12 +141,12 @@ export class EhxElectricMistressNode implements AudioPedalNode {
 
     this.flangerFeedbackHighpass = ctx.createBiquadFilter();
     this.flangerFeedbackHighpass.type = 'highpass';
-    this.flangerFeedbackHighpass.frequency.setValueAtTime(220, ctx.currentTime);
+    this.flangerFeedbackHighpass.frequency.setValueAtTime(160, ctx.currentTime);
     this.flangerFeedbackHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.flangerFeedbackLowpass = ctx.createBiquadFilter();
     this.flangerFeedbackLowpass.type = 'lowpass';
-    this.flangerFeedbackLowpass.frequency.setValueAtTime(3000, ctx.currentTime);
+    this.flangerFeedbackLowpass.frequency.setValueAtTime(6500, ctx.currentTime);
     this.flangerFeedbackLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.flangerFeedbackLimiter = ctx.createWaveShaper();
@@ -174,7 +174,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.warmBodyFilter.connect(this.chorusDelayNode);
 
     this.chorusBbdWarmth = new BbdAnalogWarmthStage(ctx, {
-      cutoffFreq: 5200,
+      cutoffFreq: 8200,
       saturationAmount: 0.35,
       oversample: '4x',
     });
@@ -222,7 +222,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     // 8. DRY / WET MIXER
     // =========================================================================
     this.dryGain = ctx.createGain();
-    this.dryGain.gain.setValueAtTime(1.0, ctx.currentTime);
+    this.dryGain.gain.setValueAtTime(0.92, ctx.currentTime);
     this.warmBodyFilter.connect(this.dryGain);
 
     this.mixer = ctx.createGain();
@@ -248,25 +248,27 @@ export class EhxElectricMistressNode implements AudioPedalNode {
 
   private calcFlangerFeedback(depth: number): number {
     const clamped = Math.max(0, Math.min(10, depth));
-    // Safe progressive feedback curve capped at 0.58
-    return Math.pow(clamped / 10, 1.35) * 0.58;
+    // Progressive feedback curve driving into tanh soft-clipping for singing Gilmour chime/howl
+    return Math.pow(clamped / 10, 1.25) * 0.90;
   }
 
   private calcFlangerWetMix(depth: number): number {
     const clamped = Math.max(0, Math.min(10, depth));
     if (clamped <= 0.05) return 0.0;
-    return Math.min(0.78, 0.15 + (clamped / 10) * 0.63);
+    // Scales up to 0.92 for authentic 1:1 comb cancellation with 0.92 dry signal
+    return Math.min(0.92, 0.20 + (clamped / 10) * 0.72);
   }
 
   private calcFlangerLfoDepth(depth: number): number {
     const clamped = Math.max(0, Math.min(10, depth));
-    return (clamped / 10) * 0.0016; // Up to 1.6ms sweep
+    // Sweeps between 0.4ms and 2.6ms around 1.5ms center
+    return (clamped / 10) * 0.0011;
   }
 
   private calcChorusWetMix(depth: number): number {
     const clamped = Math.max(0, Math.min(10, depth));
     if (clamped <= 0.05) return 0.0;
-    return Math.min(0.72, 0.12 + (clamped / 10) * 0.60);
+    return Math.min(0.80, 0.15 + (clamped / 10) * 0.65);
   }
 
   private calcChorusLfoDepth(depth: number): number {

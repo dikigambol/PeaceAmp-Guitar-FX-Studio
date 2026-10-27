@@ -132,10 +132,10 @@ export class BossCh1Node implements AudioPedalNode {
     const eqDb = ((eqVal - 5.0) / 5.0) * 9.0; // -9 dB to +9 dB
     this.eqFilter.gain.setValueAtTime(eqDb, ctx.currentTime);
 
-    // Post lowpass reconstruction filter (8.5 kHz cutoff)
+    // Post lowpass reconstruction filter (12.5 kHz cutoff for crystalline shimmer)
     this.postLowpass = ctx.createBiquadFilter();
     this.postLowpass.type = 'lowpass';
-    this.postLowpass.frequency.setValueAtTime(8500, ctx.currentTime);
+    this.postLowpass.frequency.setValueAtTime(12500, ctx.currentTime);
     this.postLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // 7. Merge the two modulated lines into true stereo L/R
@@ -147,7 +147,7 @@ export class BossCh1Node implements AudioPedalNode {
 
     this.wetGain = ctx.createGain();
     const eLevelVal = Math.max(0, Math.min(10, this.params.eLevel ?? 5.0));
-    const wetLevel = (eLevelVal / 10) * 0.707;
+    const wetLevel = eLevelVal <= 5.0 ? (eLevelVal / 5.0) * 0.707 : 0.707 + ((eLevelVal - 5.0) / 5.0) * 0.35;
     this.wetGain.gain.setValueAtTime(wetLevel, ctx.currentTime);
 
     this.chorusMixer = ctx.createGain();
@@ -197,7 +197,7 @@ export class BossCh1Node implements AudioPedalNode {
       this.lfoGainLeft.gain.setTargetAtTime(depthSec, now, tc);
       this.lfoGainRight.gain.setTargetAtTime(-depthSec, now, tc);
     } else if (paramId === 'eLevel') {
-      const wetLevel = (clampedVal / 10) * 0.707;
+      const wetLevel = clampedVal <= 5.0 ? (clampedVal / 5.0) * 0.707 : 0.707 + ((clampedVal - 5.0) / 5.0) * 0.35;
       this.wetGain.gain.setTargetAtTime(wetLevel, now, tc);
     } else if (paramId === 'eq') {
       const eqDb = ((clampedVal - 5.0) / 5.0) * 9.0;

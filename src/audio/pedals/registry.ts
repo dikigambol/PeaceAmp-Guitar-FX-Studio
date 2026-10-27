@@ -778,7 +778,7 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
         max: 10,
         step: 0.1,
         defaultValue: 4.5,
-        formatValue: (v) => `${Math.round(80 + (v / 10) * 250)} ms`,
+        formatValue: (v) => `${Math.round(25 + (v / 10) * 305)} ms`,
       },
       {
         id: 'intensity',
@@ -861,7 +861,7 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
         max: 10,
         step: 0.1,
         defaultValue: 4.5,
-        formatValue: (v) => `${Math.round(50 + (v / 10) * 450)} ms`,
+        formatValue: (v) => `${Math.round(25 + (v / 10) * 475)} ms`,
       },
       {
         id: 'sustain',
@@ -907,7 +907,7 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
         max: 10,
         step: 0.1,
         defaultValue: 5.0,
-        formatValue: (v) => `${(2.2 + (v / 10) * 5.8).toFixed(1)} ms`,
+        formatValue: (v) => `${(1.0 + (v / 10) * 7.0).toFixed(1)} ms`,
       },
       {
         id: 'depth',
@@ -953,7 +953,7 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
         max: 10,
         step: 0.1,
         defaultValue: 3.5,
-        formatValue: (v) => `${(0.05 * Math.pow(90, v / 10)).toFixed(2)} Hz`,
+        formatValue: (v) => `${(0.05 * Math.pow(110, v / 10)).toFixed(2)} Hz`,
       },
       {
         id: 'flangerDepth',
@@ -1315,7 +1315,7 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
         max: 2,
         step: 1,
         defaultValue: 0,
-        formatValue: (v) => (v === 2 ? 'UNLATCH' : v === 1 ? 'BYPASS' : 'LATCH'),
+        formatValue: (v) => (v === 2 ? 'UNLATCH' : v === 1 ? 'WARM BBD' : 'LATCH'),
       },
     ],
   },

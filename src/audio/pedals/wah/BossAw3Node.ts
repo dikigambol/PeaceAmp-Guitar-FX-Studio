@@ -282,11 +282,12 @@ export class BossAw3Node implements AudioPedalNode {
       const targetAmp = Math.min(1.0, gatedLevel * sensMultiplier);
 
       // Ballistic integration:
-      // Attack: gentle rise (~18ms) to prevent audio-rate chatter & zipper noise
+      // Ballistic integration:
+      // Attack: fast transient rise (~8ms) for crisp, explosive funk quack on leading pick attack
       // Decay: 0.12s (fast funk snap) to 2.2s (slow expressive vocal bloom)
       const decaySec = 0.12 + (decayVal / 10) * 2.08;
       const decayCoeff = Math.exp(-0.015 / Math.max(0.05, decaySec));
-      const attackCoeff = 0.45;
+      const attackCoeff = 0.82;
 
       if (targetAmp > this.envelopeState) {
         this.envelopeState += (targetAmp - this.envelopeState) * attackCoeff;
@@ -337,14 +338,17 @@ export class BossAw3Node implements AudioPedalNode {
     const baseFreq = isBass ? 120 + (manualVal / 10) * 350 : 320 + (manualVal / 10) * 600;
     const sweepRange = isBass ? 1400 : 2200;
 
+    // Musical vocal power-curve: shapes envelope for natural vocal vowel bloom ("WAAAH")
+    const vocalEnv = Math.pow(env, 0.85);
+
     let targetFreq: number;
     if (mode === 1) {
       // DOWN Mode: Starts high, dives downward on pick attack
       const highStart = baseFreq + sweepRange;
-      targetFreq = Math.max(isBass ? 100 : 250, highStart - env * sweepRange);
+      targetFreq = Math.max(isBass ? 100 : 250, highStart - vocalEnv * sweepRange);
     } else {
-      // UP and SHARP Mode: Sweeps upwards on pick attack
-      targetFreq = Math.min(isBass ? 2200 : 3600, baseFreq + env * sweepRange);
+      // UP and SHARP Mode: Sweeps upwards on pick attack with natural vowel bloom
+      targetFreq = Math.min(isBass ? 2200 : 3600, baseFreq + vocalEnv * sweepRange);
     }
 
     this.wahPeaking.frequency.setTargetAtTime(targetFreq, now, tc);
@@ -422,9 +426,9 @@ export class BossAw3Node implements AudioPedalNode {
 
     // 2. Mode Configuration
     if (mode === 3) {
-      // HUMANIZER: Enable Formants, Mute main wah path
+      // HUMANIZER: Enable Formants, Mute main wah path (1.35 gain gives distinct, crisp talking articulation)
       this.wahMainGain.gain.setTargetAtTime(0.0, now, tc);
-      this.formantMasterGain.gain.setTargetAtTime(1.1, now, tc);
+      this.formantMasterGain.gain.setTargetAtTime(1.35, now, tc);
       this.wetMakeupGain.gain.setTargetAtTime(1.0, now, tc);
     } else if (mode === 4) {
       // TEMPO: Rhythmic LFO auto-wah
@@ -432,7 +436,7 @@ export class BossAw3Node implements AudioPedalNode {
       this.formantMasterGain.gain.setTargetAtTime(0.0, now, tc);
 
       this.wahPeaking.Q.setTargetAtTime(3.6, now, tc);
-      this.wahPeaking.gain.setTargetAtTime(9.0, now, tc);
+      this.wahPeaking.gain.setTargetAtTime(10.5, now, tc);
       this.wahBandpass.Q.setTargetAtTime(2.4, now, tc);
       this.wetMakeupGain.gain.setTargetAtTime(1.0, now, tc);
     } else {
@@ -441,16 +445,16 @@ export class BossAw3Node implements AudioPedalNode {
       this.formantMasterGain.gain.setTargetAtTime(0.0, now, tc);
 
       if (mode === 2) {
-        // SHARP Mode: Prominent vocal resonance peak
+        // SHARP Mode: Prominent vocal resonance peak (+13.5dB) for aggressive funk quack
         this.wahPeaking.Q.setTargetAtTime(5.2, now, tc);
-        this.wahPeaking.gain.setTargetAtTime(11.0, now, tc);
-        this.wahBandpass.Q.setTargetAtTime(3.2, now, tc);
+        this.wahPeaking.gain.setTargetAtTime(13.5, now, tc);
+        this.wahBandpass.Q.setTargetAtTime(3.4, now, tc);
         this.wetMakeupGain.gain.setTargetAtTime(0.95, now, tc);
       } else {
-        // UP / DOWN Modes: Musical, warm vocal wah
-        this.wahPeaking.Q.setTargetAtTime(3.2, now, tc);
-        this.wahPeaking.gain.setTargetAtTime(8.0, now, tc);
-        this.wahBandpass.Q.setTargetAtTime(2.2, now, tc);
+        // UP / DOWN Modes: Musical, warm vocal wah (+10.5dB)
+        this.wahPeaking.Q.setTargetAtTime(3.4, now, tc);
+        this.wahPeaking.gain.setTargetAtTime(10.5, now, tc);
+        this.wahBandpass.Q.setTargetAtTime(2.4, now, tc);
         this.wetMakeupGain.gain.setTargetAtTime(1.0, now, tc);
       }
     }
