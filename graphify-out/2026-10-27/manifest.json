@@ -336,10 +336,10 @@
     "semantic_hash": "6bed07cfc00af8ca26ba8f7805889c65"
   },
   "src/audio/pedals/registry.ts": {
-    "mtime": 1792226717.2832994,
-    "seen": 1792987951.9611378,
-    "ast_hash": "8ab654aadc8ef2a071c0a31bf9a53e57",
-    "semantic_hash": "8ab654aadc8ef2a071c0a31bf9a53e57"
+    "mtime": 1793092650.3863451,
+    "seen": 1793093195.3667781,
+    "ast_hash": "c630b3e9cb0e37a23c28e59cb55f4a6c",
+    "semantic_hash": ""
   },
   "src/audio/pedals/wah/BossAw3Node.ts": {
     "mtime": 1792058622.354789,
@@ -348,10 +348,10 @@
     "semantic_hash": "a52e158d403d8765851ca634e75ece52"
   },
   "src/audio/worklets/workletBundle.ts": {
-    "mtime": 1792990807.6240118,
-    "seen": 1793008928.1674926,
-    "ast_hash": "7ffa0408dec535d18ff7639aee3f63f8",
-    "semantic_hash": "7ffa0408dec535d18ff7639aee3f63f8"
+    "mtime": 1793077296.1934893,
+    "seen": 1793093195.366786,
+    "ast_hash": "bd995806d11e01d3fecfc58fe2d38734",
+    "semantic_hash": ""
   },
   "src/components/AudioHeader.tsx": {
     "mtime": 1792037687.5184405,
@@ -414,16 +414,16 @@
     "semantic_hash": "50d6d2d4358aa136f68495f15af2198a"
   },
   "src/components/pedalboard/Pedalboard.tsx": {
-    "mtime": 1792986305.9594312,
-    "seen": 1792987951.961151,
-    "ast_hash": "176b28e4798aa2b4a61037cdb84bf55c",
-    "semantic_hash": "176b28e4798aa2b4a61037cdb84bf55c"
+    "mtime": 1793092097.5035481,
+    "seen": 1793093195.366802,
+    "ast_hash": "9ed70c0f72cc93f1bbf0fd8bca126b70",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/Stompbox.tsx": {
-    "mtime": 1792226781.5712767,
-    "seen": 1792987951.961152,
-    "ast_hash": "9c55918652ffb6d7505934a2334b07b8",
-    "semantic_hash": "9c55918652ffb6d7505934a2334b07b8"
+    "mtime": 1793092083.9525537,
+    "seen": 1793093195.3668034,
+    "ast_hash": "75de04df988dc0ff6042f28ca04fc5f4",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/boost/MxrMicroAmpPedal.tsx": {
     "mtime": 1792041558.8176253,
@@ -450,28 +450,28 @@
     "semantic_hash": "02f1ce0933a393ac268136af82cadcf7"
   },
   "src/components/pedalboard/chorus/BossCe2Pedal.tsx": {
-    "mtime": 1792212810.0436883,
-    "seen": 1792987951.961157,
-    "ast_hash": "07204b5df68c722abe3dd14867fc9849",
-    "semantic_hash": "07204b5df68c722abe3dd14867fc9849"
+    "mtime": 1793082876.47641,
+    "seen": 1793093195.3668103,
+    "ast_hash": "0936b69ef74c827c0c3579b58270aec3",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/chorus/BossCh1Pedal.tsx": {
-    "mtime": 1792213146.5188165,
-    "seen": 1792987951.961158,
-    "ast_hash": "018d8f1fed00ea5474abb7e63bda9a34",
-    "semantic_hash": "018d8f1fed00ea5474abb7e63bda9a34"
+    "mtime": 1793082905.9655972,
+    "seen": 1793093195.3668118,
+    "ast_hash": "48dc2ea235d23735d58bfd7e25b2d615",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/chorus/EhxSmallClonePedal.tsx": {
-    "mtime": 1792214169.816846,
-    "seen": 1792987951.9611592,
-    "ast_hash": "34ee2aa1652e9e7aa18a068f660f8009",
-    "semantic_hash": "34ee2aa1652e9e7aa18a068f660f8009"
+    "mtime": 1793082571.09716,
+    "seen": 1793093195.366813,
+    "ast_hash": "74c6d01811d50d24d6835c8dc07a46c8",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/chorus/MxrAnalogChorusPedal.tsx": {
-    "mtime": 1792214764.2442954,
-    "seen": 1792987951.9611602,
-    "ast_hash": "dcf95dfd0a7b041501c62a86438815ab",
-    "semantic_hash": "dcf95dfd0a7b041501c62a86438815ab"
+    "mtime": 1793086212.484774,
+    "seen": 1793093195.3668141,
+    "ast_hash": "013dfd1bdf8d0a06bded475f1b7b3731",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/compressors/BossCs3Pedal.tsx": {
     "mtime": 1792034598.8130486,
@@ -498,10 +498,10 @@
     "semantic_hash": "ce13453d364c571f64c455d1eb60da54"
   },
   "src/components/pedalboard/delay/BossDm2Pedal.tsx": {
-    "mtime": 1792216785.9687822,
-    "seen": 1792987951.961166,
-    "ast_hash": "df8d459de85fcecd67856f26546692fb",
-    "semantic_hash": "df8d459de85fcecd67856f26546692fb"
+    "mtime": 1793084415.2125108,
+    "seen": 1793093195.366821,
+    "ast_hash": "1634c6c641dfcdb362358db157e815d7",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/delay/MxrCarbonCopyPedal.tsx": {
     "mtime": 1792216994.2044702,
@@ -510,10 +510,10 @@
     "semantic_hash": "64cbbb1bbad616b626186cbd255837f9"
   },
   "src/components/pedalboard/delay/TcGaussTapeEchoPedal.tsx": {
-    "mtime": 1792217622.770901,
-    "seen": 1792987951.9611676,
-    "ast_hash": "8b7f2a55dfceb142364783c427ce0e5f",
-    "semantic_hash": "8b7f2a55dfceb142364783c427ce0e5f"
+    "mtime": 1793083511.4820902,
+    "seen": 1793093195.366824,
+    "ast_hash": "d5ffd3fd9e8ee3931a2259a0bf2d031d",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/distortion/BossDs1Pedal.tsx": {
     "mtime": 1792034471.6595101,
@@ -528,10 +528,10 @@
     "semantic_hash": "0f8d2360c43c75ac24148b92f500fd76"
   },
   "src/components/pedalboard/distortion/BossMt2Pedal.tsx": {
-    "mtime": 1792034505.4291751,
-    "seen": 1792987951.9611716,
-    "ast_hash": "caae44e82c526b1e67e551e07b14a4eb",
-    "semantic_hash": "caae44e82c526b1e67e551e07b14a4eb"
+    "mtime": 1793083017.2661731,
+    "seen": 1793093195.366828,
+    "ast_hash": "b67e1f1d06a5cdc94965844c801b470b",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/distortion/IbanezSm7Pedal.tsx": {
     "mtime": 1792034518.5955496,
@@ -540,10 +540,10 @@
     "semantic_hash": "e9ce969ef08330157d77167b2795628d"
   },
   "src/components/pedalboard/distortion/MarshallShredMasterPedal.tsx": {
-    "mtime": 1792034539.1003501,
-    "seen": 1792987951.9611738,
-    "ast_hash": "d4a04c30487d8f81f79c56251190c58d",
-    "semantic_hash": "d4a04c30487d8f81f79c56251190c58d"
+    "mtime": 1793081718.7988508,
+    "seen": 1793093195.3668306,
+    "ast_hash": "8befb796427df2c5bf283a55fe2ac5f0",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/distortion/MxrDistortionPlusPedal.tsx": {
     "mtime": 1792034441.960896,
@@ -570,10 +570,10 @@
     "semantic_hash": "c3acf668f35a52cdc195835a072be3b9"
   },
   "src/components/pedalboard/flanger/EhxElectricMistressPedal.tsx": {
-    "mtime": 1792221871.0971873,
-    "seen": 1792987951.9611788,
-    "ast_hash": "d62a73a4d16eb18fd642fa3b90f58af4",
-    "semantic_hash": "d62a73a4d16eb18fd642fa3b90f58af4"
+    "mtime": 1793085186.7386062,
+    "seen": 1793093195.3668377,
+    "ast_hash": "e134f1683ff6a224a88a7a8f558deba6",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/flanger/MxrFlangerPedal.tsx": {
     "mtime": 1792226421.8449085,
@@ -678,28 +678,28 @@
     "semantic_hash": "48a5516f2a4f5085c84581de33a1dd67"
   },
   "src/components/pedalboard/pedalLayout.ts": {
-    "mtime": 1792986225.1161056,
-    "seen": 1792987951.961201,
-    "ast_hash": "558c0ef900f4f598dbb4a71a9838fb65",
-    "semantic_hash": "558c0ef900f4f598dbb4a71a9838fb65"
+    "mtime": 1793091128.3286848,
+    "seen": 1793093195.3668637,
+    "ast_hash": "6d8dea0aab5f73ed9be35c40b3abbf04",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/phaser/EhxSmallStonePedal.tsx": {
-    "mtime": 1792226740.6729538,
-    "seen": 1792987951.961202,
-    "ast_hash": "9ef85c592aeb8ba779768530fe5299e4",
-    "semantic_hash": "9ef85c592aeb8ba779768530fe5299e4"
+    "mtime": 1793086009.7369053,
+    "seen": 1793093195.366865,
+    "ast_hash": "5d19276ffbc36e4abebb59e444bb6eda",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/phaser/MxrPhase90Pedal.tsx": {
-    "mtime": 1792226762.151718,
-    "seen": 1792987951.9612029,
-    "ast_hash": "72b1640a88d3b5861c4f0c6b206d6d46",
-    "semantic_hash": "72b1640a88d3b5861c4f0c6b206d6d46"
+    "mtime": 1793085819.944805,
+    "seen": 1793093195.366866,
+    "ast_hash": "0f04bab7d411e13fd3aa009eacfde22c",
+    "semantic_hash": ""
   },
   "src/components/pedalboard/wah/BossAw3Pedal.tsx": {
-    "mtime": 1792057980.7472224,
-    "seen": 1792987951.961204,
-    "ast_hash": "850c4c747f64ba84942321934f49bce9",
-    "semantic_hash": "850c4c747f64ba84942321934f49bce9"
+    "mtime": 1793084796.1729133,
+    "seen": 1793093195.366875,
+    "ast_hash": "47bee929eb8494e2431f994e9e032733",
+    "semantic_hash": ""
   },
   "src/components/presets/PresetBar.tsx": {
     "mtime": 1792219589.2509713,
@@ -798,10 +798,10 @@
     "semantic_hash": "92002fba252f3abd3572da695585e38f"
   },
   "src/types/pedal.ts": {
-    "mtime": 1792226686.5576074,
-    "seen": 1792987951.9612231,
-    "ast_hash": "9633cecdc5399053f6d819f12f7deed6",
-    "semantic_hash": "9633cecdc5399053f6d819f12f7deed6"
+    "mtime": 1793090542.3333707,
+    "seen": 1793093195.3669026,
+    "ast_hash": "4684565c32a02d30695b1d77e690fe3f",
+    "semantic_hash": ""
   },
   "src/types/preset.ts": {
     "mtime": 1792035188.89649,
@@ -840,8 +840,8 @@
     "semantic_hash": "5b51b67ef84a4ffadad39fcbb18fff79"
   },
   "cabinet-instalation.md": {
-    "mtime": 1791259926.9312692,
-    "seen": 1792987951.9612305,
+    "mtime": 1793005994.7130628,
+    "seen": 1793093195.3669126,
     "ast_hash": "bc93861d9040b4b89d4731c682892215",
     "semantic_hash": "bc93861d9040b4b89d4731c682892215"
   },
@@ -904,5 +904,83 @@
     "seen": 1793008928.1674454,
     "ast_hash": "11b8e24fae874dbd35f96dd0d7e456ce",
     "semantic_hash": "11b8e24fae874dbd35f96dd0d7e456ce"
+  },
+  "src/audio/pedals/pitch/BossOc5Node.ts": {
+    "mtime": 1793078057.2810585,
+    "seen": 1793093195.3667724,
+    "ast_hash": "6164da4ac5e283173202ebe40117292c",
+    "semantic_hash": ""
+  },
+  "src/audio/pedals/pitch/EhxPitchForkNode.ts": {
+    "mtime": 1793077377.5257442,
+    "seen": 1793093195.3667748,
+    "ast_hash": "815495e0100c2f2c014e4a258816c3da",
+    "semantic_hash": ""
+  },
+  "src/audio/pedals/pitch/PitchEngine.ts": {
+    "mtime": 1793077332.4128337,
+    "seen": 1793093195.3667762,
+    "ast_hash": "b339ad50dd39bc7913107cca119dfc32",
+    "semantic_hash": ""
+  },
+  "src/audio/pedals/tremolo/BossTr2Node.ts": {
+    "mtime": 1793090069.040689,
+    "seen": 1793093195.3667793,
+    "ast_hash": "f77f410f5b47b36efe7d7f8aaac97b47",
+    "semantic_hash": ""
+  },
+  "src/audio/pedals/tremolo/FulltoneSupaTremNode.ts": {
+    "mtime": 1793090056.5048726,
+    "seen": 1793093195.3667808,
+    "ast_hash": "9b03988b412df447454229335f59c505",
+    "semantic_hash": ""
+  },
+  "src/audio/pedals/vibrato/BossVb2Node.ts": {
+    "mtime": 1793091798.8479638,
+    "seen": 1793093195.3667817,
+    "ast_hash": "5f1184510a3211a3f267aa6ec467e23c",
+    "semantic_hash": ""
+  },
+  "src/audio/pedals/vibrato/MxrUniVibeNode.ts": {
+    "mtime": 1793091993.676259,
+    "seen": 1793093195.366783,
+    "ast_hash": "cabe62ae1e26111e3291a87c6e7825ea",
+    "semantic_hash": ""
+  },
+  "src/components/pedalboard/pitch/BossOc5Pedal.tsx": {
+    "mtime": 1793087696.59066,
+    "seen": 1793093195.3668675,
+    "ast_hash": "1afbb338b4133c3bb973afb37c225ead",
+    "semantic_hash": ""
+  },
+  "src/components/pedalboard/pitch/EhxPitchForkPedal.tsx": {
+    "mtime": 1793087980.071414,
+    "seen": 1793093195.3668687,
+    "ast_hash": "8d52a509d4616c19c27d8d8d0f1edc66",
+    "semantic_hash": ""
+  },
+  "src/components/pedalboard/tremolo/BossTr2Pedal.tsx": {
+    "mtime": 1793088259.9335775,
+    "seen": 1793093195.3668697,
+    "ast_hash": "2838238df56148e23e878d5ed535ddcb",
+    "semantic_hash": ""
+  },
+  "src/components/pedalboard/tremolo/FulltoneSupaTremPedal.tsx": {
+    "mtime": 1793089556.5222147,
+    "seen": 1793093195.366871,
+    "ast_hash": "74698ebcbcefa06a023361291582e7d9",
+    "semantic_hash": ""
+  },
+  "src/components/pedalboard/vibrato/BossVb2Pedal.tsx": {
+    "mtime": 1793091764.9732766,
+    "seen": 1793093195.3668723,
+    "ast_hash": "333fdb4c5fd0f0064b9ebea65cd1d690",
+    "semantic_hash": ""
+  },
+  "src/components/pedalboard/vibrato/MxrUniVibePedal.tsx": {
+    "mtime": 1793092569.2870028,
+    "seen": 1793093195.3668735,
+    "ast_hash": "1bdf0edd156b99b257fce00f0abc4ca0",
+    "semantic_hash": ""
   }
 }
