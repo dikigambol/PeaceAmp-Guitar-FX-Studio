@@ -302,12 +302,17 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
 
   // Calculate dynamic vertical height based on lowest pedal
   const surfaceHeight = useMemo(() => {
+    if (pedals.length === 0) return 0;
     let maxY = 450;
-    Object.values(positions).forEach((pos) => {
-      if (pos.y + 360 > maxY) maxY = pos.y + 360;
+    pedals.forEach((p) => {
+      const pos = positions[p.id];
+      if (pos) {
+        const dims = getPedalDimensions(p.type);
+        if (pos.y + dims.h > maxY) maxY = pos.y + dims.h;
+      }
     });
     return Math.max(600, maxY + 70);
-  }, [positions]);
+  }, [pedals, positions]);
 
   // Jack center coordinates lookup (INPUT and OUTPUT boxes stay permanently pinned)
   const getJackCoords = useCallback(
@@ -1713,13 +1718,13 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
       </div>
 
       {/* Free Canvas Area: Vertical Scrolling Only, No Horizontal Scroll */}
-      <div className="pedalboard-canvas-viewport" ref={canvasRef}>
+      <div className={`pedalboard-canvas-viewport ${pedals.length === 0 ? 'is-empty' : ''}`} ref={canvasRef}>
         <div
           className="pedalboard-canvas-surface"
           ref={surfaceRef}
           style={{
             width: '100%',
-            height: `${surfaceHeight}px`,
+            height: surfaceHeight > 0 ? `${surfaceHeight}px` : '100%',
           }}
           onPointerMove={handleSurfacePointerMove}
           onClick={() => {
@@ -1749,7 +1754,7 @@ export const Pedalboard: React.FC<PedalboardProps> = ({
           </div>
 
           {/* SVG Patch Cables Layer */}
-          {showCables && (
+          {showCables && pedals.length > 0 && surfaceHeight > 0 && (
             <svg
               className={`canvas-cables-svg ${draggingId ? 'is-dragging-active' : ''}`}
               style={{

@@ -336,6 +336,25 @@ export class CabinetNode implements AudioPedalNode {
   private applyMicPlacementFilters(immediate = false): void {
     const now = this.ctx.currentTime;
     const tc = immediate ? 0.001 : 0.018;
+
+    // For synthetic IRs, the acoustic profile, proximity effect, mic curves, and cone ceiling
+    // are already modeled directly in the generated impulse response. Post-filters are kept flat
+    // to avoid redundant double-filtering.
+    const key = irMapKey(this.settings.model, this.settings.mic);
+    const isSynthetic = this.settings.model !== 'custom' && REAL_IR_MAP[key] === undefined;
+    if (isSynthetic) {
+      if (immediate) {
+        this.micProximityShelf.gain.setValueAtTime(0, now);
+        this.micPositionShelf.gain.setValueAtTime(0, now);
+        this.speakerConeLowpass.frequency.setValueAtTime(20000, now);
+      } else {
+        this.micProximityShelf.gain.setTargetAtTime(0, now, tc);
+        this.micPositionShelf.gain.setTargetAtTime(0, now, tc);
+        this.speakerConeLowpass.frequency.setTargetAtTime(20000, now, tc);
+      }
+      return;
+    }
+
     const posNorm = Math.max(0, Math.min(1, this.settings.position ?? 0.5));
     const distNorm = Math.max(0, Math.min(1, this.settings.distance ?? 0.15));
 
@@ -381,8 +400,8 @@ export class CabinetNode implements AudioPedalNode {
     const proximityGainDb = (0.3 - distNorm) * 4.5 + micLowDb;
     // Cap-to-Edge brightness: -4.5 dB at Cone Edge (0.0) up to +3.5 dB at Dust Cap Center (1.0)
     const positionGainDb = (posNorm - 0.5) * 8.0 + micTiltDb;
-    // Speaker cone acoustic lowpass: rolls off harsh digital fizz above 4.4 kHz (Edge) - 5.7 kHz (Center)
-    const coneCeilingHz = Math.max(3800, Math.min(6200, 4450 + posNorm * 1250 + micCutoffOffsetHz - distNorm * 250));
+    // Speaker cone acoustic lowpass: rolls off harsh aliasing/digital fizz while preserving natural guitar chime & air
+    const coneCeilingHz = Math.max(5500, Math.min(10500, 6800 + posNorm * 2400 + micCutoffOffsetHz * 2 - distNorm * 400));
 
     if (immediate) {
       this.micProximityShelf.gain.setValueAtTime(proximityGainDb, now);

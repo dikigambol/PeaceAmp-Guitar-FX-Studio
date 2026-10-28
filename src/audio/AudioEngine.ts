@@ -29,17 +29,12 @@ export class AudioEngine {
   private inputGainNode: GainNode | null = null;
   private inputAnalyser: AnalyserNode | null = null;
 
-  // Input conditioning: discrete channel splitter -> 72 Hz sub-cut -> 50/60/100 Hz AC hum notch -> 5.4 kHz RF low-pass -> input gain -> studio input gate
+  // Input conditioning: discrete channel splitter -> 35 Hz sub-cut -> input gain
   private inputSplitter: ChannelSplitterNode | null = null;
   private inputLeftGain: GainNode | null = null;
   private inputRightGain: GainNode | null = null;
   private inputMonoBus: GainNode | null = null;
   private inputHighpass: BiquadFilterNode | null = null;
-  private humNotch50Hz: BiquadFilterNode | null = null;
-  private humNotch60Hz: BiquadFilterNode | null = null;
-  private humNotch100Hz: BiquadFilterNode | null = null;
-  private inputRfLowpass: BiquadFilterNode | null = null;
-  private inputStudioGate: AudioWorkletNode | null = null;
   private inputChannelMode: InputChannelMode = 'left';
   private detectedInputChannels = 2;
 
@@ -346,41 +341,15 @@ export class AudioEngine {
     });
     this.updateAutoInputImpedance();
 
-    // 1. 72 Hz Butterworth high-pass: removes DC offset, 50/60 Hz mains rumble and handling thumps below E2 (82.4 Hz)
+    // 35 Hz Butterworth high-pass: removes DC offset, sub-audible rumble and handling thumps
     this.inputHighpass = this.ctx.createBiquadFilter();
     this.inputHighpass.type = 'highpass';
-    this.inputHighpass.frequency.setValueAtTime(72, this.ctx.currentTime);
+    this.inputHighpass.frequency.setValueAtTime(35, this.ctx.currentTime);
     this.inputHighpass.Q.setValueAtTime(0.707, this.ctx.currentTime);
-
-    // 2. Surgical AC Power-Line Hum Notch Filters (50 Hz, 60 Hz & 100 Hz 2nd-harmonic rectifier buzz)
-    this.humNotch50Hz = this.ctx.createBiquadFilter();
-    this.humNotch50Hz.type = 'notch';
-    this.humNotch50Hz.frequency.setValueAtTime(50, this.ctx.currentTime);
-    this.humNotch50Hz.Q.setValueAtTime(10, this.ctx.currentTime);
-
-    this.humNotch60Hz = this.ctx.createBiquadFilter();
-    this.humNotch60Hz.type = 'notch';
-    this.humNotch60Hz.frequency.setValueAtTime(60, this.ctx.currentTime);
-    this.humNotch60Hz.Q.setValueAtTime(10, this.ctx.currentTime);
-
-    this.humNotch100Hz = this.ctx.createBiquadFilter();
-    this.humNotch100Hz.type = 'notch';
-    this.humNotch100Hz.frequency.setValueAtTime(100, this.ctx.currentTime);
-    this.humNotch100Hz.Q.setValueAtTime(14, this.ctx.currentTime);
-
-    // 3. 5.4 kHz Butterworth RF / ADC Hiss Low-Pass: strips soundcard white hiss above passive pickup band
-    this.inputRfLowpass = this.ctx.createBiquadFilter();
-    this.inputRfLowpass.type = 'lowpass';
-    this.inputRfLowpass.frequency.setValueAtTime(5400, this.ctx.currentTime);
-    this.inputRfLowpass.Q.setValueAtTime(0.707, this.ctx.currentTime);
 
     this.inputMonoBus.connect(this.inputImpedanceNode.inputNode);
     this.inputImpedanceNode.outputNode.connect(this.inputHighpass);
-    this.inputHighpass.connect(this.humNotch50Hz);
-    this.humNotch50Hz.connect(this.humNotch60Hz);
-    this.humNotch60Hz.connect(this.humNotch100Hz);
-    this.humNotch100Hz.connect(this.inputRfLowpass);
-    this.inputRfLowpass.connect(this.inputGainNode);
+    this.inputHighpass.connect(this.inputGainNode);
 
     // Input Analyser (2048 samples for accurate low E2 guitar pitch detection)
     this.inputAnalyser = this.ctx.createAnalyser();
@@ -391,24 +360,6 @@ export class AudioEngine {
     // Passthrough chain nodes (entry & exit points for modular pedals/amps/cabinets)
     this.chainInputNode = this.ctx.createGain();
     this.chainOutputNode = this.ctx.createGain();
-
-    // 4. Built-in Studio Input Gate & De-Hisser before modular chain (clamps idle cable buzz automatically)
-    try {
-      this.inputStudioGate = new AudioWorkletNode(this.ctx, 'noise-gate-processor', {
-        numberOfInputs: 1,
-        numberOfOutputs: 1,
-        outputChannelCount: [1],
-        channelCount: 1,
-        channelCountMode: 'explicit',
-        parameterData: {
-          threshold: -48,
-          release: 0.055,
-          hold: 0.022,
-        },
-      });
-    } catch {
-      this.inputStudioGate = null;
-    }
 
     // Setup modular signal chain (pedals, amp heads, and cabinet IRs)
     this.signalChain = new SignalChain(this.ctx, this.chainInputNode, this.chainOutputNode);
@@ -421,6 +372,7 @@ export class AudioEngine {
 
     // Zero-Makeup-Gain Transparent Brickwall Safety Limiter (prevents digital clipping without boosting noise floor)
     this.safetyLimiter = this.ctx.createWaveShaper();
+    this.safetyLimiter.oversample = '4x';
     const limSamples = 2048;
     const limCurve = new Float32Array(new ArrayBuffer(limSamples * Float32Array.BYTES_PER_ELEMENT));
     const limThresh = 0.88;
@@ -443,14 +395,9 @@ export class AudioEngine {
     this.outputAnalyser.smoothingTimeConstant = 0.3;
     this.outputBuffer = new Float32Array(this.outputAnalyser.fftSize);
 
-    // Connect downstream graph: inputGainNode -> inputAnalyser (for tuner) & inputStudioGate -> chainInputNode
+    // Connect downstream graph: inputGainNode -> inputAnalyser (for tuner) & chainInputNode
     this.inputGainNode.connect(this.inputAnalyser);
-    if (this.inputStudioGate) {
-      this.inputGainNode.connect(this.inputStudioGate);
-      this.inputStudioGate.connect(this.chainInputNode);
-    } else {
-      this.inputGainNode.connect(this.chainInputNode);
-    }
+    this.inputGainNode.connect(this.chainInputNode);
 
     // Safety DC blocker at the end of the modular rig chain before Master Output
     this.chainDcBlocker = createDcBlocker(this.ctx, 15);

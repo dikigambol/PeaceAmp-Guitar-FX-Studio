@@ -144,21 +144,18 @@ export class RangemasterNode implements AudioPedalNode {
     const curve = new Float32Array(samples);
     const kneePos = 0.42; // Positive swing soft threshold
     const kneeNeg = 0.28; // Negative swing soft conduction
-    const noiseKnee = 0.014; // Suppresses low-level interface hiss before boosting into the amp
 
     for (let i = 0; i < samples; i++) {
       const x = (i * 2) / (samples - 1) - 1; // Normalized -1 to +1
-      const ax = Math.abs(x);
-      const expWeight = (ax * ax) / (ax * ax + noiseKnee * noiseKnee);
 
       if (x >= 0) {
         // Upper swing: softer compression with gentle curvature
         const scaled = x / kneePos;
-        curve[i] = ((kneePos * scaled) / Math.pow(1 + Math.pow(scaled, 2.4), 1 / 2.4)) * expWeight;
+        curve[i] = (kneePos * scaled) / Math.pow(1 + Math.pow(scaled, 2.4), 1 / 2.4);
       } else {
         // Lower swing: earlier Germanium knee saturation producing even harmonics
         const scaled = -x / kneeNeg;
-        curve[i] = -((kneeNeg * scaled) / Math.pow(1 + Math.pow(scaled, 1.9), 1 / 1.9)) * expWeight;
+        curve[i] = -(kneeNeg * scaled) / Math.pow(1 + Math.pow(scaled, 1.9), 1 / 1.9);
       }
     }
     return curve;

@@ -96,7 +96,7 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
               onClick={() => setActiveTab('pedalboard')}
             >
               <Layers size={14} />
-              <span>5. Virtual Pedalboard (53 FX)</span>
+              <span>5. Modular Rig Canvas (58 FX)</span>
             </button>
             <button
               className={`manual-nav-link ${activeTab === 'presets' ? 'active' : ''}`}
@@ -153,16 +153,16 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
                   <div className="manual-doc-step">
                     <div className="manual-step-counter">02</div>
                     <div className="manual-step-text">
-                      <h3>Build Your Pedal Chain or Load a Rig Preset</h3>
-                      <p>Your workspace starts with a clean pedalboard. Click <code>+ ADD PEDAL</code> on the canvas toolbar to choose from <strong>53 boutique analog & digital pedals</strong> across 15 categories. Added pedals are automatically positioned and patched right-to-left from <code>INSTRUMENT IN</code> to <code>TO AMPLIFIER</code>.</p>
+                      <h3>Build Your Rig on the Modular Canvas</h3>
+                      <p>Your workspace starts with a clean, zero-scroll 100vh canvas displaying <code>NO CONFIGURATION</code>. Click <code>+ ADD PEDAL</code> on the canvas toolbar to choose from <strong>58 boutique models</strong> across 16 categories—including the <strong>Guitar Amp Head</strong>, <strong>PEACE IR-200 Cabinet</strong>, <strong>MXR Smart Gate</strong>, and 55 analog stompboxes. Units can be freely arranged and patched with custom 1/4&quot; cables.</p>
                     </div>
                   </div>
 
                   <div className="manual-doc-step">
                     <div className="manual-step-counter">03</div>
                     <div className="manual-step-text">
-                      <h3>Sculpt Your Amp Head & Cabinet IR</h3>
-                      <p>In the left sidebar rack, dial in your <strong>Guitar Amp Head</strong> (18 classic amplifier voicings with 6-knob tone stack) and <strong>Cabinet IR Simulator</strong> (16 speaker enclosures & 6 studio microphones). Play your guitar and monitor levels via the dual <code>PRE-FX</code> and <code>POST-LIMIT</code> VU meters.</p>
+                      <h3>Dial in Your Tone or Load Artist Signature Presets</h3>
+                      <p>Use the preset dropdown in the top header to immediately audition curated rigs (like <em>Brian May Bohemian Lead</em>, <em>Slash Appetite JCM800</em>, or <em>SRV Texas Flood Blues</em>). Tweak the 6-knob tone stack on your Amp Head, mic placement on your Cabinet IR, and monitor signal health via the real-time VU telemetry.</p>
                     </div>
                   </div>
                 </div>
@@ -172,34 +172,34 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
             {activeTab === 'preamp' && (
               <section className="manual-doc-section">
                 <div className="manual-doc-chapter-tag">CHAPTER 02 / GAIN STAGING & I/O</div>
-                <h2 className="manual-doc-heading">Input Preamp, Noise Gate & Master Output Rack</h2>
+                <h2 className="manual-doc-heading">Input Preamp, Pickup Voicing & Master Output</h2>
                 <p className="manual-doc-lead">
-                  The top and bottom modules of the left studio sidebar manage hardware device routing, mono channel selection, reactive pickup impedance, noise suppression, and brickwall output protection.
+                  The top studio header and pre-FX processing chain manage hardware device routing, mono channel selection, 35 Hz studio sub-cut, reactive pickup impedance modeling, and 4x oversampled brickwall output protection.
                 </p>
 
                 <div className="manual-doc-grid">
                   <div className="manual-doc-card">
                     <h4>Input Device & Channel Mode</h4>
                     <p>
-                      Choose your USB audio interface or microphone and click <code>[↻]</code> to hot-scan newly plugged hardware. Use <strong>INPUT CH</strong> to select <code>L+R</code> (mono sum), <code>IN 1</code> (left jack only), or <code>IN 2</code> (right jack only) for multi-input interfaces.
+                      Choose your USB audio interface or microphone and click <code>[↻]</code> to hot-scan newly plugged hardware. Use <strong>INPUT CH</strong> to select <code>L+R</code> (mono sum), <code>IN 1</code> (left jack only), or <code>IN 2</code> (right jack only / Hi-Z instrument).
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>Stage Gain & Pickup Impedance</h4>
+                    <h4>Stage Gain & Pickup Voicing</h4>
                     <p>
-                      Adjust input preamp gain from <code>0.0x</code> to <code>3.0x (+9.5 dB)</code> while watching the <code>PRE-FX VU</code> meter. An internal <strong>Input Impedance Simulator</strong> models passive pickup loading and dynamic cleanup when driving vintage fuzzes or treble boosters.
+                      Adjust input gain from <code>0.0x</code> to <code>3.0x (+9.5 dB)</code> while watching the <code>IN VU</code> meter. The <strong>Pickup Voicing</strong> selector configures reactive source impedance and resonant peaks for <code>Single-Coil</code>, <code>Humbucker</code>, <code>P90</code>, <code>Tri-Sonic Series</code>, or <code>Flat</code>.
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>Studio Noise Gate</h4>
+                    <h4>Studio Sub-Cut & Noise Suppression</h4>
                     <p>
-                      Positioned right before your pedalboard to silence single-coil 60Hz hum and high-gain hiss between notes. Toggle <code>ON / OFF</code> and sweep the <strong>THRESH</strong> slider from <code>-80 dB</code> to <code>-15 dB</code>.
+                      An internal <strong>35 Hz highpass filter</strong> strips sub-audible DC rumble and handling thumps without attenuating low E2 (82.4 Hz) or drop-tuning fundamentals. Noise gating is handled dynamically by the modular <strong>MXR M135 Smart Gate</strong> pedal with Hiss, Mid, and Full filter modes.
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>Master Output, Sink Selection & Limiter</h4>
+                    <h4>Master Output & 4x Oversampled Limiter</h4>
                     <p>
-                      Select your dedicated headphone/monitor output device (via browser <code>setSinkId</code>), adjust <strong>MAIN VOLUME</strong> (<code>0%–150%</code>), or click <code>MUTE MASTER AUDIO</code>. A continuous <strong>-0.5 dB Brickwall Limiter</strong> protects your ears and studio monitors from clipping spikes.
+                      Select your dedicated headphone/monitor output (via browser <code>setSinkId</code>), adjust <strong>MASTER VOLUME</strong>, or click <code>MUTE</code>. A transparent <strong>4x oversampled safety limiter</strong> with zero makeup gain prevents digital clipping without adding aliasing fizz.
                     </p>
                   </div>
                 </div>
@@ -211,7 +211,7 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
                 <div className="manual-doc-chapter-tag">CHAPTER 03 / TUBE PREAMP & POWER AMP</div>
                 <h2 className="manual-doc-heading">Guitar Amp Head Simulator</h2>
                 <p className="manual-doc-lead">
-                  Positioned immediately after your Virtual Pedalboard and before the Cabinet IR Simulator, the Guitar Amp Head models multi-stage tube saturation, authentic passive tone stacks, negative-feedback presence, and power-tube compression sag.
+                  Available as a full-featured modular unit on the canvas, the Guitar Amp Head models multi-stage vacuum tube clipping, authentic passive tone stacks, reactive power-amp sag, and negative-feedback presence with zero crossover distortion.
                 </p>
 
                 <div className="manual-doc-grid">
@@ -234,15 +234,15 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>6-Knob Tone & Drive Matrix</h4>
+                    <h4>Analog Touch Sensitivity & 4x Oversampling</h4>
                     <p>
-                      Dial in <strong>GAIN</strong> (<code>1.0x–19.0x</code>), interactive 3-band EQ (<strong>BASS</strong>, <strong>MID</strong>, <strong>TREBLE</strong>), power-amp <strong>PRESENCE</strong> (<code>-9.0 dB</code> to <code>+9.0 dB</code>), and <strong>MASTER</strong> output level.
+                      Features asymmetric V1A grid-conduction compression without artificial threshold gating. Rolling back your guitar&apos;s volume knob cleans up smoothly from high-gain crunch to edge-of-breakup and pure cleans with full dynamic decay.
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>Active / Bypass Switching</h4>
+                    <h4>Sensitivity & Power Modes</h4>
                     <p>
-                      Toggle the <code>ACTIVE / BYPASS</code> badge in the module header at any time to run direct preamp-bypassed pedalboard rigs into your cabinet or external DAW interface.
+                      Toggle between <strong>High</strong> (modern punch) and <strong>Low</strong> sensitivity inputs, switch between <strong>Full</strong>, <strong>Half</strong>, or <strong>Triode</strong> power modes, and shape your rig with <strong>GAIN</strong>, <strong>BASS</strong>, <strong>MID</strong>, <strong>TREBLE</strong>, <strong>PRESENCE</strong>, and <strong>MASTER</strong>.
                     </p>
                   </div>
                 </div>
@@ -254,39 +254,38 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
                 <div className="manual-doc-chapter-tag">CHAPTER 04 / END-OF-CHAIN ACOUSTICS</div>
                 <h2 className="manual-doc-heading">Cabinet IR (Impulse Response) Simulator</h2>
                 <p className="manual-doc-lead">
-                  Placed after the Guitar Amp Head, the Cabinet Simulator performs real-time zero-latency convolution and acoustic modeling of physical speaker enclosures, studio microphones, and room placement.
+                  Available as a dedicated modular pedal (PEACE IR-200) on the canvas, the Cabinet Simulator performs real-time zero-latency convolution and acoustic modeling of physical speaker enclosures, studio microphones, and room air.
                 </p>
 
                 <div className="manual-doc-grid">
                   <div className="manual-doc-card">
                     <h4>16 Iconic Speaker Enclosures</h4>
                     <p>
-                      • <strong>Fender®</strong>: 1×8 Champ, 1×10 Princeton, 1×12 Deluxe, 2×12 Twin, 4×10 Bassman (Open & Super Closed)
+                      • <strong>Fender®</strong>: 1×8 Champ, 1×10 Princeton, 1×12 Deluxe, 2×12 Twin, 4×10 Bassman
                       <br />• <strong>Vox® & Roland®</strong>: 2×12 AC30 Alnico Blue, 2×12 JC-120 Stereo
                       <br />• <strong>Marshall® & Orange®</strong>: 1960AX Greenback, 1960A Vintage 30, PPC412 Birch
                       <br />• <strong>Mesa®, Dumble® & EVH®</strong>: 1×12 Thiele, 2×12 Recto, 4×12 Recto Oversized, 1×12 Dumble Oval, 4×12 5150 III Stealth
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>6 Studio Microphones</h4>
+                    <h4>6 Studio Microphones & Studio WAVs</h4>
                     <p>
-                      • <strong>Shure® SM57</strong>: Classic 5 kHz mid-presence rock bite.
-                      <br />• <strong>Shure® SM7B</strong>: Thick broadcast body, smooth silk highs.
-                      <br />• <strong>Sennheiser® MD421</strong>: Tight low-end girth and articulate pick attack.
-                      <br />• <strong>Royer® R-121 & Beyerdynamic® M160</strong>: Warm figure-8 & hypercardioid ribbons.
-                      <br />• <strong>AKG® C414</strong>: Full-spectrum large-diaphragm condenser air.
+                      • <strong>Dynamic</strong>: Shure® SM57 (5 kHz presence bite), SM7B (smooth thick body), Sennheiser® MD421 (punchy low-mid authority)
+                      <br />• <strong>Ribbon</strong>: Royer® R-121 (creamy warm top-end), Beyerdynamic® M160
+                      <br />• <strong>Condenser</strong>: AKG® C414 (full-bandwidth air & sparkle)
+                      <br />Includes 6 bundled studio WAV captures with fallback physical modeling.
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>Mic Position & Distance</h4>
+                    <h4>Mic Position, Distance & Zero Double-Filtering</h4>
                     <p>
-                      Dual-axis acoustic placement: sweep <strong>Position</strong> (Cap Edge for warm wool ↔ Cone Center for direct aggressive bite) and <strong>Distance</strong> (<code>0.5&quot;</code> close proximity punch ↔ <code>6.0&quot;</code> ambient room air).
+                      Sweep <strong>Position</strong> (Cap Edge for dark warmth ↔ Dust Cap Center for aggressive bite) and <strong>Distance</strong> (<code>0.5&quot;</code> close proximity punch ↔ <code>6.0&quot;</code> ambient room air). Synthetic models compute responses directly in the impulse with zero redundant post-EQ muffling.
                     </p>
                   </div>
                   <div className="manual-doc-card">
-                    <h4>Mix, Level Trim & Custom WAV IR</h4>
+                    <h4>Mix, Level, Stereo Pan & Custom WAVs</h4>
                     <p>
-                      Blend dry/wet signal with <strong>Convolution Mix</strong> (<code>0%–100%</code>), fine-tune output with <strong>Level Trim</strong> (<code>-12 dB</code> to <code>+6 dB</code>), or click <strong>Load Custom IR (.wav)</strong> to import third-party cabinet impulse responses.
+                      Features <strong>Convolution Mix</strong> (<code>0%–100%</code>), <strong>Level Trim</strong> (<code>-12 dB</code> to <code>+6 dB</code>), and true <strong>Stereo Pan</strong>. Click <strong>LOAD IR</strong> to drag-and-drop any third-party <code>.wav</code> cabinet impulse response directly into your rig.
                     </p>
                   </div>
                 </div>
@@ -295,20 +294,22 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
 
             {activeTab === 'pedalboard' && (
               <section className="manual-doc-section">
-                <div className="manual-doc-chapter-tag">CHAPTER 05 / CANVAS, ROUTING & 53 EFFECTS</div>
-                <h2 className="manual-doc-heading">Virtual Modular Pedalboard</h2>
+                <div className="manual-doc-chapter-tag">CHAPTER 05 / MODULAR STAGE & 58 UNITS</div>
+                <h2 className="manual-doc-heading">Virtual Modular Rig & Pedalboard</h2>
                 <p className="manual-doc-lead">
-                  A freeform modular stage with authentic right-to-left guitar signal flow (<code>INSTRUMENT IN</code> → Stompboxes → <code>TO AMPLIFIER</code>), custom 1/4&quot; cable patching, and 53 hand-crafted effects across 15 categories.
+                  A freeform modular canvas with authentic right-to-left guitar signal flow (<code>FROM GUITAR</code> → Stompboxes → Amp Heads → Cabinets → <code>TO MASTER OUT</code>), custom 1/4&quot; cable patching, and 58 hand-crafted units across 16 categories.
                 </p>
 
                 <div className="manual-doc-grid" style={{ marginBottom: '16px' }}>
                   <div className="manual-doc-card">
-                    <h4>Dynamics, Drive, Distortion, Fuzz & Boost</h4>
+                    <h4>Amps, Cabinets, Gates, Dynamics & Drives</h4>
                     <p>
-                      • <strong>Compressor (4)</strong>: MXR Dyna Comp, Ross, Boss CS-3, Keeley C4
+                      • <strong>Amp & Cab (2)</strong>: PEACE Amp Head, PEACE IR-200 Cabinet Simulator
+                      <br />• <strong>Noise Gate (1)</strong>: MXR M135 Smart Gate (Hiss / Mid / Full)
+                      <br />• <strong>Compressor (4)</strong>: MXR Dyna Comp, Ross, Boss CS-3, Keeley C4
                       <br />• <strong>Overdrive (10)</strong>: TS-808, TS9, TS Mini, Boss SD-1, OD-3, BD-2, Klon Centaur, Rockett Archer, Fulltone OCD, Nobels ODR-1
                       <br />• <strong>Distortion (7)</strong>: Boss DS-1, HM-2, MT-2 Metal Zone, Ibanez SM7, Marshall ShredMaster, MXR Distortion+, ProCo RAT 2
-                      <br />• <strong>Fuzz (6) & Boost (4)</strong>: Big Muff, Fuzz Face, Tone Bender, Fuzz Factory, Flatiron, EQD Hoof, MXR Micro Amp, Rangemaster, Spark Mini, Xotic EP
+                      <br />• <strong>Fuzz (6) & Boost (4)</strong>: Big Muff, Fuzz Face, Tone Bender, Fuzz Factory, Flatiron, EQD Hoof, MXR Micro Amp, Dallas Rangemaster, Spark Mini, Xotic EP
                     </p>
                   </div>
                   <div className="manual-doc-card">
@@ -324,16 +325,16 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
 
                 <div className="manual-doc-list">
                   <div className="manual-doc-list-item">
-                    <strong>Search & Category Filtering:</strong> Click <code>+ ADD PEDAL</code> to search by model name or filter across all 15 effect categories.
+                    <strong>Search & Category Filtering:</strong> Click <code>+ ADD PEDAL</code> to search all 58 units by model name or filter across all 16 categories.
                   </div>
                   <div className="manual-doc-list-item">
                     <strong>Manual & Auto Patching:</strong> Click any pedal&apos;s <code>OUT</code> jack and then another pedal&apos;s <code>IN</code> jack to route custom patch cables. Click an existing cable to unplug it, or use <code>DEFAULT WIRING</code> and <code>UNPLUG ALL</code> in the top bar.
                   </div>
                   <div className="manual-doc-list-item">
-                    <strong>Canvas Controls & Collision Avoidance:</strong> Drag pedals freely on the stage; overlapping is automatically prevented. Toggle <code>GRID SNAP: ON/OFF</code> for 20px alignment or <code>CABLES ON/OFF</code> for an unobstructed view of your knobs.
+                    <strong>Compact 100vh Zero-Scroll Workspace:</strong> Enjoy a clean, centered <code>NO CONFIGURATION</code> indicator on empty boards with zero viewport scroll-y. Drag pedals freely with magnetic 20px grid snap and automatic collision avoidance.
                   </div>
                   <div className="manual-doc-list-item">
-                    <strong>Precision Controls:</strong> Drag rotary knobs or EQ sliders vertically, scroll with your mouse wheel for fine adjustments, or <strong>double-click any knob</strong> to snap back to its default setting. Click the 3PDT footswitch to toggle bypass.
+                    <strong>Precision Controls:</strong> Drag rotary knobs or EQ sliders vertically, scroll with your mouse wheel for fine adjustments, or <strong>double-click any knob</strong> to snap back to its default setting. Click footswitches to toggle bypass.
                   </div>
                 </div>
               </section>
@@ -407,14 +408,14 @@ export const ManualModal: React.FC<ManualModalProps> = ({ isOpen, onClose }) => 
                 <div className="manual-doc-card" style={{ marginBottom: '12px' }}>
                   <h4>Guitar plugged into USB Audio Interface produces no sound or only plays on one side</h4>
                   <p>
-                    Check the <strong>INPUT CH</strong> selector in the <strong>Input Preamp & I/O</strong> panel. If your guitar is plugged into Input 1, select <code>IN 1</code>; if plugged into Input 2 (Hi-Z instrument input on many 2-channel interfaces), select <code>IN 2</code>, or use <code>L+R</code> to sum both channels to mono.
+                    Check the <strong>INPUT CH</strong> selector in the top studio console bar. If your guitar is plugged into Input 1, select <code>IN 1</code>; if plugged into Input 2 (Hi-Z instrument input on many 2-channel interfaces), select <code>IN 2</code>, or use <code>L+R</code> to sum both channels to mono.
                   </p>
                 </div>
 
                 <div className="manual-doc-card" style={{ marginBottom: '12px' }}>
                   <h4>High-pitched squealing, hum, or audio feedback</h4>
                   <p>
-                    Acoustic feedback happens when an open microphone picks up sound from speakers—always wear wired headphones or mute laptop speakers. For electrical single-coil hum or heavy distortion hiss, enable the <strong>NOISE GATE</strong> in the Input Preamp panel and raise the threshold (e.g., <code>-45 dB</code> to <code>-30 dB</code>).
+                    Acoustic feedback happens when an open microphone picks up sound from speakers—always wear wired headphones. For single-coil hum or high-gain hiss, patch in the <strong>MXR M135 Smart Gate</strong> pedal. Use <code>HISS</code> mode for transparent preamp de-hissing, or <code>FULL</code> mode for tight high-gain gating, dialing the <strong>TRIGGER</strong> knob until background noise is silenced when muting strings.
                   </p>
                 </div>
 

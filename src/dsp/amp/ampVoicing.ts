@@ -527,13 +527,9 @@ export function makeInputGridLimiterCurve(samples = 2048): Float32Array<ArrayBuf
   const curve = new Float32Array(new ArrayBuffer(samples * Float32Array.BYTES_PER_ELEMENT));
   const kneePos = 0.48; // Positive grid conduction threshold
   const kneeNeg = 0.62; // Cathode cutoff side has wider swing before soft compression
-  const noiseKnee = 0.012; // Micro-noise downward expansion knee (-38 dB)
 
   for (let i = 0; i < samples; i++) {
     const x = (i * 2) / (samples - 1) - 1;
-    const ax = Math.abs(x);
-    // Smooth micro-noise downward expansion near zero so idle pedal hiss is attenuated before preamp gain
-    const expWeight = (ax * ax) / (ax * ax + noiseKnee * noiseKnee);
     let out: number;
     if (x >= 0) {
       if (x <= kneePos) {
@@ -543,6 +539,7 @@ export function makeInputGridLimiterCurve(samples = 2048): Float32Array<ArrayBuf
         out = kneePos + (0.94 - kneePos) * Math.tanh(over * 1.35);
       }
     } else {
+      const ax = -x;
       if (ax <= kneeNeg) {
         out = x;
       } else {
@@ -550,7 +547,7 @@ export function makeInputGridLimiterCurve(samples = 2048): Float32Array<ArrayBuf
         out = -(kneeNeg + (0.97 - kneeNeg) * Math.tanh(over * 1.25));
       }
     }
-    curve[i] = out * expWeight;
+    curve[i] = out;
   }
   return curve;
 }
@@ -576,26 +573,19 @@ function buildCleanCurve(spec: CurveShape, samples: number): Float32Array<ArrayB
 
 function buildTubeCurve(spec: CurveShape, samples: number): Float32Array<ArrayBuffer> {
   const curve = new Float32Array(new ArrayBuffer(samples * Float32Array.BYTES_PER_ELEMENT));
-  // Soft-knee asymmetric tube transfer with controlled small-signal slope at x=0
-  const posDrive = Math.min(4.2, spec.drive * (0.65 + 0.35 * spec.positive));
-  const negDrive = Math.min(4.8, spec.drive * (0.65 + 0.35 * spec.negative));
   const transfer = (u: number): number =>
-    u >= 0 ? Math.tanh(posDrive * u) : Math.tanh(negDrive * u);
-
+    u >= 0
+      ? Math.tanh(spec.drive * spec.positive * u)
+      : Math.tanh(spec.drive * spec.negative * u);
   const atBias = transfer(spec.bias);
   const positiveSpan = Math.max(1e-6, transfer(1 + spec.bias) - atBias);
   const negativeSpan = Math.max(1e-6, atBias - transfer(-1 + spec.bias));
-  // Micro-signal noise suppression knee: prevents high-gain tube curves from multiplying
-  // near-zero thermal/interface hiss by 20x while keeping full sustain on guitar notes
-  const noiseKnee = 0.015;
 
   for (let i = 0; i < samples; i++) {
     const x = (i * 2) / (samples - 1) - 1;
-    const ax = Math.abs(x);
-    const expWeight = (ax * ax) / (ax * ax + noiseKnee * noiseKnee);
     const y = transfer(x + spec.bias) - atBias;
     const span = x >= 0 ? positiveSpan : negativeSpan;
-    curve[i] = (y / span) * spec.headroom * expWeight;
+    curve[i] = (y / span) * spec.headroom;
   }
   return curve;
 }

@@ -160,6 +160,7 @@ export class MxrUniVibeNode implements AudioPedalNode {
 
     // Asymmetric filament heating/cooling waveshaper curve
     this.lfoLampShaper = ctx.createWaveShaper();
+    this.lfoLampShaper.oversample = '4x';
     this.lfoLampShaper.curve = this.createLampCurve() as Float32Array<ArrayBuffer>;
 
     this.lfoDepthGain = ctx.createGain();

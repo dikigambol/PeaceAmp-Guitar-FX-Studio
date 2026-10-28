@@ -33,9 +33,8 @@ export class AmpHeadNode implements AudioPedalNode {
   private bypassDry: GainNode;
   private bypassWet: GainNode;
 
-  // V1A Input 68k Grid-Stopper, Built-in Preamp De-Hisser & Grid-Current Soft Limiter
+  // V1A Input 68k Grid-Stopper & Grid-Current Soft Limiter
   private inputGridStopperLp: BiquadFilterNode;
-  private preampDeHisser: AudioWorkletNode | null = null;
   private inputGridShaper: WaveShaperNode;
 
   // Pre-EQ voicing filter (tight high-pass & model character)
@@ -118,30 +117,12 @@ export class AmpHeadNode implements AudioPedalNode {
     this.bypassDry = ctx.createGain();
     this.bypassWet = ctx.createGain();
 
-    // 0. V1A Input 68kΩ Grid-Stopper + Miller Capacitance & Grid-Current Soft Limiter
-    // Strips ultrasonic/high-frequency pedal hiss (>5.4 kHz) before preamp amplification
-    // and smoothly compresses boosted pedal peaks like a real 12AX7 input grid.
+    // 0. V1A Input 68kΩ Grid-Stopper & Grid-Current Soft Limiter
+    // Models 68k input resistor + 12AX7 Miller capacitance (rolls off ultrasonic RF > 6.8 kHz naturally)
     this.inputGridStopperLp = ctx.createBiquadFilter();
     this.inputGridStopperLp.type = 'lowpass';
-    this.inputGridStopperLp.frequency.setValueAtTime(5200, ctx.currentTime);
+    this.inputGridStopperLp.frequency.setValueAtTime(6800, ctx.currentTime);
     this.inputGridStopperLp.Q.setValueAtTime(0.65, ctx.currentTime);
-
-    try {
-      this.preampDeHisser = new AudioWorkletNode(ctx, 'noise-gate-processor', {
-        numberOfInputs: 1,
-        numberOfOutputs: 1,
-        outputChannelCount: [1],
-        channelCount: 1,
-        channelCountMode: 'explicit',
-        parameterData: {
-          threshold: -46,
-          release: 0.055,
-          hold: 0.02,
-        },
-      });
-    } catch {
-      this.preampDeHisser = null;
-    }
 
     this.inputGridShaper = ctx.createWaveShaper();
     this.inputGridShaper.oversample = '2x';
@@ -196,18 +177,13 @@ export class AmpHeadNode implements AudioPedalNode {
     this.inputNode.connect(this.bypassDry);
     this.bypassDry.connect(this.outputNode);
 
-    // inputNode -> bypassWet -> inputGridStopperLp -> [preampDeHisser] -> inputGridShaper
+    // inputNode -> bypassWet -> inputGridStopperLp -> inputGridShaper
     // -> preHighpass -> preVoicingPeak -> preampGain -> tubeShaper -> postPreampLowpass
     // -> dcBlocker -> bassFilter -> midFilter -> trebleFilter -> presenceFilter
     // -> powerAmpGain -> powerAmpShaper -> outputTransformerLowpass -> outputNode
     this.inputNode.connect(this.bypassWet);
     this.bypassWet.connect(this.inputGridStopperLp);
-    if (this.preampDeHisser) {
-      this.inputGridStopperLp.connect(this.preampDeHisser);
-      this.preampDeHisser.connect(this.inputGridShaper);
-    } else {
-      this.inputGridStopperLp.connect(this.inputGridShaper);
-    }
+    this.inputGridStopperLp.connect(this.inputGridShaper);
     this.inputGridShaper.connect(this.preHighpass);
     this.preHighpass.connect(this.preVoicingPeak);
     this.preVoicingPeak.connect(this.preampGain);
@@ -299,14 +275,6 @@ export class AmpHeadNode implements AudioPedalNode {
     const masterGainLinear = Math.pow(masterNorm, 1.3) * profile.masterScale * powerScale;
     set(this.powerAmpGain.gain, masterGainLinear);
 
-    // 6. Built-in Preamp Front-End Noise Suppressor & Dynamic De-Hisser
-    // Automatically scales threshold slightly higher on high-gain models so boosted pedals stay dead-silent
-    const deHisserThreshParam = this.preampDeHisser?.parameters.get('threshold');
-    if (deHisserThreshParam) {
-      const baseThresh = profile.preampCurve.kind === 'clean' ? -54 : -48 + gainNorm * 6;
-      set(deHisserThreshParam, baseThresh);
-    }
-
     // 7. Preamp Snubber & Output Transformer HF Roll-Off
     const defaultPreLp = profile.preampCurve.kind === 'clean' ? 9500 : profile.preampCurve.drive > 4.2 ? 4900 : 5400;
     const defaultOutLp = profile.powerAmpCurve.kind === 'clean' ? 11000 : 6200;
@@ -384,7 +352,6 @@ export class AmpHeadNode implements AudioPedalNode {
       this.bypassDry.disconnect();
       this.bypassWet.disconnect();
       this.inputGridStopperLp.disconnect();
-      this.preampDeHisser?.disconnect();
       this.inputGridShaper.disconnect();
       this.preHighpass.disconnect();
       this.preVoicingPeak.disconnect();
