@@ -42,7 +42,9 @@ export interface KnobProps {
     | 'proco-rat'
     | 'tc-spark'
     | 'xotic-clear'
-    | 'ehx-pointer';
+    | 'ehx-pointer'
+    | 'jhs'
+    | 'tc-drip';
   showLabel?: boolean;
   showValue?: boolean;
   subLabel?: string;
@@ -1354,6 +1356,101 @@ const XoticClearKnobDial: React.FC = () => (
   </svg>
 );
 
+const JhsKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="jhs-body-grad" cx="42%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#2e323b" />
+        <stop offset="60%" stopColor="#181b22" />
+        <stop offset="100%" stopColor="#0a0c10" />
+      </radialGradient>
+      <filter id="jhs-knob-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2.5" stdDeviation="3" floodColor="#000000" floodOpacity="0.75" />
+      </filter>
+    </defs>
+    {/* Main Cylindrical Body */}
+    <circle cx="50" cy="50" r="48" fill="url(#jhs-body-grad)" filter="url(#jhs-knob-shadow)" />
+    {/* Perimeter Flute Ribs (8 flutes) */}
+    <g fill="#07090c" opacity="0.65">
+      <circle cx="50" cy="3.5" r="4.5" />
+      <circle cx="82.9" cy="17.1" r="4.5" />
+      <circle cx="96.5" cy="50" r="4.5" />
+      <circle cx="82.9" cy="82.9" r="4.5" />
+      <circle cx="50" cy="96.5" r="4.5" />
+      <circle cx="17.1" cy="82.9" r="4.5" />
+      <circle cx="3.5" cy="50" r="4.5" />
+      <circle cx="17.1" cy="17.1" r="4.5" />
+    </g>
+    {/* Flat Top Face */}
+    <circle cx="50" cy="50" r="42" fill="url(#jhs-body-grad)" stroke="#0f1217" strokeWidth="1" />
+    <circle cx="50" cy="50" r="41.5" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" />
+    {/* Crisp White Radial Indicator Line */}
+    <line
+      x1="50"
+      y1="3"
+      x2="50"
+      y2="44"
+      stroke="#ffffff"
+      strokeWidth="4.5"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.85))"
+    />
+  </svg>
+);
+
+const TcDripKnobDial: React.FC = () => (
+  <svg viewBox="0 0 100 100" className="knob-svg">
+    <defs>
+      <radialGradient id="tc-drip-body-grad" cx="42%" cy="38%" r="65%">
+        <stop offset="0%" stopColor="#2c3038" />
+        <stop offset="50%" stopColor="#16181f" />
+        <stop offset="100%" stopColor="#08090c" />
+      </radialGradient>
+      <radialGradient id="tc-drip-cap-grad" cx="46%" cy="40%" r="58%">
+        <stop offset="0%" stopColor="#353b45" />
+        <stop offset="55%" stopColor="#1b1e25" />
+        <stop offset="100%" stopColor="#0d0e12" />
+      </radialGradient>
+      <filter id="tc-drip-shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000000" floodOpacity="0.85" />
+      </filter>
+    </defs>
+    {/* Outer Cylindrical Ribbed Body */}
+    <circle cx="50" cy="50" r="48" fill="url(#tc-drip-body-grad)" filter="url(#tc-drip-shadow)" />
+    {/* 12 Perimeter Ribs */}
+    <g fill="#07080a" opacity="0.6">
+      <circle cx="50" cy="3.5" r="3.5" />
+      <circle cx="73.3" cy="9.7" r="3.5" />
+      <circle cx="90.3" cy="26.7" r="3.5" />
+      <circle cx="96.5" cy="50" r="3.5" />
+      <circle cx="90.3" cy="73.3" r="3.5" />
+      <circle cx="73.3" cy="90.3" r="3.5" />
+      <circle cx="50" cy="96.5" r="3.5" />
+      <circle cx="26.7" cy="90.3" r="3.5" />
+      <circle cx="9.7" cy="73.3" r="3.5" />
+      <circle cx="3.5" cy="50" r="3.5" />
+      <circle cx="9.7" cy="26.7" r="3.5" />
+      <circle cx="26.7" cy="9.7" r="3.5" />
+    </g>
+    {/* Inner Machined Faceplate */}
+    <circle cx="50" cy="50" r="36" fill="url(#tc-drip-cap-grad)" stroke="#060709" strokeWidth="1.2" />
+    <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8" />
+    {/* Center Cap Detail */}
+    <circle cx="50" cy="50" r="14" fill="#111317" stroke="#0a0b0d" strokeWidth="1" />
+    {/* Pure White Radial Pointer Line (Strictly x=50, from edge to inner hub) */}
+    <line
+      x1="50"
+      y1="6"
+      x2="50"
+      y2="36"
+      stroke="#ffffff"
+      strokeWidth="3.2"
+      strokeLinecap="round"
+      filter="drop-shadow(0 1px 1.5px rgba(0,0,0,0.95))"
+    />
+  </svg>
+);
+
 export const Knob: React.FC<KnobProps> = ({
   label,
   value,
@@ -1477,6 +1574,8 @@ export const Knob: React.FC<KnobProps> = ({
           {variant === 'tc-spark' && <TcSparkKnobDial />}
           {variant === 'xotic-clear' && <XoticClearKnobDial />}
           {variant === 'ehx-pointer' && <EhxPointerKnobDial />}
+          {variant === 'jhs' && <JhsKnobDial />}
+          {variant === 'tc-drip' && <TcDripKnobDial />}
           {variant === 'default' && <DefaultKnobDial color={color} />}
         </div>
       </div>

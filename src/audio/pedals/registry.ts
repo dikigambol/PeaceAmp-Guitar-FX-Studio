@@ -75,6 +75,12 @@ import { FulltoneSupaTremNode } from './tremolo/FulltoneSupaTremNode';
 import { BossVb2Node } from './vibrato/BossVb2Node';
 import { MxrUniVibeNode } from './vibrato/MxrUniVibeNode';
 
+// Reverb Nodes
+import { BossRv6Node } from './reverb/BossRv6Node';
+import { EhxHolyGrailNode } from './reverb/EhxHolyGrailNode';
+import { JhsHallReverbNode } from './reverb/JhsHallReverbNode';
+import { TcDripSpringReverbNode } from './reverb/TcDripSpringReverbNode';
+
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
@@ -1365,6 +1371,175 @@ export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
       },
     ],
   },
+
+  // Category 20: Reverbs
+  'reverb-boss-rv6': {
+    type: 'reverb-boss-rv6',
+    name: 'Boss RV-6',
+    subtitle: 'Studio-Grade Multi-Mode Digital Reverb',
+    category: 'reverb',
+    chassisColor: '#3a3d42',
+    accentColor: '#00aeef',
+    parameters: [
+      {
+        id: 'eLevel',
+        name: 'E.LEVEL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `${Math.round((v / 10) * 100)}%`,
+      },
+      {
+        id: 'tone',
+        name: 'TONE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `${(1.2 * Math.pow(15 / 1.2, v / 10)).toFixed(1)} kHz`,
+      },
+      {
+        id: 'time',
+        name: 'TIME',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5,
+        formatValue: (v) => `${(0.35 + Math.pow(v / 10, 1.4) * 7.15).toFixed(1)} s`,
+      },
+      {
+        id: 'mode',
+        name: 'MODE',
+        min: 0,
+        max: 7,
+        step: 1,
+        defaultValue: 1,
+        formatValue: (v) =>
+          [
+            'ROOM',
+            'HALL',
+            'PLATE',
+            'SPRING',
+            'MODULATE',
+            '+DELAY',
+            'SHIMMER',
+            'DYNAMIC',
+          ][Math.round(v)] || 'HALL',
+      },
+    ],
+  },
+  'reverb-ehx-holygrail': {
+    type: 'reverb-ehx-holygrail',
+    name: 'EHX Holy Grail',
+    subtitle: 'Iconic Digital Spring, Hall & Flerb Reverb',
+    category: 'reverb',
+    chassisColor: '#c8cdd4',
+    accentColor: '#00aeef',
+    parameters: [
+      {
+        id: 'reverb',
+        name: 'REVERB',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 4.5,
+        formatValue: (v) => `${Math.round(v * 10)}%`,
+      },
+      {
+        id: 'mode',
+        name: 'MODE',
+        min: 0,
+        max: 2,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => ['SPRING', 'HALL', 'FLERB'][Math.round(v)] || 'SPRING',
+      },
+    ],
+  },
+  'reverb-jhs-hall': {
+    type: 'reverb-jhs-hall',
+    name: 'JHS 3 Series Hall',
+    subtitle: 'Minimalist Studio Hall with Modulate Switch',
+    category: 'reverb',
+    chassisColor: '#f8fafc',
+    accentColor: '#0f172a',
+    parameters: [
+      {
+        id: 'verb',
+        name: 'VERB',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round(v * 10)}%`,
+      },
+      {
+        id: 'dampen',
+        name: 'DAMPEN',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${(v * 10).toFixed(0)}%`,
+      },
+      {
+        id: 'decay',
+        name: 'DECAY',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.5,
+        formatValue: (v) => `${(0.5 + Math.pow(v / 10, 1.4) * 5.0).toFixed(1)} s`,
+      },
+      {
+        id: 'modulate',
+        name: 'MODULATE',
+        min: 0,
+        max: 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => (v >= 0.5 ? 'ON' : 'OFF'),
+      },
+    ],
+  },
+  'reverb-tc-drip': {
+    type: 'reverb-tc-drip',
+    name: 'TC Electronic Drip',
+    subtitle: 'Vintage Fender 6G15 Spring Tank Emulation',
+    category: 'reverb',
+    chassisColor: '#c5a059',
+    accentColor: '#3d2611',
+    parameters: [
+      {
+        id: 'dwell',
+        name: 'DWELL',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${(v * 10).toFixed(0)}%`,
+      },
+      {
+        id: 'mix',
+        name: 'MIX',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${Math.round(v * 10)}%`,
+      },
+      {
+        id: 'tone',
+        name: 'TONE',
+        min: 0,
+        max: 10,
+        step: 0.1,
+        defaultValue: 5.0,
+        formatValue: (v) => `${(1.2 * Math.pow(14.5 / 1.2, v / 10)).toFixed(1)} kHz`,
+      },
+    ],
+  },
 };
 
 export function createPedalAudioNode(
@@ -1375,6 +1550,16 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Reverb
+    case 'reverb-boss-rv6':
+      return new BossRv6Node(ctx, id, initialParams, enabled);
+    case 'reverb-ehx-holygrail':
+      return new EhxHolyGrailNode(ctx, id, initialParams, enabled);
+    case 'reverb-jhs-hall':
+      return new JhsHallReverbNode(ctx, id, initialParams, enabled);
+    case 'reverb-tc-drip':
+      return new TcDripSpringReverbNode(ctx, id, initialParams, enabled);
+
     // Vibrato
     case 'vibrato-boss-vb2':
       return new BossVb2Node(ctx, id, initialParams, enabled);

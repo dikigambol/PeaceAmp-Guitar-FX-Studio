@@ -65,6 +65,10 @@ import { BossTr2Pedal } from './tremolo/BossTr2Pedal';
 import { FulltoneSupaTremPedal } from './tremolo/FulltoneSupaTremPedal';
 import { BossVb2Pedal } from './vibrato/BossVb2Pedal';
 import { MxrUniVibePedal } from './vibrato/MxrUniVibePedal';
+import { BossRv6Pedal } from './reverb/BossRv6Pedal';
+import { EhxHolyGrailPedal } from './reverb/EhxHolyGrailPedal';
+import { JhsHallReverbPedal } from './reverb/JhsHallReverbPedal';
+import { TcDripSpringReverbPedal } from './reverb/TcDripSpringReverbPedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -227,6 +231,16 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
       return <BossVb2Pedal {...props} />;
     case 'vibrato-mxr-univibe':
       return <MxrUniVibePedal {...props} />;
+
+    // Category 20: Reverb
+    case 'reverb-boss-rv6':
+      return <BossRv6Pedal {...props} />;
+    case 'reverb-ehx-holygrail':
+      return <EhxHolyGrailPedal {...props} />;
+    case 'reverb-jhs-hall':
+      return <JhsHallReverbPedal {...props} />;
+    case 'reverb-tc-drip':
+      return <TcDripSpringReverbPedal {...props} />;
   }
 
   // Fallback for standard analog enclosure

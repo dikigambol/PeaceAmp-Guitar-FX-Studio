@@ -97,15 +97,12 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.inputNode.connect(this.bypassDry);
     this.bypassDry.connect(this.outputNode);
 
-    // 2. Wet path input
-    this.inputNode.connect(this.bypassWet);
-
-    // 3. Sub-bass cleanup HPF (35Hz)
+    // 2. Sub-bass cleanup HPF (40Hz)
     this.preHighpass = ctx.createBiquadFilter();
     this.preHighpass.type = 'highpass';
-    this.preHighpass.frequency.setValueAtTime(35, ctx.currentTime);
+    this.preHighpass.frequency.setValueAtTime(40, ctx.currentTime);
     this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
-    this.bypassWet.connect(this.preHighpass);
+    this.inputNode.connect(this.preHighpass);
 
     // 4. Subtle input buffer EQ (Gentle presence & body boost at 300Hz, +0.8dB)
     this.warmBodyFilter = ctx.createBiquadFilter();
@@ -132,21 +129,19 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     });
     this.flangerDelayNode.connect(this.flangerBbdWarmth.inputNode);
 
-    // Feedback Loop (Bandpass 160Hz - 6.5kHz + pure tanh limiter for Gilmour chime/howl)
+    // Feedback Loop (Bandpass 280Hz - 4.8kHz + pure tanh limiter for singing chime without runaway screech)
     this.flangerFeedbackGain = ctx.createGain();
-    this.flangerFeedbackGain.gain.setValueAtTime(
-      this.calcFlangerFeedback(this.params.flangerDepth),
-      ctx.currentTime
-    );
+    const initialFb = this.enabled ? this.calcFlangerFeedback(this.params.flangerDepth) : 0;
+    this.flangerFeedbackGain.gain.setValueAtTime(initialFb, ctx.currentTime);
 
     this.flangerFeedbackHighpass = ctx.createBiquadFilter();
     this.flangerFeedbackHighpass.type = 'highpass';
-    this.flangerFeedbackHighpass.frequency.setValueAtTime(160, ctx.currentTime);
+    this.flangerFeedbackHighpass.frequency.setValueAtTime(280, ctx.currentTime);
     this.flangerFeedbackHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.flangerFeedbackLowpass = ctx.createBiquadFilter();
     this.flangerFeedbackLowpass.type = 'lowpass';
-    this.flangerFeedbackLowpass.frequency.setValueAtTime(6500, ctx.currentTime);
+    this.flangerFeedbackLowpass.frequency.setValueAtTime(4800, ctx.currentTime);
     this.flangerFeedbackLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.flangerFeedbackLimiter = ctx.createWaveShaper();
@@ -230,13 +225,13 @@ export class EhxElectricMistressNode implements AudioPedalNode {
     this.flangerWetGain.connect(this.mixer);
     this.chorusWetGain.connect(this.mixer);
 
-    // 9. DC Blocker
+    // 9. DC Blocker & True Clean Bypass Output Gate (Completely isolates wet path and oscillations when bypassed)
     this.dcBlocker = createDcBlocker(ctx);
     this.mixer.connect(this.dcBlocker);
-    this.dcBlocker.connect(this.outputNode);
+    this.dcBlocker.connect(this.bypassWet);
+    this.bypassWet.connect(this.outputNode);
 
-    // Apply initial bypass state (1 ms, matching the other bypass-style pedals so the
-    // startup crossfade finishes inside SignalChain's insert mute)
+    // Apply initial bypass state
     applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx, 0.001);
   }
 
@@ -248,8 +243,8 @@ export class EhxElectricMistressNode implements AudioPedalNode {
 
   private calcFlangerFeedback(depth: number): number {
     const clamped = Math.max(0, Math.min(10, depth));
-    // Progressive feedback curve driving into tanh soft-clipping for singing Gilmour chime/howl
-    return Math.pow(clamped / 10, 1.25) * 0.90;
+    // Classic Mistress chime capped at 0.76 to preserve rich harmonic combs without runaway self-oscillation
+    return Math.pow(clamped / 10, 1.25) * 0.76;
   }
 
   private calcFlangerWetMix(depth: number): number {
@@ -301,7 +296,7 @@ export class EhxElectricMistressNode implements AudioPedalNode {
 
       case 'flangerDepth':
       case 'color': {
-        const fbGain = this.calcFlangerFeedback(value);
+        const fbGain = this.enabled ? this.calcFlangerFeedback(value) : 0;
         this.flangerFeedbackGain.gain.cancelScheduledValues(now);
         this.flangerFeedbackGain.gain.setTargetAtTime(fbGain, now, 0.035);
 
@@ -332,6 +327,15 @@ export class EhxElectricMistressNode implements AudioPedalNode {
   public setEnabled(enabled: boolean): void {
     if (this.isDisposed) return;
     this.enabled = enabled;
+    const now = this.ctx.currentTime;
+    if (!enabled) {
+      this.flangerFeedbackGain.gain.cancelScheduledValues(now);
+      this.flangerFeedbackGain.gain.setTargetAtTime(0, now, 0.015);
+    } else {
+      const fb = this.calcFlangerFeedback(this.params.flangerDepth);
+      this.flangerFeedbackGain.gain.cancelScheduledValues(now);
+      this.flangerFeedbackGain.gain.setTargetAtTime(fb, now, 0.02);
+    }
     applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx);
   }
 

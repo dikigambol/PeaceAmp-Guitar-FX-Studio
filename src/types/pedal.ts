@@ -13,7 +13,7 @@ export interface PedalMetadata {
   type: string;
   name: string;
   subtitle: string;
-  category: 'dynamics' | 'eq' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'chorus' | 'delay' | 'flanger' | 'phaser' | 'pitch' | 'tremolo' | 'vibrato' | 'modulation' | 'time' | 'utility' | 'wah';
+  category: 'dynamics' | 'eq' | 'drive' | 'distortion' | 'fuzz' | 'boost' | 'chorus' | 'delay' | 'flanger' | 'phaser' | 'pitch' | 'tremolo' | 'vibrato' | 'modulation' | 'time' | 'utility' | 'wah' | 'reverb';
   chassisColor: string;
   accentColor: string;
   parameters: PedalParameterDef[];

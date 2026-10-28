@@ -214,22 +214,14 @@ export const BossCh1Pedal: React.FC<PedalProps> = ({
             </div>
           </div>
         </div>
-
-        {/* Output B Stereo Indicator Graphic on Cavity Plate */}
-        <div className="boss-ch1-output-b-badge">
-          <span>&larr; OUTPUT</span>
-          <div className="badge-box">B</div>
-        </div>
       </div>
 
       {/* Middle Stamped Graphic Section */}
       <div className="boss-mid-graphics boss-ch1-mid">
         {/* I/O Labels */}
         <div className="boss-io-arrows">
-          <div className="boss-ch1-io-left">
+          <div className="boss-io-left">
             <span>&larr; OUTPUT</span>
-            <div className="badge-box">A</div>
-            <span className="sub-mono">(MONO)</span>
           </div>
           <div className="boss-io-right">
             <span>INPUT &larr;</span>

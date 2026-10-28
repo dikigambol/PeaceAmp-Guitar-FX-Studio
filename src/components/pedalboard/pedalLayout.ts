@@ -16,8 +16,12 @@ export function getPedalDimensions(type: string): { w: number; h: number } {
   const isSupaTrem = type === 'tremolo-fulltone-supatrem';
   const isAw3 = type === 'wah-boss-aw3' || type === 'boss-aw3';
   const isVb2 = type === 'vibrato-boss-vb2' || type === 'boss-vb2';
-  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : isGe7 ? 248 : isSupaTrem ? 360 : isMxrFlanger ? 256 : isAw3 || isVb2 ? 228 : PEDAL_WIDTH;
-  const h = isMini ? 290 : isFuzzFactory ? 176 : isSupaTrem ? 232 : isMxrFlanger ? 195 : 360;
+  const isRv6 = type === 'reverb-boss-rv6' || type === 'boss-rv6';
+  const isHolyGrail = type === 'reverb-ehx-holygrail' || type === 'ehx-holy-grail';
+  const isJhsHall = type === 'reverb-jhs-hall';
+  const isTcDrip = type === 'reverb-tc-drip';
+  const w = isWide ? 260 : isMini ? 140 : isToneBender ? 186 : isFuzzFactory ? 250 : isFlatiron ? 148 : isHoof ? 164 : isGe7 ? 248 : isSupaTrem ? 360 : isMxrFlanger ? 256 : isAw3 || isVb2 || isRv6 ? 228 : isHolyGrail ? 192 : isJhsHall ? 196 : isTcDrip ? 172 : PEDAL_WIDTH;
+  const h = isMini ? 290 : isFuzzFactory ? 176 : isSupaTrem ? 232 : isMxrFlanger ? 195 : isHolyGrail ? 336 : isJhsHall ? 344 : isTcDrip ? 290 : 360;
   return { w, h };
 }
 

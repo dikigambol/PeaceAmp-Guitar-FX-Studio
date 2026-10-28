@@ -84,15 +84,12 @@ export class BossBf2Node implements AudioPedalNode {
     this.inputNode.connect(this.bypassDry);
     this.bypassDry.connect(this.outputNode);
 
-    // 2. Wet path input
-    this.inputNode.connect(this.bypassWet);
-
-    // 3. Sub-bass cleanup HPF (35Hz)
+    // 2. Sub-bass cleanup HPF (40Hz)
     this.preHighpass = ctx.createBiquadFilter();
     this.preHighpass.type = 'highpass';
-    this.preHighpass.frequency.setValueAtTime(35, ctx.currentTime);
+    this.preHighpass.frequency.setValueAtTime(40, ctx.currentTime);
     this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
-    this.bypassWet.connect(this.preHighpass);
+    this.inputNode.connect(this.preHighpass);
 
     // 4. Analog input buffer warmth & round body EQ (280Hz peaking, +1.0dB)
     this.warmBodyFilter = ctx.createBiquadFilter();
@@ -120,19 +117,20 @@ export class BossBf2Node implements AudioPedalNode {
     });
     this.delayNode.connect(this.bbdWarmth.inputNode);
 
-    // 8. Feedback (Resonance) loop: Bandpass filtered (160Hz - 6.5kHz) & pure tanh soft-clip
-    // 160Hz highpass removes subsonic mud; 6.5kHz lowpass allows authentic jet-whistle resonance to sizzle
+    // 8. Feedback (Resonance) loop: Bandpass filtered (280Hz - 4.8kHz) & pure tanh soft-clip
+    // 280Hz highpass eliminates low-frequency drone/hum; 4.8kHz lowpass produces warm analog jet whoosh without piercing screech
     this.feedbackGain = ctx.createGain();
-    this.feedbackGain.gain.setValueAtTime(this.calcFeedbackGain(this.params.res), ctx.currentTime);
+    const initialFb = this.enabled ? this.calcFeedbackGain(this.params.res) : 0;
+    this.feedbackGain.gain.setValueAtTime(initialFb, ctx.currentTime);
 
     this.feedbackHighpass = ctx.createBiquadFilter();
     this.feedbackHighpass.type = 'highpass';
-    this.feedbackHighpass.frequency.setValueAtTime(160, ctx.currentTime);
+    this.feedbackHighpass.frequency.setValueAtTime(280, ctx.currentTime);
     this.feedbackHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.feedbackLowpass = ctx.createBiquadFilter();
     this.feedbackLowpass.type = 'lowpass';
-    this.feedbackLowpass.frequency.setValueAtTime(6500, ctx.currentTime);
+    this.feedbackLowpass.frequency.setValueAtTime(4800, ctx.currentTime);
     this.feedbackLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.feedbackLimiter = ctx.createWaveShaper();
@@ -172,13 +170,13 @@ export class BossBf2Node implements AudioPedalNode {
     this.dryGain.connect(this.mixer);
     this.wetGain.connect(this.mixer);
 
-    // 11. DC Blocker
+    // 11. DC Blocker & True Clean Bypass Output Gate (Completely isolates wet path and oscillations when bypassed)
     this.dcBlocker = createDcBlocker(ctx);
     this.mixer.connect(this.dcBlocker);
-    this.dcBlocker.connect(this.outputNode);
+    this.dcBlocker.connect(this.bypassWet);
+    this.bypassWet.connect(this.outputNode);
 
-    // Apply initial bypass state (1 ms, matching the other bypass-style pedals so the
-    // startup crossfade finishes inside SignalChain's insert mute)
+    // Apply initial bypass state
     applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx, 0.001);
   }
 
@@ -204,13 +202,13 @@ export class BossBf2Node implements AudioPedalNode {
 
   private calcFeedbackGain(res: number): number {
     const clamped = Math.max(0, Math.min(10, res));
-    // Progressive curve driving into tanh soft-clipping for screaming, burning jet resonance:
+    // Progressive curve capped at 0.78 matching authentic MN3207 circuit limits:
     // res = 0 -> 0.0
-    // res = 3.5 -> 0.28 (warm metallic body)
-    // res = 5 -> 0.48 (classic chewy BF-2 flanging)
-    // res = 7 -> 0.68 (intense jet sweep)
-    // res = 10 -> 0.92 (screaming, burning jet roar saturated cleanly by tanh limiter)
-    return Math.pow(clamped / 10, 1.2) * 0.92;
+    // res = 3.5 -> 0.22 (warm metallic body)
+    // res = 5 -> 0.38 (classic chewy BF-2 flanging)
+    // res = 7 -> 0.56 (intense jet sweep)
+    // res = 10 -> 0.78 (screaming, burning jet roar safely bounded by analog feedback limiting)
+    return Math.pow(clamped / 10, 1.25) * 0.78;
   }
 
   private createSaturationCurve(samples: number): Float32Array {
@@ -258,9 +256,11 @@ export class BossBf2Node implements AudioPedalNode {
       }
 
       case 'res': {
-        const fbGain = this.calcFeedbackGain(value);
-        this.feedbackGain.gain.cancelScheduledValues(now);
-        this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.03);
+        if (this.enabled) {
+          const fbGain = this.calcFeedbackGain(value);
+          this.feedbackGain.gain.cancelScheduledValues(now);
+          this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.03);
+        }
         break;
       }
     }
@@ -269,7 +269,19 @@ export class BossBf2Node implements AudioPedalNode {
   public setEnabled(enabled: boolean): void {
     if (this.isDisposed) return;
     this.enabled = enabled;
+    const now = this.ctx.currentTime;
     applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx);
+
+    if (!enabled) {
+      // Instantly kill any internal feedback loop resonance while bypassed
+      this.feedbackGain.gain.cancelScheduledValues(now);
+      this.feedbackGain.gain.setTargetAtTime(0, now, 0.015);
+    } else {
+      // Restore active feedback resonance
+      const fb = this.calcFeedbackGain(this.params.res);
+      this.feedbackGain.gain.cancelScheduledValues(now);
+      this.feedbackGain.gain.setTargetAtTime(fb, now, 0.02);
+    }
   }
 
   public dispose(): void {

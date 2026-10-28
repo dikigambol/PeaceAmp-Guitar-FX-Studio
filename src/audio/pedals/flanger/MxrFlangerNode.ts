@@ -84,17 +84,14 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.inputNode.connect(this.bypassDry);
     this.bypassDry.connect(this.outputNode);
 
-    // 2. Wet path input
-    this.inputNode.connect(this.bypassWet);
-
-    // 3. Sub-bass cleanup HPF (30Hz)
+    // 2. Pre-filter & Wet path input
     this.preHighpass = ctx.createBiquadFilter();
     this.preHighpass.type = 'highpass';
     this.preHighpass.frequency.setValueAtTime(30, ctx.currentTime);
     this.preHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
-    this.bypassWet.connect(this.preHighpass);
+    this.inputNode.connect(this.preHighpass);
 
-    // 4. Analog input buffer warmth & round body EQ (320Hz peaking, +0.8dB)
+    // 3. Analog input buffer warmth & round body EQ (320Hz peaking, +0.8dB)
     this.warmBodyFilter = ctx.createBiquadFilter();
     this.warmBodyFilter.type = 'peaking';
     this.warmBodyFilter.frequency.setValueAtTime(320, ctx.currentTime);
@@ -102,17 +99,17 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.warmBodyFilter.gain.setValueAtTime(0.8, ctx.currentTime);
     this.preHighpass.connect(this.warmBodyFilter);
 
-    // 5. Delay Input Summing Node
+    // 4. Delay Input Summing Node
     this.delayInputSum = ctx.createGain();
     this.warmBodyFilter.connect(this.delayInputSum);
 
-    // 6. Analog BBD Delay Line (Reticon SAD1024 range: ~0.4ms to ~4.2ms)
+    // 5. Analog BBD Delay Line (Reticon SAD1024 range: ~0.4ms to ~4.2ms)
     this.delayNode = ctx.createDelay(0.05);
     const initialDelay = this.calcBaseDelay(this.params.manual);
     this.delayNode.delayTime.setValueAtTime(initialDelay, ctx.currentTime);
     this.delayInputSum.connect(this.delayNode);
 
-    // 7. BBD Reconstruction & Anti-Aliasing (4-Pole Sallen-Key 8.0 kHz) & Compander Saturation
+    // 6. BBD Reconstruction & Anti-Aliasing (4-Pole Sallen-Key 8.0 kHz) & Compander Saturation
     this.bbdWarmth = new BbdAnalogWarmthStage(ctx, {
       cutoffFreq: 8000,
       saturationAmount: 0.35,
@@ -120,22 +117,20 @@ export class MxrFlangerNode implements AudioPedalNode {
     });
     this.delayNode.connect(this.bbdWarmth.inputNode);
 
-    // 8. Feedback (REGEN) loop: Bandpass filtered (160Hz - 7.0kHz) + pure tanh soft-clip limiter
-    // Allows EVH metallic jet harmonics to scream and sing at high REGEN settings
+    // 7. Feedback (REGEN) loop: Bandpass filtered (280Hz - 5.0kHz) + pure tanh soft-clip limiter
+    // Bandpass limits prevent both low-frequency motor hum and ear-piercing runaway whistle
     this.feedbackGain = ctx.createGain();
-    this.feedbackGain.gain.setValueAtTime(
-      this.calcFeedbackGain(this.params.regen),
-      ctx.currentTime
-    );
+    const initialFb = this.enabled ? this.calcFeedbackGain(this.params.regen) : 0;
+    this.feedbackGain.gain.setValueAtTime(initialFb, ctx.currentTime);
 
     this.feedbackHighpass = ctx.createBiquadFilter();
     this.feedbackHighpass.type = 'highpass';
-    this.feedbackHighpass.frequency.setValueAtTime(160, ctx.currentTime);
+    this.feedbackHighpass.frequency.setValueAtTime(280, ctx.currentTime);
     this.feedbackHighpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.feedbackLowpass = ctx.createBiquadFilter();
     this.feedbackLowpass.type = 'lowpass';
-    this.feedbackLowpass.frequency.setValueAtTime(7000, ctx.currentTime);
+    this.feedbackLowpass.frequency.setValueAtTime(5000, ctx.currentTime);
     this.feedbackLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
 
     this.feedbackLimiter = ctx.createWaveShaper();
@@ -148,7 +143,7 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.feedbackLowpass.connect(this.feedbackLimiter);
     this.feedbackLimiter.connect(this.delayInputSum);
 
-    // 9. LFO Modulation Core (Smooth sine sweep with musical depth scaling)
+    // 8. LFO Modulation Core (Smooth sine sweep with musical depth scaling)
     this.lfoNode = ctx.createOscillator();
     this.lfoNode.type = 'sine';
     this.lfoNode.frequency.setValueAtTime(this.calcSpeedHz(this.params.speed), ctx.currentTime);
@@ -161,7 +156,7 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.lfoGainNode.connect(this.delayNode.delayTime);
     this.lfoNode.start();
 
-    // 10. Wet / Dry Mixer: Exact 1:1 ratio (0.88 Dry + 0.88 Wet) creates razor-sharp -inf dB
+    // 9. Wet / Dry Mixer: Exact 1:1 ratio (0.88 Dry + 0.88 Wet) creates razor-sharp -inf dB
     // comb notches for iconic Van Halen "Unchained" jet sweeps
     this.dryGain = ctx.createGain();
     this.dryGain.gain.setValueAtTime(0.88, ctx.currentTime);
@@ -175,13 +170,13 @@ export class MxrFlangerNode implements AudioPedalNode {
     this.dryGain.connect(this.mixer);
     this.wetGain.connect(this.mixer);
 
-    // 11. DC Blocker
+    // 10. DC Blocker & True Clean Bypass Output Gate (Completely isolates wet path and oscillations when bypassed)
     this.dcBlocker = createDcBlocker(ctx);
     this.mixer.connect(this.dcBlocker);
-    this.dcBlocker.connect(this.outputNode);
+    this.dcBlocker.connect(this.bypassWet);
+    this.bypassWet.connect(this.outputNode);
 
-    // Apply initial bypass state (1 ms, matching the other bypass-style pedals so the
-    // startup crossfade finishes inside SignalChain's insert mute)
+    // Apply initial bypass state
     applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx, 0.001);
   }
 
@@ -206,12 +201,12 @@ export class MxrFlangerNode implements AudioPedalNode {
 
   private calcFeedbackGain(regen: number): number {
     const clamped = Math.max(0, Math.min(10, regen));
-    // Progressive feedback curve driving into tanh saturation for screaming Van Halen jet roar:
+    // Progressive feedback curve capped at 0.78 matching authentic Reticon SAD1024 circuit limits:
     // regen = 0 -> 0.0
-    // regen = 5 -> 0.42 (musical flanger body)
-    // regen = 8 -> 0.72 (aggressive jet whoosh)
-    // regen = 10 -> 0.93 (singing, burning combustion howl safely compressed by tanh limiter)
-    return Math.pow(clamped / 10, 1.2) * 0.93;
+    // regen = 4 -> 0.25 (warm chewy flanger body)
+    // regen = 7 -> 0.52 (classic Van Halen "Unchained" jet sweep)
+    // regen = 10 -> 0.78 (screaming metallic combustion howl safely bounded without runaway self-oscillation)
+    return Math.pow(clamped / 10, 1.25) * 0.78;
   }
 
   private createSaturationCurve(samples: number): Float32Array {
@@ -257,9 +252,11 @@ export class MxrFlangerNode implements AudioPedalNode {
       }
 
       case 'regen': {
-        const fbGain = this.calcFeedbackGain(value);
-        this.feedbackGain.gain.cancelScheduledValues(now);
-        this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.03);
+        if (this.enabled) {
+          const fbGain = this.calcFeedbackGain(value);
+          this.feedbackGain.gain.cancelScheduledValues(now);
+          this.feedbackGain.gain.setTargetAtTime(fbGain, now, 0.03);
+        }
         break;
       }
     }
@@ -268,6 +265,15 @@ export class MxrFlangerNode implements AudioPedalNode {
   public setEnabled(enabled: boolean): void {
     if (this.isDisposed) return;
     this.enabled = enabled;
+    const now = this.ctx.currentTime;
+    if (!enabled) {
+      this.feedbackGain.gain.cancelScheduledValues(now);
+      this.feedbackGain.gain.setTargetAtTime(0, now, 0.015);
+    } else {
+      const fb = this.calcFeedbackGain(this.params.regen);
+      this.feedbackGain.gain.cancelScheduledValues(now);
+      this.feedbackGain.gain.setTargetAtTime(fb, now, 0.02);
+    }
     applyBypassCrossfade(this.bypassWet, this.bypassDry, this.enabled, this.ctx);
   }
 

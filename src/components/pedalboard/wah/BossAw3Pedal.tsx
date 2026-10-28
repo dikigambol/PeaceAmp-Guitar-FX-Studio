@@ -203,20 +203,6 @@ export const BossAw3Pedal: React.FC<PedalProps> = ({
             <span className="boss-sub-ticks mode-active-text">{currentModeLabel}</span>
           </div>
         </div>
-
-        {/* Humanizer Vowel Bracket Subtext */}
-        <div className="boss-aw3-vowel-bracket-wrap">
-          <div className="boss-aw3-vowel-bracket">
-            <span className="bracket-title">
-              {isHumanizer
-                ? `TALKING VOWEL MORPH: ${vowel1Label} → ${vowel2Label}`
-                : isTempo
-                ? 'RHYTHMIC TEMPO LFO WAH'
-                : 'DYNAMIC ENVELOPE WAH'}
-            </span>
-          </div>
-        </div>
-
       </div>
 
       {/* Middle Stamped Graphic Section (Clean Authentic Stamped Chassis) */}

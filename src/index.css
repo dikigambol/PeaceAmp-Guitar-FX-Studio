@@ -6887,7 +6887,8 @@ body {
 .pedal-boss-aw3 .boss-treadle-plate,
 .pedal-boss-oc5 .boss-treadle-plate,
 .pedal-boss-tr2 .boss-treadle-plate,
-.pedal-boss-vb2 .boss-treadle-plate {
+.pedal-boss-vb2 .boss-treadle-plate,
+.pedal-boss-rv6 .boss-treadle-plate {
   width: 100% !important;
   height: 85px !important;
   margin-top: auto !important;
@@ -16273,6 +16274,1074 @@ body {
   vertical-align: super !important;
   margin-left: 2px !important;
 }
+
+/* =========================================================================
+   CATEGORY 20: REVERB PEDALS
+   ========================================================================= */
+
+/* 1. BOSS RV-6 DIGITAL REVERB */
+.pedal-boss-rv6 {
+  width: 228px !important;
+  max-width: 228px !important;
+  min-height: 330px !important;
+  background: linear-gradient(180deg, #44474e 0%, #34373d 40%, #282a2f 80%, #1e2024 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.88),
+    inset 0 1px 2px rgba(255, 255, 255, 0.45) !important;
+  padding: 8px 10px 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+/* Symmetrical Side 1/4" Phone Jacks */
+.pedal-boss-rv6 .stompbox-side-jack {
+  top: 46px !important;
+}
+
+.pedal-boss-rv6 .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+
+.pedal-boss-rv6 .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+/* Control Cavity & Knobs Row (Matching Boss AW-3) */
+.pedal-boss-rv6 .boss-control-cavity {
+  width: 100% !important;
+  background: #0b0e13 !important;
+  border-radius: 5px !important;
+  border: 1.5px solid #232936 !important;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.95), 0 1px 1px rgba(255, 255, 255, 0.2) !important;
+  padding: 6px 8px 8px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.pedal-boss-rv6 .boss-check-led-wrap {
+  margin-bottom: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer !important;
+}
+
+.pedal-boss-rv6 .boss-check-text {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.8px !important;
+  color: #94a3b8 !important;
+}
+
+.pedal-boss-rv6 .boss-knobs-row {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  width: 100% !important;
+  gap: 3px !important;
+  align-items: start !important;
+  justify-items: center !important;
+  padding: 0 2px !important;
+  box-sizing: border-box !important;
+}
+
+.pedal-boss-rv6 .boss-knob-col {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 3px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  text-align: center !important;
+}
+
+.pedal-boss-rv6 .boss-knob-name {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.8px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+}
+
+.pedal-boss-rv6 .boss-sub-ticks {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 5.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+  color: #cbd5e1 !important;
+  line-height: 1.1 !important;
+  white-space: nowrap !important;
+}
+
+.pedal-boss-rv6 .mode-active-text {
+  background: rgba(0, 174, 239, 0.24) !important;
+  color: #7dd3fc !important;
+  padding: 0.5px 3px !important;
+  border-radius: 3px !important;
+  border: 1px solid rgba(0, 174, 239, 0.45) !important;
+  font-weight: 800 !important;
+  font-size: 6px !important;
+  letter-spacing: 0.4px !important;
+}
+
+/* Middle Stepped Section */
+.boss-rv6-mid {
+  width: 100% !important;
+  margin: 7px 0 6px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-rv6-mid .boss-io-arrows {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 0 4px !important;
+  box-sizing: border-box !important;
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  color: #e2e8f0 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.boss-rv6-mid .boss-io-left,
+.boss-rv6-mid .boss-io-right {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+}
+
+.boss-rv6-mid .boss-sub-io {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 6.5px !important;
+  color: #cbd5e1 !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.4px !important;
+}
+
+/* Middle Model Typography (Matching Boss AW-3 / SD-1 Style) */
+.boss-rv6-typography {
+  text-align: center !important;
+  margin: 5px 0 8px !important;
+  line-height: 1.15 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.boss-rv6-title {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+
+.boss-rv6-model {
+  font-family: 'Michroma', sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  letter-spacing: 1px !important;
+  margin-left: 28px !important;
+}
+
+/* 2. ELECTRO-HARMONIX HOLY GRAIL NANO */
+.pedal-holy-grail {
+  width: 192px !important;
+  min-width: 192px !important;
+  max-width: 192px !important;
+  height: 336px !important;
+  min-height: 336px !important;
+  max-height: 336px !important;
+  background: linear-gradient(180deg, #edf0f3 0%, #d8dde3 25%, #c5cbd2 60%, #b2b8c0 100%) !important;
+  border: 2px solid #5a626f !important;
+  border-radius: 12px !important;
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.75),
+    inset 0 2px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.45) !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  padding: 3px !important;
+  overflow: visible !important;
+  cursor: grab !important;
+  user-select: none !important;
+}
+
+.pedal-holy-grail.is-dragging {
+  cursor: grabbing !important;
+}
+
+/* Floating Top Bar (Close button stays out of flex flow so frame is 100% flush at top) */
+.pedal-holy-grail .holy-grail-top-bar {
+  position: absolute !important;
+  top: 4px !important;
+  right: 4px !important;
+  width: auto !important;
+  z-index: 40 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* 1/4" Side Phone Jacks placed at top aligned to standard JACK_Y_OFFSET = 57 (top: 46px) */
+.pedal-holy-grail .stompbox-side-jack {
+  top: 46px !important;
+  z-index: 25 !important;
+}
+
+.pedal-holy-grail .stompbox-side-jack.jack-left {
+  left: -6px !important;
+}
+
+.pedal-holy-grail .stompbox-side-jack.jack-right {
+  right: -6px !important;
+}
+
+.holy-grail-faceplate {
+  width: 100% !important;
+  height: 100% !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+}
+
+/* Mathematical full-bleed cyan vector frame with clean gaps for AMP & INPUT */
+.holy-grail-frame-svg {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none !important;
+  z-index: 5 !important;
+}
+
+.holy-grail-inner-content {
+  position: relative !important;
+  z-index: 10 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 4px 6px 8px !important;
+  box-sizing: border-box !important;
+}
+
+.holy-grail-power-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  font-family: var(--font-mono), monospace !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  margin-top: 1px !important;
+  margin-bottom: 2px !important;
+}
+
+.power-polarity-icon {
+  font-size: 8.5px !important;
+  font-weight: 900 !important;
+}
+
+.holy-grail-controls-row {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  padding: 2px 4px 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Symmetrical precision toggle box */
+.holy-grail-toggle-box {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  user-select: none !important;
+  width: 68px !important;
+  padding: 2px !important;
+  background: transparent !important;
+}
+
+.toggle-txt-top {
+  margin-bottom: 2px !important;
+}
+
+.toggle-switch-middle {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+}
+
+.toggle-txt-bottom {
+  margin-top: 2px !important;
+}
+
+.toggle-txt {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  color: #334155 !important;
+  letter-spacing: 0.5px !important;
+  transition: color 0.15s ease !important;
+}
+
+.toggle-txt.active {
+  color: #0077b6 !important;
+  font-weight: 900 !important;
+  text-shadow: 0 0 2px rgba(0, 174, 239, 0.5) !important;
+}
+
+.toggle-txt-side {
+  margin-left: 2px !important;
+}
+
+/* Precision Hardware Mini-Toggle Switch */
+.vintage-toggle-switch {
+  width: 24px !important;
+  height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.toggle-hex-nut {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 45%, #64748b 85%, #334155 100%) !important;
+  border: 1.5px solid #1e293b !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 1px #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.toggle-bushing {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, #475569 0%, #0f172a 100%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.toggle-bat {
+  width: 6px !important;
+  height: 15px !important;
+  background: linear-gradient(90deg, #94a3b8 0%, #ffffff 35%, #cbd5e1 65%, #64748b 100%) !important;
+  border-radius: 3px !important;
+  border: 0.5px solid #1e293b !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.toggle-bat.pos-0 {
+  transform: translateY(-5px) !important;
+}
+
+.toggle-bat.pos-1 {
+  transform: translateY(0px) !important;
+}
+
+.toggle-bat.pos-2 {
+  transform: translateY(5px) !important;
+}
+
+.holy-grail-knob-box {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 72px !important;
+}
+
+.holy-grail-knob-caption {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 8.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 1px !important;
+  color: #090c10 !important;
+  margin-top: 3px !important;
+}
+
+.holy-grail-center-deck {
+  position: relative !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 6px 0 2px !important;
+}
+
+/* Mathematically Centered Concentric Red Dome LED */
+.holy-grail-bezel-led {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, #ffffff 0%, #e2e8f0 30%, #94a3b8 70%, #334155 100%) !important;
+  border: 1.5px solid #0f172a !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45), inset 0 1px 1.5px #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  position: relative !important;
+  z-index: 5 !important;
+  margin: 0 auto 8px !important;
+}
+
+.holy-grail-led-lens {
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  display: block !important;
+  margin: auto !important;
+  background: radial-gradient(circle at 45% 45%, #64748b 0%, #1e293b 100%) !important;
+  border: 1px solid #0f172a !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+.holy-grail-bezel-led.lit .holy-grail-led-lens {
+  background: radial-gradient(circle at 40% 40%, #ffffff 0%, #ef4444 45%, #991b1b 100%) !important;
+  box-shadow: 0 0 10px #ef4444, 0 0 18px rgba(239, 68, 68, 0.85) !important;
+}
+
+.holy-grail-logo-wrap {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+.holy-grail-svg-art {
+  width: 100% !important;
+  max-width: 160px !important;
+  height: auto !important;
+  display: block !important;
+  margin: 0 auto !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) !important;
+}
+
+.holy-grail-lower-deck {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: auto !important;
+}
+
+.holy-grail-stomp-wrap {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 1px 0 6px !important;
+}
+
+.holy-grail-footer-brand {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  line-height: 1.15 !important;
+}
+
+.ehx-brand-name {
+  font-family: "Times New Roman", Georgia, serif !important;
+  font-size: 13px !important;
+  font-style: italic !important;
+  font-weight: bold !important;
+  color: #090c10 !important;
+  letter-spacing: -0.2px !important;
+}
+
+.ehx-brand-city {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 800 !important;
+  color: #334155 !important;
+  letter-spacing: 0.8px !important;
+  margin-top: 1px !important;
+}
+
+/* ==========================================================================
+   Category 20: JHS 3 Series Hall Reverb Styles
+   ========================================================================== */
+.pedal-jhs-hall {
+  width: 196px !important;
+  height: 344px !important;
+  background: #fbfbfb !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 16px !important;
+  box-shadow:
+    0 14px 32px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.95) !important;
+  position: relative !important;
+  overflow: visible !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+}
+
+/* Side 1/4" Jacks (Aligned with OUTPUT and INPUT at y = 209px) */
+.pedal-jhs-hall .stompbox-side-jack {
+  top: 209px !important;
+}
+
+.pedal-jhs-hall .stompbox-side-jack.jack-left {
+  left: -6px !important;
+}
+
+.pedal-jhs-hall .stompbox-side-jack.jack-right {
+  right: -6px !important;
+}
+
+/* Top-Right Floating Close Button */
+.jhs-top-bar {
+  position: absolute !important;
+  top: 6px !important;
+  right: 6px !important;
+  left: auto !important;
+  z-index: 25 !important;
+}
+
+.jhs-faceplate {
+  width: 100% !important;
+  height: 100% !important;
+  padding: 16px 14px 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Header Title: HALL REVERB (Clean Centered Header) */
+.jhs-header-title {
+  text-align: center !important;
+  padding: 0 !important;
+  margin-top: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.jhs-header-title span {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #111111 !important;
+  letter-spacing: 0.18em !important;
+}
+
+/* 3 Knobs Area: Clean, frameless, 100% centered 3-column CSS Grid */
+.jhs-knobs-area {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  justify-items: center !important;
+  align-items: start !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.jhs-knob-column {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+
+.jhs-knob-label {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  color: #111111 !important;
+  text-align: center !important;
+  user-select: none !important;
+}
+
+/* MODULATE Row: Shared 3-column grid, exactly aligned directly below the DECAY column */
+.jhs-modulate-row {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  justify-items: center !important;
+  align-items: start !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  margin-top: 14px !important;
+}
+
+.jhs-modulate-spacer {
+  display: none !important;
+}
+
+.jhs-modulate-col {
+  grid-column: 3 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+.jhs-toggle-switch {
+  width: 22px !important;
+  height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  position: relative !important;
+}
+
+.jhs-toggle-hex-nut {
+  width: 17px !important;
+  height: 17px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, #f8fafc 0%, #cbd5e1 45%, #64748b 85%, #334155 100%) !important;
+  border: 1px solid #111111 !important;
+  box-shadow: 0 1.5px 3px rgba(0, 0, 0, 0.4), inset 0 1px 1px #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.jhs-toggle-hole {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: #111111 !important;
+}
+
+.jhs-toggle-bat {
+  position: absolute !important;
+  width: 5px !important;
+  height: 13px !important;
+  border-radius: 2.5px !important;
+  background: linear-gradient(90deg, #94a3b8 0%, #ffffff 40%, #cbd5e1 70%, #475569 100%) !important;
+  border: 0.5px solid #0f172a !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  pointer-events: none !important;
+}
+
+.jhs-toggle-switch .jhs-toggle-bat.pos-up {
+  transform: translateY(-3px) scaleY(1.05) !important;
+}
+
+.jhs-toggle-switch .jhs-toggle-bat.pos-down {
+  transform: translateY(3px) scaleY(0.95) !important;
+}
+
+/* Clean L-bracket wrapping outside the MODULATE label without striking through */
+.jhs-modulate-label-box {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  border-left: 2px solid #111111 !important;
+  border-bottom: 2px solid #111111 !important;
+  padding: 1px 4px 1px 3px !important;
+  margin-top: 3px !important;
+}
+
+.jhs-modulate-text {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  color: #111111 !important;
+  line-height: 1 !important;
+}
+
+/* Middle I/O Section - Mepet ke tepi kiri dan tepi kanan */
+.jhs-io-section {
+  position: absolute !important;
+  top: 198px !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 0 6px !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+  z-index: 8 !important;
+}
+
+.jhs-io-bracket {
+  display: flex !important;
+  position: relative !important;
+}
+
+.jhs-io-bracket.bracket-left {
+  border-left: 2px solid #111111 !important;
+  border-bottom: 2px solid #111111 !important;
+  padding: 2px 4px 2px 2px !important;
+}
+
+.jhs-io-bracket.bracket-right {
+  border-right: 2px solid #111111 !important;
+  border-bottom: 2px solid #111111 !important;
+  padding: 2px 2px 2px 4px !important;
+}
+
+.jhs-bracket-txt {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.12em !important;
+  color: #111111 !important;
+  writing-mode: vertical-lr !important;
+}
+
+.bracket-left .jhs-bracket-txt {
+  transform: rotate(0deg) !important;
+}
+
+.bracket-right .jhs-bracket-txt {
+  transform: rotate(180deg) !important;
+}
+
+/* Bottom Section */
+.jhs-bottom-section {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 84px !important;
+  z-index: 10 !important;
+}
+
+/* JHS Brand Block (Left) */
+.jhs-brand-badge {
+  position: absolute !important;
+  left: 14px !important;
+  bottom: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  user-select: none !important;
+}
+
+.jhs-bold-logo {
+  font-family: 'Impact', 'Arial Black', sans-serif !important;
+  font-size: 34px !important;
+  font-weight: 900 !important;
+  line-height: 0.8 !important;
+  letter-spacing: -2px !important;
+  color: #111111 !important;
+  transform: scaleY(0.96) !important;
+}
+
+.jhs-series-tag {
+  background: #111111 !important;
+  color: #ffffff !important;
+  padding: 1.5px 5px !important;
+  border-radius: 2px !important;
+  margin-top: 3px !important;
+}
+
+.jhs-series-tag span {
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 7.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.12em !important;
+  display: block !important;
+  line-height: 1 !important;
+  color: #ffffff !important;
+}
+
+/* Mathematically Centered ClassicStompSwitch (seperti Klon Centaur) */
+.jhs-center-footswitch {
+  position: absolute !important;
+  left: 50% !important;
+  bottom: 18px !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 15 !important;
+}
+
+/* Status Red LED (Right) */
+.jhs-led-socket {
+  position: absolute !important;
+  right: 20px !important;
+  bottom: 30px !important;
+  width: 18px !important;
+  height: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 12 !important;
+}
+
+.jhs-led-lens {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 35% 35%, #4a0d11 0%, #1a0204 100%) !important;
+  border: 1px solid #0f172a !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9) !important;
+  transition: all 0.2s ease !important;
+}
+
+.jhs-led-lens.lit {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ff3b30 40%, #cc0000 75%, #660000 100%) !important;
+  border-color: #990000 !important;
+  box-shadow:
+    0 0 8px #ff3b30,
+    0 0 18px rgba(255, 59, 48, 0.85),
+    inset 0 1px 1px #ffffff !important;
+}
+
+/* ==========================================================================
+   Category 20: TC Electronic Drip Spring Reverb Styles
+   ========================================================================== */
+.pedal-tc-drip {
+  width: 172px !important;
+  height: 290px !important;
+  background: linear-gradient(180deg, #c29d38 0%, #b8932e 45%, #a88324 100%) !important;
+  border: 2px solid #5a400f !important;
+  border-radius: 4px !important;
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(220, 180, 80, 0.4) !important;
+  position: relative !important;
+  overflow: visible !important;
+  user-select: none !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+}
+
+.pedal-tc-drip .stompbox-side-jack {
+  top: 46px !important;
+}
+
+.pedal-tc-drip .stompbox-side-jack.jack-left {
+  left: -8px !important;
+}
+
+.pedal-tc-drip .stompbox-side-jack.jack-right {
+  right: -8px !important;
+}
+
+.tc-drip-top-bar {
+  position: absolute !important;
+  top: 5px !important;
+  right: 6px !important;
+  z-index: 25 !important;
+}
+
+.tc-drip-faceplate {
+  width: 100% !important;
+  padding: 8px 12px 0 !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+.tc-drip-header {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  gap: 2px !important;
+}
+
+.tc-drip-brand {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: #2b1807 !important;
+  letter-spacing: -0.2px !important;
+  line-height: 1 !important;
+}
+
+.tc-drip-led-wrap {
+  cursor: pointer !important;
+  margin-top: 1px !important;
+}
+
+.tc-drip-led {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 40% 40%, #573a11 0%, #1e1104 100%) !important;
+  border: 1px solid #2b1807 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+  transition: all 0.2s ease !important;
+}
+
+.tc-drip-led.lit {
+  background: radial-gradient(circle at 35% 35%, #fff 0%, #ef4444 40%, #b91c1c 80%, #7f1d1d 100%) !important;
+  border-color: #991b1b !important;
+  box-shadow: 0 0 10px #ef4444, 0 0 16px rgba(239, 68, 68, 0.9) !important;
+}
+
+/* Precision Inverted Triangle Knobs Layout */
+.tc-drip-top-knobs {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  padding: 0 14px !important;
+  box-sizing: border-box !important;
+  margin-top: 5px !important;
+}
+
+.tc-drip-mid-knob {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: -2px !important;
+}
+
+.tc-drip-knob-col {
+  width: 48px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.tc-drip-knob-title {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 900 !important;
+  color: #2b1807 !important;
+  letter-spacing: 0.8px !important;
+  margin-bottom: 2px !important;
+  text-align: center !important;
+}
+
+/* Script Logo */
+.tc-drip-badge-section {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  margin-top: 4px !important;
+}
+
+.tc-drip-script-logo {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+.drip-word {
+  font-family: 'Brush Script MT', 'Dancing Script', 'Segoe Script', cursive, sans-serif !important;
+  font-size: 28px !important;
+  font-weight: bold !important;
+  font-style: italic !important;
+  color: #2b1807 !important;
+  line-height: 0.85 !important;
+}
+
+.drip-swoosh {
+  width: 58px !important;
+  height: 2.5px !important;
+  background: #2b1807 !important;
+  border-radius: 1.5px !important;
+  margin-top: 1px !important;
+}
+
+.tc-drip-subtitle {
+  font-family: var(--font-ui), sans-serif !important;
+  font-size: 7px !important;
+  font-weight: 900 !important;
+  color: #2b1807 !important;
+  letter-spacing: 1px !important;
+  margin-top: 2px !important;
+}
+
+/* Bottom Section with Edge-to-edge Pinstripes */
+.tc-drip-bottom-section {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  height: 84px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 10 !important;
+}
+
+.tc-drip-stripes {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-evenly !important;
+  padding: 8px 0 !important;
+  box-sizing: border-box !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  border-bottom-left-radius: 2px !important;
+  border-bottom-right-radius: 2px !important;
+  z-index: 1 !important;
+}
+
+.tc-drip-stripes .tc-stripe-line {
+  width: 100% !important;
+  height: 2px !important;
+  background: #2b1807 !important;
+  opacity: 0.85 !important;
+}
+
+.tc-drip-footswitch-center {
+  position: relative !important;
+  z-index: 5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
 
 
 

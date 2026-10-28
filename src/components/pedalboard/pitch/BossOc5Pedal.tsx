@@ -231,10 +231,6 @@ export const BossOc5Pedal: React.FC<PedalProps> = ({
               <span className="boss-io-arrow">&larr;</span>
               <span className="boss-io-name">OUTPUT</span>
             </div>
-            <div className="boss-oc5-io-item">
-              <span className="boss-io-arrow">&larr;</span>
-              <span className="boss-io-name">DIRECT OUT</span>
-            </div>
           </div>
           <div className="boss-oc5-right-labels">
             <div className="boss-oc5-io-item">
