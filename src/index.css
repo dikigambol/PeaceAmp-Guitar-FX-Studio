@@ -2439,9 +2439,9 @@ body {
   background: #141822;
   border: 1px solid #333d52;
   border-radius: var(--radius-md);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.85);
-  width: 320px;
-  max-width: 90vw;
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.9);
+  width: 680px;
+  max-width: calc(100vw - 32px);
   z-index: 100;
   padding: 0;
   display: flex;
@@ -2454,14 +2454,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px 8px;
+  padding: 12px 16px 10px;
   background: #171c28;
   border-bottom: 1px solid #232a3b;
 }
 
 .dropdown-title {
   font-family: var(--font-rack);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--accent-brass);
   letter-spacing: 1.2px;
@@ -2472,7 +2472,7 @@ body {
   border: none;
   color: #64748b;
   cursor: pointer;
-  padding: 3px;
+  padding: 4px;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -2489,7 +2489,7 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  padding: 7px 12px;
+  padding: 9px 16px;
   background: #0f1219;
   border-bottom: 1px solid #232a3b;
   transition: border-color 0.2s ease;
@@ -2501,7 +2501,7 @@ body {
 
 .dropdown-search-box .search-icon {
   color: var(--accent-brass);
-  margin-right: 8px;
+  margin-right: 10px;
   flex-shrink: 0;
 }
 
@@ -2511,7 +2511,7 @@ body {
   border: none;
   outline: none;
   color: #f1f5f9;
-  font-size: 11.5px;
+  font-size: 13px;
   font-family: var(--font-ui);
 }
 
@@ -2537,9 +2537,9 @@ body {
 
 .dropdown-category-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 5px;
-  padding: 7px 12px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 10px 14px;
   background: #121620;
   border-bottom: 1px solid #1f2533;
 }
@@ -2551,11 +2551,11 @@ body {
   text-align: center;
   background: #1c2230;
   border: 1px solid #2a3346;
-  color: #94a3b8;
-  font-size: 9.5px;
+  color: #cbd5e1;
+  font-size: 10.5px;
   font-weight: 700;
-  border-radius: 12px;
-  padding: 3px 6px;
+  border-radius: 14px;
+  padding: 5px 8px;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.15s ease;
@@ -2563,7 +2563,7 @@ body {
 
 .cat-tab-btn:hover {
   color: #f1f5f9;
-  border-color: rgba(200, 166, 101, 0.4);
+  border-color: rgba(200, 166, 101, 0.45);
 }
 
 .cat-tab-btn.active {
@@ -2574,13 +2574,13 @@ body {
 }
 
 .dropdown-pedals-list {
-  max-height: 280px;
+  max-height: min(480px, calc(100vh - 270px));
   overflow-y: auto;
-  padding: 6px 0;
+  padding: 10px 12px 14px;
 }
 
 .dropdown-pedals-list::-webkit-scrollbar {
-  width: 6px;
+  width: 7px;
 }
 
 .dropdown-pedals-list::-webkit-scrollbar-track {
@@ -2588,31 +2588,35 @@ body {
 }
 
 .dropdown-pedals-list::-webkit-scrollbar-thumb {
-  background: #252c3c;
-  border-radius: 3px;
+  background: #2b3447;
+  border-radius: 4px;
 }
 
 .dropdown-pedals-list::-webkit-scrollbar-thumb:hover {
-  background: #38435c;
+  background: #3d4963;
 }
 
 .dropdown-category-group {
-  margin-bottom: 6px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 12px;
 }
 
 .group-header {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 14px 3px;
+  padding: 4px 4px 2px;
   margin-top: 2px;
 }
 
 .group-tag {
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.8px;
-  padding: 1.5px 6px;
+  padding: 2px 7px;
   border-radius: 3px;
   font-family: var(--font-mono);
   background: rgba(200, 166, 101, 0.18) !important;
@@ -2621,19 +2625,19 @@ body {
 }
 
 .group-count {
-  font-size: 9.5px;
-  color: rgba(200, 166, 101, 0.65);
+  font-size: 10.5px;
+  color: rgba(200, 166, 101, 0.75);
   font-weight: 600;
 }
 
 .dropdown-empty-state {
-  padding: 22px 14px;
+  padding: 32px 16px;
   text-align: center;
   color: #94a3b8;
-  font-size: 11px;
+  font-size: 12.5px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .dropdown-empty-state span {
@@ -2643,37 +2647,46 @@ body {
 
 .dropdown-empty-state small {
   color: #64748b;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .dropdown-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 14px;
-  background: transparent;
-  border: none;
+  gap: 11px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  box-sizing: border-box;
+}
+
+/* Single-item groups (Amp Head, Cabinet IR, Noise Gate, etc.) span full width */
+.dropdown-category-group > .dropdown-item:first-of-type:last-of-type {
+  grid-column: 1 / -1;
 }
 
 .dropdown-item:hover {
-  background: #1c2333;
+  background: #1d2536;
+  border-color: rgba(200, 166, 101, 0.45);
 }
 
 .dropdown-color-dot {
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
 }
 
 .dropdown-item-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   flex: 1;
   min-width: 0;
 }
@@ -2688,7 +2701,7 @@ body {
 
 .dropdown-item-info .item-name {
   font-family: var(--font-rack);
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #fff;
   letter-spacing: 0.4px;
@@ -2698,9 +2711,9 @@ body {
 }
 
 .item-pill-badge {
-  font-size: 7.5px;
+  font-size: 8px;
   font-weight: 800;
-  padding: 1px 5px;
+  padding: 1.5px 6px;
   border-radius: 3px;
   letter-spacing: 0.4px;
   font-family: var(--font-mono);
@@ -2711,7 +2724,7 @@ body {
 }
 
 .dropdown-item-info .item-desc {
-  font-size: 9.5px;
+  font-size: 10.5px;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -17354,4 +17367,2049 @@ body {
 
 
 
-
+
+
+/* ==========================================================================
+   UNIFIED MINIMALIST STUDIO TOP CONSOLE BAR (FULL-WIDTH CANVAS WORKSPACE)
+   ========================================================================== */
+
+.studio-header {
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  padding: 0 12px;
+  gap: 10px;
+}
+
+.dashboard-main-layout {
+  height: calc(100vh - 48px - 24px);
+}
+
+.header-left-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.header-cluster-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(200, 166, 101, 0.22);
+  margin: 0 2px;
+}
+
+/* I/O Popover Trigger & Dropdown Panel */
+.header-io-popover-anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.header-console-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  background: #11141c;
+  border: 1px solid rgba(200, 166, 101, 0.35);
+  border-radius: 5px;
+  color: #f3e5c2;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.header-console-pill:hover,
+.header-console-pill.is-open {
+  background: rgba(200, 166, 101, 0.18);
+  border-color: #c8a665;
+  box-shadow: 0 0 8px rgba(200, 166, 101, 0.3);
+}
+
+.header-pill-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 800;
+  color: #15130f;
+  background: #c8a665;
+  padding: 0 4px;
+  border-radius: 3px;
+  line-height: 1.35;
+}
+
+.header-io-dropdown-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 310px;
+  background: #141720;
+  border: 1px solid rgba(200, 166, 101, 0.45);
+  border-radius: 8px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(200, 166, 101, 0.2);
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 9500;
+}
+
+.io-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(200, 166, 101, 0.2);
+}
+
+.io-popover-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #f3d48d;
+}
+
+.io-popover-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
+.io-popover-close:hover {
+  color: #fff;
+}
+
+.io-popover-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.io-popover-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #c8a665;
+}
+
+.io-popover-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Inline Pickup Selector */
+.header-inline-control {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 7px;
+  background: #11141c;
+  border: 1px solid rgba(200, 166, 101, 0.28);
+  border-radius: 5px;
+}
+
+.header-inline-control svg {
+  color: #c8a665;
+}
+
+.header-compact-select {
+  background: transparent;
+  border: none;
+  color: #f1f5f9;
+  font-family: var(--font-ui);
+  font-size: 10.5px;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+  padding-right: 2px;
+}
+
+.header-compact-select option {
+  background: #11141c;
+  color: #f1f5f9;
+}
+
+/* Inline Input / Output Gain + Mini VU Bar */
+.header-inline-meter-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  background: #11141c;
+  border: 1px solid #282f3d;
+  border-radius: 5px;
+}
+
+.header-mini-label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 800;
+  color: #c8a665;
+  letter-spacing: 0.4px;
+}
+
+.header-mini-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 54px;
+  height: 4px;
+  background: #090b10;
+  border: 1px solid rgba(200, 166, 101, 0.3);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.header-mini-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d4af37;
+  border: 1px solid #fff1b8;
+  cursor: pointer;
+}
+
+.header-mini-vu-track {
+  width: 34px;
+  height: 6px;
+  background: #080a0f;
+  border: 1px solid rgba(200, 166, 101, 0.25);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.header-mini-vu-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #f59e0b 75%, #ef4444 100%);
+  transition: width 0.06s linear;
+}
+
+.header-mini-vu-fill.is-clip {
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+
+/* Quick Noise Gate Pill */
+.header-gate-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 7px;
+  border-radius: 5px;
+  background: #11141c;
+  border: 1px solid #282f3d;
+  color: #64748b;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.header-gate-pill.is-active {
+  background: rgba(200, 166, 101, 0.15);
+  border-color: rgba(200, 166, 101, 0.55);
+  color: #f3d48d;
+  box-shadow: 0 0 8px rgba(200, 166, 101, 0.2);
+}
+
+.header-gate-pill:hover {
+  border-color: #c8a665;
+  color: #fff;
+}
+
+/* Mute Icon Button inside OUT group */
+.header-mute-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  background: transparent;
+  border: none;
+  color: #c8a665;
+  cursor: pointer;
+  padding: 0;
+}
+
+.header-mute-icon-btn:hover {
+  color: #fff;
+}
+
+.header-mute-icon-btn.is-muted {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.18);
+}
+
+/* Minimalist Chromatic Tuner Pill & Floating Bar */
+.header-tuner-anchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.header-tuner-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 5px;
+  background: #11141c;
+  border: 1px solid rgba(200, 166, 101, 0.35);
+  color: #dfc185;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.header-tuner-pill:hover {
+  border-color: #c8a665;
+  color: #fff;
+}
+
+.header-tuner-pill.is-active {
+  background: rgba(200, 166, 101, 0.22);
+  border-color: #f3d48d;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(200, 166, 101, 0.35);
+}
+
+.header-tuner-pill.is-in-tune {
+  border-color: #34d399;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.45);
+}
+
+.header-tuner-note-badge {
+  background: #0b0d13;
+  border: 1px solid rgba(200, 166, 101, 0.4);
+  color: #f3d48d;
+  padding: 0 5px;
+  border-radius: 3px;
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.header-tuner-note-badge.is-tune {
+  color: #34d399;
+  border-color: #34d399;
+}
+
+.header-floating-tuner-card {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: #13161f;
+  border: 1px solid rgba(200, 166, 101, 0.55);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85), 0 0 16px rgba(200, 166, 101, 0.2);
+  z-index: 9500;
+}
+
+.floating-tuner-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 54px;
+  padding: 4px 6px;
+  background: #0a0c12;
+  border: 1px solid rgba(200, 166, 101, 0.3);
+  border-radius: 5px;
+}
+
+.floating-tuner-note {
+  font-family: var(--font-ui);
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  color: #f3d48d;
+}
+
+.floating-tuner-note small {
+  font-size: 11px;
+  margin-left: 1px;
+}
+
+.floating-tuner-note.is-tune {
+  color: #34d399;
+  text-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+}
+
+.floating-tuner-hz {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.floating-tuner-gauge {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.floating-tuner-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #c8a665;
+}
+
+.floating-tuner-ticks .is-tune {
+  color: #34d399;
+}
+
+.floating-tuner-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.floating-tuner-close:hover {
+  color: #fff;
+}
+
+/* ==========================================================================
+   MXR M135 SMART GATE PEDAL (SILVER METALLIC CAST ENCLOSURE)
+   ========================================================================== */
+
+.pedal-mxr-smartgate {
+  width: 168px;
+  height: 276px;
+  border-radius: 10px;
+  background:
+    radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.25) 0%, transparent 55%),
+    repeating-radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 2px),
+    linear-gradient(165deg, #c6cbd0 0%, #aeb4ba 48%, #979da4 100%) !important;
+  border: 2px solid #848a91 !important;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.65),
+    inset 0 2px 3px rgba(255, 255, 255, 0.65),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35) !important;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 9px 11px 10px;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+.pedal-mxr-smartgate > .pedal-top-bar {
+  position: absolute !important;
+  top: 4px !important;
+  right: 4px !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  z-index: 25 !important;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.pedal-mxr-smartgate:hover > .pedal-top-bar {
+  opacity: 1;
+}
+
+/* Black Pin-Line Frame on Upper Face */
+.smartgate-pinline-frame {
+  width: 100%;
+  height: 194px;
+  border: 1.6px solid #141619;
+  border-radius: 8px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 8px 8px;
+  box-sizing: border-box;
+  margin-top: 0;
+}
+
+/* Vertical Side Labels breaking the black pin-line border */
+.smartgate-side-label {
+  position: absolute;
+  top: 112px;
+  background: #aeb4ba;
+  padding: 3px 2px;
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  color: #111317;
+  line-height: 1;
+  z-index: 3;
+}
+
+.smartgate-side-label.side-out {
+  left: -12px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.smartgate-side-label.side-in {
+  right: -10px;
+  writing-mode: vertical-rl;
+}
+
+/* Top Row inside Frame: HI TRIGGER RANGE Push Button + GATE LED */
+.smartgate-top-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1px;
+  margin-bottom: 3px;
+}
+
+.smartgate-range-btn {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #dfe5ec 65%, #9aa3ad 100%);
+  border: 1.3px solid #1b1e23;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.55), inset 0 1px 1px #ffffff;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s ease;
+}
+
+.smartgate-range-btn.is-pressed {
+  transform: translateY(1px) scale(0.93);
+  background: radial-gradient(circle at 35% 35%, #d9f99d 0%, #84cc16 70%, #4d7c0f 100%);
+  box-shadow: 0 0 6px rgba(132, 204, 22, 0.7), inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.smartgate-top-label {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  color: #111317;
+}
+
+.smartgate-gate-led-wrap {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.smartgate-gate-led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fef08a 0%, #ca8a04 75%, #713f12 100%);
+  border: 1.2px solid #1e2024;
+  opacity: 0.45;
+  transition: all 0.1s ease;
+}
+
+.smartgate-gate-led.is-lit {
+  opacity: 1;
+  background: radial-gradient(circle at 35% 35%, #ecfccb 0%, #a3e635 55%, #65a30d 100%);
+  box-shadow: 0 0 8px rgba(163, 230, 53, 0.95);
+}
+
+/* Center Row: Knob + 3-Way Slide Switch */
+.smartgate-center-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-top: 1px;
+  min-height: 62px;
+}
+
+.smartgate-knob-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 3-Way Slide Switch Assembly on the Right */
+.smartgate-mode-assembly {
+  position: absolute;
+  right: 0;
+  top: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.smartgate-mode-text {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7px;
+  font-weight: 900;
+  color: #111317;
+  letter-spacing: 0.2px;
+  line-height: 1;
+}
+
+.smartgate-mode-text.is-selected {
+  text-decoration: underline;
+}
+
+.smartgate-slide-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.smartgate-mid-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 6.5px;
+  font-weight: 900;
+  line-height: 0.95;
+  color: #111317;
+}
+
+.smartgate-slide-slot {
+  width: 11px;
+  height: 25px;
+  border-radius: 5.5px;
+  background: #141619;
+  border: 1px solid #2c3036;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.85);
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.smartgate-slide-cap {
+  width: 7.5px;
+  height: 7.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #dce3ea 70%, #949da6 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+  position: absolute;
+  transition: top 0.14s ease;
+}
+
+/* Mode 2 = FULL (Top), Mode 1 = MID (Middle), Mode 0 = HISS (Bottom) */
+.smartgate-slide-cap.pos-2 {
+  top: 1.5px;
+}
+
+.smartgate-slide-cap.pos-1 {
+  top: 8px;
+}
+
+.smartgate-slide-cap.pos-0 {
+  top: 14px;
+}
+
+/* Trigger Level Label */
+.smartgate-trigger-label {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  color: #111317;
+  margin-top: 3px;
+}
+
+/* Iconic MXR Rounded Box */
+.smartgate-mxr-box {
+  margin-top: 6px;
+  border: 2px solid #141619;
+  border-radius: 7px;
+  padding: 1px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.smartgate-mxr-text {
+  font-family: 'Arial Black', 'Inter', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  color: #141619;
+  line-height: 1.05;
+}
+
+/* Status LED Bezel */
+.smartgate-status-led-bezel {
+  margin-top: 6px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2e3238 0%, #0e1013 100%);
+  border: 1.5px solid #181a1f;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.smartgate-status-led-core {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #e2e8f0 0%, #64748b 100%);
+  transition: all 0.15s ease;
+}
+
+.smartgate-status-led-core.is-on {
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #ef4444 55%, #991b1b 100%);
+  box-shadow: 0 0 10px #ef4444, 0 0 4px #ffffff;
+}
+
+/* 3PDT Stomp Switch overlapping bottom border of pinline frame */
+.smartgate-stomp-wrap {
+  margin-top: -19px;
+  z-index: 4;
+  background: #a9afb6;
+  padding: 0 5px;
+  border-radius: 50%;
+}
+
+/* Bottom Typography: "smartgate" */
+.smartgate-bottom-title {
+  margin-top: auto;
+  padding-bottom: 2px;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 19px;
+  letter-spacing: -0.4px;
+  color: #121417;
+  line-height: 1;
+  display: flex;
+  align-items: baseline;
+}
+
+.smartgate-bottom-title .smart-thin {
+  font-weight: 400;
+}
+
+.smartgate-bottom-title .gate-bold {
+  font-weight: 900;
+}
+
+/* ============================================================================
+   PEACEAMP JCM 800 STUDIO HEAD (AUTHENTIC HORIZONTAL GUITAR AMPLIFIER HEAD)
+   ============================================================================ */
+.peaceamp-head-cabinet {
+  width: 720px !important;
+  max-width: 720px !important;
+  min-width: 720px !important;
+  height: 296px !important;
+  min-height: 296px !important;
+  max-height: 296px !important;
+  /* Black Levant Tolex outer wooden shell */
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 0),
+    radial-gradient(rgba(0, 0, 0, 0.55) 1px, transparent 0),
+    linear-gradient(180deg, #232529 0%, #16181b 35%, #111316 80%, #0b0c0e 100%) !important;
+  background-size: 5px 5px, 7px 7px, 100% 100% !important;
+  background-position: 0 0, 2.5px 2.5px, 0 0 !important;
+  border: 2px solid #2b2e33 !important;
+  border-radius: 15px !important;
+  box-shadow:
+    0 24px 44px rgba(0, 0, 0, 0.88),
+    0 8px 18px rgba(0, 0, 0, 0.65),
+    inset 0 2px 3px rgba(255, 255, 255, 0.16),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.85),
+    inset 3px 0 5px rgba(255, 255, 255, 0.06),
+    inset -3px 0 5px rgba(0, 0, 0, 0.65) !important;
+  padding: 16px 18px 16px !important;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-sizing: border-box;
+  user-select: none;
+  overflow: visible !important;
+}
+
+.peaceamp-head-cabinet.pedal-bypassed {
+  filter: brightness(0.88);
+}
+
+/* Top Leather Carry Handle with Gold End-Caps */
+.peaceamp-top-handle {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 248px;
+  height: 12px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.peaceamp-handle-cap {
+  width: 36px;
+  height: 9px;
+  background: linear-gradient(90deg, #8c6b27 0%, #f1d285 45%, #c59b3e 75%, #75571b 100%);
+  border: 1px solid #3d2c09;
+  border-radius: 3px 3px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.peaceamp-handle-rivet {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff6d1 0%, #b88a28 70%, #4d3607 100%);
+}
+
+.peaceamp-handle-strap {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  bottom: 2px;
+  height: 9px;
+  background: linear-gradient(180deg, #2a2d32 0%, #121417 65%, #07080a 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
+}
+
+/* Bottom Rubber Feet */
+.peaceamp-foot {
+  position: absolute;
+  bottom: -8px;
+  width: 36px;
+  height: 8px;
+  background: linear-gradient(90deg, #090a0c 0%, #26292e 45%, #090a0c 100%);
+  border: 1px solid #050607;
+  border-radius: 0 0 5px 5px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.peaceamp-foot.foot-left {
+  left: 48px;
+}
+
+.peaceamp-foot.foot-right {
+  right: 48px;
+}
+
+/* 4 Molded Gloss-Black Corner Protectors with Brass Rivets */
+.peaceamp-corner {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  background: radial-gradient(circle at 35% 35%, #34383f 0%, #15171b 55%, #08090b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.75), inset 0 1px 2px rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+  z-index: 4;
+}
+
+.peaceamp-corner.corner-tl {
+  top: -1px;
+  left: -1px;
+  border-radius: 14px 5px 16px 5px;
+}
+
+.peaceamp-corner.corner-tr {
+  top: -1px;
+  right: -1px;
+  border-radius: 5px 14px 5px 16px;
+}
+
+.peaceamp-corner.corner-bl {
+  bottom: -1px;
+  left: -1px;
+  border-radius: 5px 16px 5px 14px;
+}
+
+.peaceamp-corner.corner-br {
+  bottom: -1px;
+  right: -1px;
+  border-radius: 16px 5px 14px 5px;
+}
+
+.peaceamp-rivet {
+  position: absolute;
+  width: 5.5px;
+  height: 5.5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff3c4 0%, #d4af37 55%, #5c450e 100%);
+  box-shadow: 0 1px 1.5px rgba(0, 0, 0, 0.9);
+}
+
+.corner-tl .r1 { top: 7px; left: 21px; }
+.corner-tl .r2 { top: 21px; left: 7px; }
+.corner-tr .r1 { top: 7px; right: 21px; }
+.corner-tr .r2 { top: 21px; right: 7px; }
+.corner-bl .r1 { bottom: 7px; left: 21px; }
+.corner-bl .r2 { bottom: 21px; left: 7px; }
+.corner-br .r1 { bottom: 7px; right: 21px; }
+.corner-br .r2 { bottom: 21px; right: 7px; }
+
+/* Inner Recessed Front Baffle */
+.peaceamp-inner-baffle {
+  width: 100%;
+  height: 100%;
+  border-radius: 7px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #070809;
+  box-shadow:
+    inset 0 3px 8px rgba(0, 0, 0, 0.95),
+    0 1px 0 rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 2;
+}
+
+/* UPPER SECTION: Woven Black Fret/Grill Cloth (57% height) */
+.peaceamp-grill-cloth {
+  position: relative;
+  flex: 1 1 56%;
+  background-color: #0e1013;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.045) 0px,
+      rgba(255, 255, 255, 0.045) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 0px,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(ellipse at 50% 50%, rgba(35, 39, 46, 0.45) 0%, rgba(8, 9, 11, 0.92) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 2px solid #090a0c;
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.9);
+}
+
+/* Crisp White Piping Frame along Top, Left, Right of Grill Cloth */
+.peaceamp-white-piping {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 0;
+  border-top: 3.5px solid #f1f5f9;
+  border-left: 3.5px solid #f1f5f9;
+  border-right: 3.5px solid #f1f5f9;
+  border-radius: 6px 6px 12px 12px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.85),
+    inset 0 1px 2px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Top-Right Subtle Model Selector & Close Button on Grill */
+.peaceamp-grill-toolbar {
+  position: absolute;
+  top: 9px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 5;
+}
+
+.peaceamp-model-select {
+  appearance: none;
+  background: rgba(15, 17, 21, 0.88);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3.5px 10px;
+  max-width: 290px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.65);
+}
+
+.peaceamp-model-select:hover,
+.peaceamp-model-select:focus {
+  border-color: #dfbe6f;
+  color: #ffffff;
+  background: rgba(20, 23, 28, 0.95);
+}
+
+.peaceamp-close-btn {
+  width: 22px !important;
+  height: 22px !important;
+  background: rgba(15, 17, 21, 0.86) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #cbd5e1 !important;
+  border-radius: 5px !important;
+}
+
+.peaceamp-close-btn:hover {
+  color: #f87171 !important;
+  border-color: rgba(248, 113, 113, 0.5) !important;
+}
+
+/* Center Molded 3D White Plastic Script Logo: "PeaceAmp" */
+.peaceamp-script-logo {
+  font-family: 'Brush Script MT', 'Segoe Script', 'Lucida Handwriting', 'Pacifico', cursive;
+  font-size: 54px;
+  font-weight: 700;
+  font-style: italic;
+  color: #f8fafc;
+  letter-spacing: -1px;
+  line-height: 1;
+  transform: rotate(-2deg) translateY(3px);
+  text-shadow:
+    0 1px 0 #cbd5e1,
+    0 2.5px 0 #94a3b8,
+    0 5px 10px rgba(0, 0, 0, 0.95),
+    0 0 18px rgba(255, 255, 255, 0.14);
+  z-index: 3;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* LOWER SECTION: Brushed Anodized Gold Control Faceplate */
+.peaceamp-gold-faceplate {
+  flex: 0 0 110px;
+  height: 110px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 2px,
+      rgba(0, 0, 0, 0.025) 2px,
+      rgba(0, 0, 0, 0.025) 4px
+    ),
+    linear-gradient(
+      90deg,
+      #a88948 0%,
+      #cfb06b 18%,
+      #e6cb88 45%,
+      #c6a55e 72%,
+      #dfbe78 90%,
+      #9e7e3e 100%
+    );
+  border-top: 2px solid #f7e4b2;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.35),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 18px 6px 18px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* 1. Left Power & Standby Rocker Switches */
+.peaceamp-switches-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.peaceamp-switch-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+}
+
+.peaceamp-sw-top-lbl,
+.peaceamp-sw-bot-lbl {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  color: #1a1409;
+  letter-spacing: 0.3px;
+}
+
+.peaceamp-sw-top-lbl {
+  margin-bottom: 2px;
+}
+
+.peaceamp-sw-bot-lbl {
+  margin-top: 2px;
+}
+
+.peaceamp-sw-main-lbl {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  color: #140f06;
+  letter-spacing: 0.4px;
+  margin-top: 2px;
+}
+
+.peaceamp-rocker-switch {
+  width: 26px;
+  height: 38px;
+  padding: 2.5px;
+  background: #141416;
+  border: 1.5px solid #09090b;
+  border-radius: 3px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.65),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.peaceamp-rocker-switch.rocker-power .rocker-lens {
+  width: 100%;
+  height: 100%;
+  border-radius: 1.5px;
+  background: linear-gradient(180deg, #7f1d1d 0%, #991b1b 50%, #450a0a 100%);
+  border: 1px solid #300606;
+  transition: all 0.15s ease;
+}
+
+.peaceamp-rocker-switch.rocker-power.is-on .rocker-lens {
+  background: linear-gradient(180deg, #ff6b5b 0%, #dc2626 45%, #991b1b 100%);
+  box-shadow:
+    0 0 10px rgba(239, 68, 68, 0.85),
+    inset 0 2px 3px rgba(255, 220, 200, 0.65);
+}
+
+.peaceamp-rocker-switch.rocker-standby .rocker-face {
+  width: 100%;
+  height: 100%;
+  border-radius: 1.5px;
+  background: linear-gradient(180deg, #3a3e46 0%, #1c1e22 50%, #0b0c0e 100%);
+  border: 1px solid #090a0c;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+/* Mode LOW (rocked UP toward LOW) */
+.peaceamp-rocker-switch.rocker-standby.mode-low .rocker-face {
+  background: linear-gradient(180deg, #4b505a 0%, #24272d 42%, #090a0c 100%);
+  box-shadow:
+    inset 0 2.5px 2.5px rgba(255, 255, 255, 0.35),
+    0 2px 3px rgba(0, 0, 0, 0.85);
+}
+
+/* Mode HIGH (rocked DOWN toward HIGH) */
+.peaceamp-rocker-switch.rocker-standby.mode-high .rocker-face {
+  background: linear-gradient(180deg, #090a0c 0%, #24272d 58%, #4b505a 100%);
+  box-shadow:
+    inset 0 -2.5px 2.5px rgba(255, 255, 255, 0.35),
+    0 -1px 2px rgba(0, 0, 0, 0.85);
+}
+
+.peaceamp-sw-top-lbl.is-selected,
+.peaceamp-sw-bot-lbl.is-selected {
+  color: #7c1919;
+  font-weight: 900;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+/* 2. Classic JCM 800 Lead Series Silkscreen Inscription (Strictly Fixed Width so Knobs Never Shift) */
+.peaceamp-series-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0 10px 0 4px;
+  color: #161108;
+  flex: 0 0 112px;
+  width: 112px;
+  min-width: 112px;
+  max-width: 112px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.peaceamp-series-badge .series-model-code {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 16.5px;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.2px;
+  line-height: 1.05;
+  padding-right: 2px;
+}
+
+.peaceamp-series-badge .series-sub-line {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  font-style: italic;
+  letter-spacing: 0.15px;
+  line-height: 1.1;
+  border-bottom: 1.5px solid #161108;
+  padding-bottom: 1.5px;
+  padding-right: 2px;
+}
+
+.peaceamp-series-badge .series-studio-tag {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  margin-top: 2.5px;
+  padding-right: 2px;
+}
+
+/* 3. Six Horizontal Marshall Gold-Cap Knobs Row */
+.peaceamp-knobs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex: 1;
+  margin: 0 10px;
+}
+
+.peaceamp-knob-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+}
+
+.peaceamp-knob-title {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  color: #161108;
+  letter-spacing: 0.25px;
+  line-height: 1;
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+
+.peaceamp-dial-frame {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.peaceamp-scale-svg {
+  position: absolute;
+  inset: -2px;
+  width: 56px;
+  height: 56px;
+  pointer-events: none;
+}
+
+.peaceamp-dial-frame .scale-num {
+  position: absolute;
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 6.8px;
+  font-weight: 800;
+  color: #161108;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.peaceamp-dial-frame .num-4 {
+  top: 0px;
+  left: 11px;
+}
+
+.peaceamp-dial-frame .num-6 {
+  top: 0px;
+  right: 11px;
+}
+
+.peaceamp-dial-frame .num-0 {
+  bottom: 2px;
+  left: 5px;
+}
+
+.peaceamp-dial-frame .num-10 {
+  bottom: 2px;
+  right: 2px;
+}
+
+.peaceamp-knob-sub {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7.2px;
+  font-weight: 800;
+  color: #161108;
+  letter-spacing: 0.25px;
+  line-height: 1;
+  margin-top: 2px;
+}
+
+/* 4. Right Vertical Pair of 1/4" Input Jacks (HIGH / LOW Sensitivity) */
+.peaceamp-front-jacks {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 3px;
+  flex: 0 0 62px;
+  width: 62px;
+  padding-left: 6px;
+  padding-right: 4px;
+  box-sizing: border-box;
+}
+
+.peaceamp-jack-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.peaceamp-hex-jack {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  margin: 0;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #373a40 0%, #16181b 65%, #090a0c 100%);
+  border: 2px solid #090a0c;
+  box-shadow:
+    0 1.5px 3.5px rgba(0, 0, 0, 0.7),
+    inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.peaceamp-hex-jack:hover {
+  border-color: #dfbe6f;
+  transform: scale(1.08);
+}
+
+.peaceamp-hex-jack.is-plugged {
+  border-color: #f59e0b;
+  box-shadow:
+    0 0 8px rgba(245, 158, 11, 0.6),
+    0 1.5px 3.5px rgba(0, 0, 0, 0.8);
+}
+
+.hex-jack-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: #040506;
+  border: 1px solid #525866;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.95);
+  transition: all 0.15s ease;
+}
+
+.peaceamp-hex-jack.is-plugged .hex-jack-hole {
+  background: radial-gradient(circle at 50% 50%, #fef08a 0%, #f59e0b 65%, #92400e 100%);
+  border-color: #fef08a;
+  box-shadow: 0 0 5px #f59e0b;
+}
+
+.peaceamp-front-jacks .jack-lbl {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  color: #4a3c20;
+  transition: color 0.15s ease;
+}
+
+.peaceamp-jack-row.is-active .jack-lbl {
+  color: #0b0803;
+  font-weight: 900;
+  text-decoration: underline;
+}
+
+.peaceamp-front-jacks .jack-mid-lbl {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 6.5px;
+  font-weight: 800;
+  color: #161108;
+  letter-spacing: 0.2px;
+  padding-left: 1px;
+}
+
+/* ============================================================================
+   PEACE IR-200 CABINET & IR PROCESSOR (INSPIRED BY BOSS IR-200 200-SERIES)
+   ============================================================================ */
+.pedal-ir200-chassis {
+  width: 380px !important;
+  max-width: 380px !important;
+  min-width: 380px !important;
+  height: 420px !important;
+  min-height: 420px !important;
+  max-height: 420px !important;
+  /* Matte Slate-Blue / Gunmetal Powder-Coat Aluminum Enclosure */
+  background:
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0),
+    radial-gradient(rgba(0, 0, 0, 0.35) 1px, transparent 0),
+    linear-gradient(180deg, #394452 0%, #303a47 45%, #27303b 72%, #222a34 100%) !important;
+  background-size: 4px 4px, 6px 6px, 100% 100% !important;
+  background-position: 0 0, 2px 2px, 0 0 !important;
+  border: 2px solid #485666 !important;
+  border-radius: 10px !important;
+  box-shadow:
+    0 20px 38px rgba(0, 0, 0, 0.85),
+    0 6px 14px rgba(0, 0, 0, 0.6),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.22),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.75) !important;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  box-sizing: border-box;
+  user-select: none;
+  overflow: visible !important;
+}
+
+.pedal-ir200-chassis.pedal-bypassed {
+  filter: brightness(0.9);
+}
+
+/* 5 Top-Mounted Metallic 1/4" Hardware Jack Nuts */
+.ir200-top-jacks-row {
+  position: absolute;
+  top: -8px;
+  left: 34px;
+  right: 34px;
+  height: 8px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ir200-top-nut {
+  width: 26px;
+  height: 7px;
+  background: linear-gradient(90deg, #475569 0%, #e2e8f0 38%, #94a3b8 68%, #334155 100%);
+  border: 1px solid #1e293b;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.65);
+}
+
+/* Subtle Top-Right Close Button */
+.ir200-close-btn {
+  position: absolute !important;
+  top: 7px !important;
+  right: 7px !important;
+  width: 20px !important;
+  height: 20px !important;
+  background: rgba(15, 23, 42, 0.65) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #cbd5e1 !important;
+  border-radius: 4px !important;
+  z-index: 15 !important;
+}
+
+.ir200-close-btn:hover {
+  color: #f87171 !important;
+  border-color: rgba(248, 113, 113, 0.5) !important;
+}
+
+/* Upper Control Panel */
+.ir200-upper-panel {
+  flex: 1;
+  width: 100%;
+  padding: 14px 16px 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* ROW 1: Wide Blue Backlit Dot-Matrix LCD + MEMORY Encoder */
+.ir200-top-deck {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.ir200-lcd-bezel {
+  flex: 1;
+  min-width: 0;
+  background: linear-gradient(180deg, #111419 0%, #1a1f27 100%);
+  border: 2px solid #0b0d11;
+  border-radius: 6px;
+  padding: 7px 8px;
+  box-shadow:
+    inset 0 2px 5px rgba(0, 0, 0, 0.95),
+    0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.ir200-lcd-screen {
+  background: linear-gradient(180deg, #3c44c8 0%, #2f36ab 55%, #262c91 100%);
+  border: 1px solid #5762e8;
+  border-radius: 4px;
+  padding: 6px 8px;
+  color: #f8fafc;
+  font-family: 'Courier New', 'JetBrains Mono', monospace;
+  box-shadow:
+    0 0 12px rgba(79, 92, 245, 0.45),
+    inset 0 0 8px rgba(15, 20, 75, 0.65);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: filter 0.15s ease;
+}
+
+.ir200-lcd-screen.is-dim {
+  filter: saturate(0.55) brightness(0.75);
+}
+
+.lcd-top-zone {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.lcd-slot-box {
+  background: #f8fafc;
+  color: #293099;
+  font-family: 'Impact', 'Arial Black', monospace;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.lcd-top-right {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.lcd-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #e0e7ff;
+  letter-spacing: 0.3px;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ir200-lcd-select {
+  appearance: none;
+  background: rgba(15, 20, 75, 0.38);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 3px;
+  font-family: 'Courier New', 'JetBrains Mono', monospace;
+  font-weight: 800;
+  cursor: pointer;
+  outline: none;
+  padding: 2px 6px;
+  text-transform: uppercase;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.ir200-lcd-select:hover,
+.ir200-lcd-select:focus {
+  background: rgba(15, 20, 75, 0.72);
+  border-color: #ffffff;
+}
+
+.ir200-lcd-select option,
+.ir200-lcd-select optgroup {
+  background: #1a2035;
+  color: #f8fafc;
+  font-family: 'Inter', sans-serif;
+}
+
+.lcd-cab-select {
+  width: 100%;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.lcd-divider-line {
+  width: 100%;
+  height: 1.5px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.lcd-bottom-zone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.lcd-speaker-tag {
+  color: #c7d2fe;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.lcd-mic-select {
+  flex: 1;
+  min-width: 0;
+  font-size: 10.5px;
+}
+
+/* MEMORY Encoder Column */
+.ir200-memory-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding-right: 4px;
+}
+
+.ir200-lbl-main {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 9.5px;
+  font-weight: 900;
+  color: #f8fafc;
+  letter-spacing: 0.45px;
+  line-height: 1.1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.ir200-lbl-sub {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7px;
+  font-weight: 700;
+  color: #cbd5e1;
+  letter-spacing: 0.3px;
+  line-height: 1.1;
+  margin-bottom: 3px;
+}
+
+/* ROW 2: 2 Blend/Output Knobs (IR MIX, OUT LEVEL) + Custom IR Push Buttons */
+.ir200-mid-deck {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.ir200-mid-knobs {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 16px;
+  flex: 1;
+}
+
+.ir200-param-knob-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.ir200-dial-wrap {
+  position: relative;
+  width: 46px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ir200-val-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #93c5fd;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 3px;
+  padding: 1px 6px;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.ir200-val-badge.is-clickable {
+  cursor: pointer;
+}
+
+.ir200-val-badge.is-clickable:hover {
+  border-color: #93c5fd;
+  color: #ffffff;
+}
+
+.ir200-menu-buttons-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 126px;
+  flex-shrink: 0;
+  background: rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 6px 8px 8px;
+  box-sizing: border-box;
+}
+
+.ir200-btn-pair {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.ir200-btn-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+
+.ir200-btn-lbl {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  color: #f1f5f9;
+  letter-spacing: 0.35px;
+  white-space: nowrap;
+}
+
+.ir200-push-btn {
+  width: 46px;
+  height: 18px;
+  background: linear-gradient(180deg, #2b313b 0%, #12151b 100%);
+  border: 1.5px solid #090b0e;
+  border-radius: 3px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition: transform 0.08s ease, border-color 0.15s ease;
+}
+
+.ir200-push-btn:hover {
+  border-color: #93c5fd;
+}
+
+.ir200-push-btn:active {
+  transform: translateY(1px);
+}
+
+.ir200-write-bracket {
+  position: relative;
+  width: 88%;
+  margin-top: 5px;
+  border-bottom: 1.5px solid #cbd5e1;
+  border-left: 1.5px solid #cbd5e1;
+  border-right: 1.5px solid #cbd5e1;
+  height: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ir200-write-bracket span {
+  background: #27303b;
+  padding: 0 4px;
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7px;
+  font-weight: 800;
+  color: #e2e8f0;
+  letter-spacing: 0.35px;
+  transform: translateY(3px);
+  white-space: nowrap;
+}
+
+/* ROW 3: 3 Acoustic Placement & Stereo Knobs (MIC POS, DISTANCE, STEREO PAN) */
+.ir200-three-knobs-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.ir200-dot {
+  position: absolute;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  bottom: 2px;
+  pointer-events: none;
+}
+
+.ir200-dot.dot-min {
+  left: 5px;
+}
+
+.ir200-dot.dot-max {
+  right: 5px;
+}
+
+/* ROW 4: Classic 200-Series Branding Strip */
+.ir200-brand-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 4px;
+  padding-top: 3px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ir200-brand-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #f1f5f9;
+}
+
+.ir200-logo-box {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ir200-logo-word {
+  font-family: 'Michroma', 'Arial Black', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1.2px;
+  line-height: 1;
+}
+
+.ir200-brand-right {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #f1f5f9;
+}
+
+.ir200-sub-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  line-height: 1.05;
+  color: #cbd5e1;
+}
+
+.ir200-model-big {
+  font-family: 'Michroma', 'Arial Black', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  line-height: 1;
+}
+
+/* LOWER SLANTED FOOTSWITCH DECK (Single Centered BYPASS Switch) */
+.ir200-lower-deck {
+  width: 100%;
+  height: 98px;
+  flex: 0 0 98px;
+  background: linear-gradient(180deg, #252e38 0%, #1d242d 100%);
+  border-top: 2.5px solid #161b22;
+  border-radius: 0 0 8px 8px;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.08),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.ir200-footswitch-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  z-index: 2;
+}
+
+.ir200-bypass-label {
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 8.5px;
+  font-weight: 900;
+  color: #e2e8f0;
+  letter-spacing: 0.8px;
+  line-height: 1;
+}
+
+.ir200-led {
+  width: 14px;
+  height: 5px;
+  border-radius: 2px;
+  background: #14181f;
+  border: 1px solid #0b0d12;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.9);
+  transition: all 0.15s ease;
+}
+
+.ir200-led.lit-red {
+  background: #ef4444;
+  border-color: #fca5a5;
+  box-shadow: 0 0 8px #ef4444, 0 0 3px #ffffff;
+}
+
+.ir200-led.lit-blue {
+  background: #38bdf8;
+  border-color: #bae6fd;
+  box-shadow: 0 0 8px #38bdf8, 0 0 3px #ffffff;
+}
+
+.ir200-led.lit-amber {
+  background: #f59e0b;
+  border-color: #fde68a;
+  box-shadow: 0 0 8px #f59e0b, 0 0 3px #ffffff;
+}
+
+.ir200-footswitch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #f8fafc 0%, #94a3b8 55%, #334155 100%);
+  border: 2px solid #1e293b;
+  box-shadow:
+    0 5px 10px rgba(0, 0, 0, 0.75),
+    inset 0 1px 2px rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.08s ease;
+}
+
+.ir200-footswitch:active {
+  transform: scale(0.93);
+}
+
+.ir200-sw-washer {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px dashed #475569;
+  pointer-events: none;
+}
+
+.ir200-sw-plunger {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #cbd5e1 55%, #64748b 100%);
+  border: 1px solid #475569;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.ir200-bypass-bracket {
+  flex: 1;
+  margin: 0 10px 14px;
+  border-bottom: 1.5px solid rgba(241, 245, 249, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 8px;
+}
+
+.ir200-bypass-bracket span {
+  background: #202832;
+  padding: 0 6px;
+  font-family: 'Arial Narrow', 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 900;
+  color: #f1f5f9;
+  letter-spacing: 0.6px;
+  transform: translateY(4px);
+}

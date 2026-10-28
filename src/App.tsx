@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { AudioEngine, detectOutputSelectionSupport } from './audio/AudioEngine';
+import type { PickupVoicingType } from './audio/InputImpedanceNode';
 import type {
   AudioDeviceInfo,
   AudioEngineMetrics,
@@ -7,7 +8,6 @@ import type {
   InputChannelMode,
   MeterData,
 } from './types/audio';
-import { DEFAULT_NOISE_GATE_ENABLED, DEFAULT_NOISE_GATE_THRESHOLD_DB } from './types/audio';
 import type { PedalInstance } from './types/pedal';
 import type { PresetSchema } from './types/preset';
 import type { TunerResult } from './dsp/tuner/pitchDetector';
@@ -20,18 +20,12 @@ import {
   exportPresetsToJson,
 } from './presets/presetStorage';
 import { AudioHeader } from './components/AudioHeader';
-import { InputPreampPanel } from './components/sidebar/InputPreampPanel';
-import { ChromaticTuner } from './components/tuner/ChromaticTuner';
-import { CabinetSimulatorPanel } from './components/sidebar/CabinetSimulatorPanel';
-import { AmpHeadPanel } from './components/sidebar/AmpHeadPanel';
-import { MasterOutputPanel } from './components/sidebar/MasterOutputPanel';
 import { Pedalboard, type PatchConnection } from './components/pedalboard/Pedalboard';
 import { calculateNextPedalPosition } from './components/pedalboard/pedalLayout';
-import { HeadphoneWarning } from './components/HeadphoneWarning';
 import { ManualModal } from './components/manual/ManualModal';
 import { DesktopOnlyBlocker } from './components/common/DesktopOnlyBlocker';
-import type { CabinetSettings } from './types/cabinet';
-import type { AmpHeadSettings } from './types/amp';
+import { cabinetModelToIndex, micModelToIndex } from './types/cabinet';
+import { ampModelToIndex } from './types/amp';
 import { AlertOctagon, X, BookOpen } from 'lucide-react';
 import './index.css';
 
@@ -69,9 +63,8 @@ export function App() {
   const [isRefreshingDevices, setIsRefreshingDevices] = useState(false);
 
   const [inputGain, setInputGain] = useState(1.0);
-  const [inputChannelMode, setInputChannelMode] = useState<InputChannelMode>('sum');
-  const [noiseGateEnabled, setNoiseGateEnabled] = useState(DEFAULT_NOISE_GATE_ENABLED);
-  const [noiseGateThreshold, setNoiseGateThreshold] = useState(DEFAULT_NOISE_GATE_THRESHOLD_DB);
+  const [inputChannelMode, setInputChannelMode] = useState<InputChannelMode>('left');
+  const [pickupVoicing, setPickupVoicing] = useState<PickupVoicingType>('flat');
   const [masterVolume, setMasterVolume] = useState(0.8);
   const [isMuted, setIsMuted] = useState(false);
 
@@ -89,29 +82,6 @@ export function App() {
   // Pedalboard Canvas Layout & Routing State (Clean board by default on fresh page load)
   const [pedalPositions, setPedalPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [patchConnections, setPatchConnections] = useState<PatchConnection[]>([]);
-
-  // Dedicated Cabinet IR Simulator State
-  const [cabinetSettings, setCabinetSettings] = useState<CabinetSettings>({
-    enabled: true,
-    model: '4x12-closed',
-    mic: 'sm57',
-    position: 0.5,
-    distance: 0.15,
-    mix: 1.0,
-    level: 0,
-  });
-
-  // Dedicated Guitar Amp Head State (Preamp Tube Drive, FMV Tone Stack, Power Sag)
-  const [ampHeadSettings, setAmpHeadSettings] = useState<AmpHeadSettings>({
-    enabled: true,
-    model: 'pristine-clean',
-    gain: 5.0,
-    bass: 5.0,
-    mid: 5.0,
-    treble: 5.0,
-    presence: 5.0,
-    master: 6.0,
-  });
 
   // Tuner & Telemetry (Default: Non-aktif/Bypass; saat AKTIF output otomatis di-mute untuk silent tuning)
   const [tunerEnabled, setTunerEnabled] = useState(false);
@@ -341,10 +311,9 @@ export function App() {
     engineRef.current?.setInputChannelMode(mode);
   }, []);
 
-  const handleNoiseGateChange = useCallback((enabled: boolean, thresholdDb: number) => {
-    setNoiseGateEnabled(enabled);
-    setNoiseGateThreshold(thresholdDb);
-    engineRef.current?.setNoiseGate(enabled, thresholdDb);
+  const handlePickupVoicingChange = useCallback((pickup: PickupVoicingType) => {
+    setPickupVoicing(pickup);
+    engineRef.current?.setInputImpedance({ pickupType: pickup });
   }, []);
 
   const handleMasterVolumeChange = useCallback((val: number) => {
@@ -429,7 +398,7 @@ export function App() {
           newInstance,
           currentPedals,
           prevPos,
-          1200
+          Math.max(1280, window.innerWidth)
         );
         try {
           localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(nextPos));
@@ -561,53 +530,90 @@ export function App() {
     });
   };
 
-  const handleActiveChainChange = useCallback((activePedals: PedalInstance[]) => {
-    engineRef.current?.setPedalInstances(activePedals);
-  }, []);
+  const handleActiveChainChange = useCallback(
+    (activePedals: PedalInstance[], activeConnections: PatchConnection[]) => {
+      engineRef.current?.setPedalInstances(activePedals, activeConnections);
+    },
+    []
+  );
 
-  // Cabinet Actions
-  const handleUpdateCabinetSettings = useCallback((newSettings: Partial<CabinetSettings>) => {
-    setCabinetSettings((prev) => {
-      const updated = { ...prev, ...newSettings };
-      engineRef.current?.updateCabinetSettings(newSettings);
-      return updated;
-    });
-  }, []);
-
-  const handleLoadCustomCabinetIR = useCallback(async (file: File) => {
+  const handleLoadCustomIRForPedal = useCallback(async (pedalId: string, file: File) => {
     if (!engineRef.current) return;
     try {
-      const fileName = await engineRef.current.loadCustomCabinetIRFromFile(file);
-      setCabinetSettings((prev) => ({
-        ...prev,
-        model: 'custom',
-        customIrName: fileName,
-      }));
+      const fileName = await engineRef.current.loadCustomIRForPedal(pedalId, file);
+      const customIdx = cabinetModelToIndex('custom');
+      setPedals((prev) =>
+        prev.map((p) =>
+          p.id === pedalId
+            ? {
+                ...p,
+                customIrName: fileName,
+                parameters: {
+                  ...p.parameters,
+                  model: customIdx,
+                },
+              }
+            : p
+        )
+      );
+      engineRef.current.updatePedalParameter(pedalId, 'model', customIdx);
     } catch (err) {
       console.error('Failed to load custom IR', err);
       alert('Gagal memuat file IR. Pastikan file berformat audio WAV valid.');
     }
   }, []);
 
-  // Amp Head Actions
-  const handleUpdateAmpHeadSettings = useCallback((newSettings: Partial<AmpHeadSettings>) => {
-    setAmpHeadSettings((prev) => {
-      const updated = { ...prev, ...newSettings };
-      engineRef.current?.updateAmpHeadSettings(newSettings);
-      return updated;
-    });
-  }, []);
-
   // Preset Actions
   const handleSelectPreset = useCallback((preset: PresetSchema) => {
     setCurrentPresetId(preset.id);
     // Ensure all pedals in loaded preset are active (ON) and ready to play
-    const activePedals = preset.pedals.map((p) => ({
+    const activePedals: PedalInstance[] = preset.pedals.map((p) => ({
       ...p,
       enabled: true,
     }));
+
+    // Auto-migrate legacy presets that stored ampHead / cabinet outside preset.pedals
+    const hasAmpNode = activePedals.some((p) => p.type === 'amp-head');
+    const hasCabNode = activePedals.some((p) => p.type === 'cabinet-ir');
+
+    if (!hasAmpNode && preset.ampHead && preset.ampHead.enabled !== false) {
+      activePedals.push({
+        id: `pedal-amp-head-${preset.id}`,
+        type: 'amp-head',
+        name: 'Guitar Amp Head',
+        enabled: true,
+        parameters: {
+          model: ampModelToIndex(preset.ampHead.model || 'pristine-clean'),
+          gain: preset.ampHead.gain ?? 5.0,
+          bass: preset.ampHead.bass ?? 5.0,
+          mid: preset.ampHead.mid ?? 5.0,
+          treble: preset.ampHead.treble ?? 5.0,
+          presence: preset.ampHead.presence ?? 5.0,
+          master: preset.ampHead.master ?? 6.0,
+        },
+      });
+    }
+
+    if (!hasCabNode && preset.cabinet && preset.cabinet.enabled !== false) {
+      activePedals.push({
+        id: `pedal-cabinet-ir-${preset.id}`,
+        type: 'cabinet-ir',
+        name: 'Cabinet IR Simulator',
+        enabled: true,
+        customIrName: preset.cabinet.customIrName,
+        parameters: {
+          model: cabinetModelToIndex(preset.cabinet.model || '4x12-closed'),
+          mic: micModelToIndex(preset.cabinet.mic || 'sm57'),
+          position: preset.cabinet.position ?? 0.5,
+          distance: preset.cabinet.distance ?? 0.15,
+          mix: preset.cabinet.mix ?? 1.0,
+          level: preset.cabinet.level ?? 0,
+          pan: 0,
+        },
+      });
+    }
+
     setPedals(activePedals);
-    engineRef.current?.setPedalInstances(activePedals);
 
     // Restore custom canvas pedal positions if present in preset
     if (preset.pedalPositions && Object.keys(preset.pedalPositions).length > 0) {
@@ -616,14 +622,12 @@ export function App() {
         localStorage.setItem('web_guitar_pedal_coords', JSON.stringify(preset.pedalPositions));
       } catch { }
     } else if (activePedals.length > 0) {
+      const boardW = Math.max(1280, window.innerWidth);
       const autoPos: Record<string, { x: number; y: number }> = {};
-      activePedals.forEach((p, idx) => {
-        const col = idx % 4;
-        const row = Math.floor(idx / 4);
-        autoPos[p.id] = {
-          x: Math.max(120, 1200 - 140 - 204 - col * 270),
-          y: 40 + row * 410,
-        };
+      const placedSoFar: PedalInstance[] = [];
+      activePedals.forEach((p) => {
+        autoPos[p.id] = calculateNextPedalPosition(p, placedSoFar, autoPos, boardW);
+        placedSoFar.push(p);
       });
       setPedalPositions(autoPos);
       try {
@@ -632,10 +636,12 @@ export function App() {
     }
 
     // Restore custom patch cables if present in preset
+    let resolvedConns: PatchConnection[] = [];
     if (preset.connections && preset.connections.length > 0) {
-      setPatchConnections(preset.connections);
+      resolvedConns = preset.connections;
+      setPatchConnections(resolvedConns);
       try {
-        localStorage.setItem('web_guitar_patch_cables', JSON.stringify(preset.connections));
+        localStorage.setItem('web_guitar_patch_cables', JSON.stringify(resolvedConns));
       } catch { }
     } else if (activePedals.length > 0) {
       // Auto-wire sequentially if preset has pedals but connections were not explicitly saved
@@ -660,6 +666,7 @@ export function App() {
         toNodeId: 'BOARD_OUTPUT',
         cableColor: 'bone-ivory',
       });
+      resolvedConns = autoConns;
       setPatchConnections(autoConns);
       try {
         localStorage.setItem('web_guitar_patch_cables', JSON.stringify(autoConns));
@@ -671,15 +678,12 @@ export function App() {
       } catch { }
     }
 
+    engineRef.current?.setPedalInstances(activePedals, resolvedConns);
+
     if (preset.inputGain !== undefined) handleInputGainChange(preset.inputGain);
     if (preset.masterVolume !== undefined) handleMasterVolumeChange(preset.masterVolume);
-    if (preset.cabinet) {
-      handleUpdateCabinetSettings(preset.cabinet);
-    }
-    if (preset.ampHead) {
-      handleUpdateAmpHeadSettings(preset.ampHead);
-    }
-  }, [handleInputGainChange, handleMasterVolumeChange, handleUpdateCabinetSettings, handleUpdateAmpHeadSettings]);
+    if (preset.pickupVoicing !== undefined) handlePickupVoicingChange(preset.pickupVoicing);
+  }, [handleInputGainChange, handleMasterVolumeChange, handlePickupVoicingChange]);
 
   // Overwrite the currently active user preset with current rig settings
   const handleSaveCurrentPreset = useCallback((): boolean => {
@@ -711,14 +715,13 @@ export function App() {
       connections: currentConns,
       inputGain,
       masterVolume,
-      cabinet: cabinetSettings,
-      ampHead: ampHeadSettings,
+      pickupVoicing,
     });
 
     const updated = loadAllPresets();
     setPresets(updated);
     return true;
-  }, [currentPresetId, presets, pedalPositions, patchConnections, pedals, inputGain, masterVolume, cabinetSettings, ampHeadSettings]);
+  }, [currentPresetId, presets, pedalPositions, patchConnections, pedals, inputGain, masterVolume, pickupVoicing]);
 
   // Save current rig settings as a brand new preset
   const handleSaveNewPreset = (name: string) => {
@@ -746,8 +749,7 @@ export function App() {
       connections: currentConns,
       inputGain,
       masterVolume,
-      cabinet: cabinetSettings,
-      ampHead: ampHeadSettings,
+      pickupVoicing,
     });
     const updated = loadAllPresets();
     setPresets(updated);
@@ -789,6 +791,7 @@ export function App() {
           connections: p.connections,
           inputGain: p.inputGain,
           masterVolume: p.masterVolume,
+          pickupVoicing: p.pickupVoicing,
           cabinet: p.cabinet,
           ampHead: p.ampHead,
         });
@@ -801,11 +804,9 @@ export function App() {
     }
   };
 
-
-
   return (
     <div className="app-viewport">
-      {/* Studio Top Bar - Minimalist with Section 2 Rig Preset */}
+      {/* Unified Minimalist Studio Top Console Bar */}
       <AudioHeader
         status={status}
         metrics={metrics}
@@ -820,71 +821,34 @@ export function App() {
         onDeletePreset={handleDeletePreset}
         onExportPresets={handleExportPresets}
         onImportPresets={handleImportPresets}
+        devices={devices}
+        selectedDeviceId={selectedDeviceId}
+        onSelectDevice={handleDeviceChange}
+        outputDevices={outputDevices}
+        selectedOutputDeviceId={selectedOutputDeviceId}
+        onSelectOutputDevice={handleOutputDeviceChange}
+        isOutputSelectionSupported={isOutputSelectionSupported}
+        onRefreshDevices={handleRefreshDevices}
+        isRefreshingDevices={isRefreshingDevices}
+        inputGain={inputGain}
+        onInputGainChange={handleInputGainChange}
+        inputChannelMode={inputChannelMode}
+        onInputChannelModeChange={handleInputChannelModeChange}
+        pickupVoicing={pickupVoicing}
+        onPickupVoicingChange={handlePickupVoicingChange}
+        masterVolume={masterVolume}
+        onMasterVolumeChange={handleMasterVolumeChange}
+        isMuted={isMuted}
+        onToggleMute={handleToggleMute}
+        tunerEnabled={tunerEnabled}
+        onToggleTuner={handleToggleTuner}
+        tunerResult={tunerResult}
+        inputMeter={inputMeter}
+        outputMeter={outputMeter}
       />
 
+      {/* Full-Width Virtual Pedalboard & Multi-Amp Free Canvas Stage */}
       <main className="dashboard-main-layout">
-        {/* Left Column: Studio Configuration & Control Dashboard */}
-        <aside className="dashboard-sidebar">
-          {/* Headphone caution banner */}
-          <HeadphoneWarning />
-
-          {/* 1. Input Preamp & Device Selector */}
-          <InputPreampPanel
-            devices={devices}
-            selectedDeviceId={selectedDeviceId}
-            onSelectDevice={handleDeviceChange}
-            onRefreshDevices={handleRefreshDevices}
-            isRefreshingDevices={isRefreshingDevices}
-            inputGain={inputGain}
-            onInputGainChange={handleInputGainChange}
-            inputChannelMode={inputChannelMode}
-            onInputChannelModeChange={handleInputChannelModeChange}
-            noiseGateEnabled={noiseGateEnabled}
-            noiseGateThreshold={noiseGateThreshold}
-            onNoiseGateChange={handleNoiseGateChange}
-            inputMeter={inputMeter}
-            isEngineRunning={status === 'running'}
-          />
-
-          {/* 2. Precision Chromatic Tuner (Tapped directly from clean input) */}
-          <ChromaticTuner
-            tunerResult={tunerResult}
-            isEngineRunning={status === 'running'}
-            enabled={tunerEnabled}
-            onToggleEnabled={handleToggleTuner}
-          />
-
-          {/* 3. Guitar Amp Head (Positioned after pedalboard & before cabinet IR) */}
-          <AmpHeadPanel
-            settings={ampHeadSettings}
-            onUpdateSettings={handleUpdateAmpHeadSettings}
-          />
-
-          {/* 4. Dedicated Cabinet IR Simulator (Positioned after amp head) */}
-          <CabinetSimulatorPanel
-            settings={cabinetSettings}
-            onUpdateSettings={handleUpdateCabinetSettings}
-            onLoadCustomIR={handleLoadCustomCabinetIR}
-          />
-
-          {/* 5. Master Output Stage & Safety Limiter */}
-          <MasterOutputPanel
-            outputDevices={outputDevices}
-            selectedOutputDeviceId={selectedOutputDeviceId}
-            onSelectOutputDevice={handleOutputDeviceChange}
-            onRefreshDevices={handleRefreshDevices}
-            isRefreshingDevices={isRefreshingDevices}
-            isOutputSelectionSupported={isOutputSelectionSupported}
-            masterVolume={masterVolume}
-            onMasterVolumeChange={handleMasterVolumeChange}
-            isMuted={isMuted}
-            onToggleMute={handleToggleMute}
-            outputMeter={outputMeter}
-            isEngineRunning={status === 'running'}
-          />
-        </aside>
-
-        {/* Right Column: Virtual Pedalboard Free Canvas Stage */}
         <section className="dashboard-canvas-stage">
           <Pedalboard
             pedals={pedals}
@@ -896,6 +860,7 @@ export function App() {
             onChangeParam={handleChangePedalParam}
             onRemovePedal={handleRemovePedal}
             onAddPedal={handleAddPedal}
+            onLoadCustomIR={handleLoadCustomIRForPedal}
             onActiveChainChange={handleActiveChainChange}
           />
         </section>

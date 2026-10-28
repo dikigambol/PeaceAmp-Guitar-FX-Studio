@@ -1,26 +1,31 @@
 /**
- * Input Impedance / Pickup Loading Simulator
+ * Input Impedance / Pickup Voicing & Loading Simulator
  *
- * Simulates the electrical loading that a passive guitar pickup experiences
- * when connected to a pedal/amp input. This is the #1 perceptual difference
- * between "direct-in digital" and "real amp" tone.
+ * Simulates both the electrical loading that a passive guitar pickup experiences
+ * when connected to a pedal/amp input AND optional pickup character voicing
+ * (e.g. Strat Single-Coil, PAF Humbucker, P-90, Burns Tri-Sonic in Series
+ * like Brian May's Red Special, or Flat Hi-Z DI).
  *
  * Circuit modeled:
- *   Pickup: series Rp (5-10k) + Lp (2-8H) + Cp (self-capacitance ~100-200pF)
- *   Cable:  Cc (200-500pF/m * 3-5m = 600-2500pF)
- *   Load:   Rload || Cload (amp/pedal input, typically 1M || 50-100pF)
- *
- * Result: resonant low-pass with peak at 2-5 kHz (depending on pickup + cable),
- * followed by 12 dB/oct roll-off. The peak frequency and Q shift with
- * Rload (volume pot position) and cable length.
+ *   Pickup: series Rp (5-14k) + Lp (2-8H) + Cp (self-capacitance ~100-250pF)
+ *   Cable:  Cc (200-300pF/m * 3-5m = 600-1500pF)
+ *   Load:   Rload || Cload (amp/pedal input, typically 1M || 50-100pF, or 10k-50k for vintage Ge pedals)
  */
 
+export type PickupVoicingType =
+  | 'flat'
+  | 'single-coil'
+  | 'humbucker'
+  | 'p90'
+  | 'trisonic-series'
+  | 'active';
+
 export interface InputImpedanceConfig {
-  /** Pickup type preset */
-  pickupType: 'single-coil' | 'humbucker' | 'p90' | 'active';
+  /** Pickup voicing / loading preset */
+  pickupType: PickupVoicingType;
   /** Cable length in meters (typical 3-6m) */
   cableLengthM: number;
-  /** Input impedance of the "amp/pedal" in ohms (100k - 2M) */
+  /** Input impedance of the "amp/pedal" in ohms (10k - 2M) */
   loadResistance: number;
   /** Input capacitance of the amp/pedal in pF (including stray) */
   loadCapacitancePf: number;
@@ -28,14 +33,26 @@ export interface InputImpedanceConfig {
   volumePosition: number;
 }
 
-const PRESETS: Record<InputImpedanceConfig['pickupType'], { Rp: number; Lp: number; Cp: number }> = {
-  'single-coil': { Rp: 6500, Lp: 2.8, Cp: 120e-12 },   // Strat/Tele typical
-  'humbucker':   { Rp: 8500, Lp: 5.2, Cp: 180e-12 },   // PAF-style
-  'p90':         { Rp: 7500, Lp: 3.8, Cp: 150e-12 },   // P-90
-  'active':      { Rp: 100,  Lp: 0.01, Cp: 10e-12 },   // EMG-style (buffered)
+interface PickupPresetSpec {
+  Rp: number;
+  Lp: number;
+  Cp: number;
+  /** Base voicing peak gain in dB at 1M load */
+  voicingPeakDb: number;
+  /** Base lowpass cap (Hz) to prevent harsh ultrasonic interface noise */
+  maxLowpassHz: number;
+}
+
+const PRESETS: Record<PickupVoicingType, PickupPresetSpec> = {
+  'flat': { Rp: 4000, Lp: 1.8, Cp: 80e-12, voicingPeakDb: 0.4, maxLowpassHz: 14000 },
+  'single-coil': { Rp: 6200, Lp: 2.6, Cp: 115e-12, voicingPeakDb: 2.0, maxLowpassHz: 9500 },   // Strat/Tele chime (~3.3 kHz peak)
+  'p90': { Rp: 7800, Lp: 3.9, Cp: 150e-12, voicingPeakDb: 2.4, maxLowpassHz: 7800 },   // P-90 gritty mid bark (~2.5 kHz peak)
+  'humbucker': { Rp: 8600, Lp: 5.0, Cp: 180e-12, voicingPeakDb: 2.2, maxLowpassHz: 6800 },   // PAF Humbucker warm (~2.1 kHz peak)
+  'trisonic-series': { Rp: 13800, Lp: 7.8, Cp: 240e-12, voicingPeakDb: 3.6, maxLowpassHz: 5200 },   // Red Special Burns Tri-Sonic in Series (~1.35 kHz vocal honk)
+  'active': { Rp: 100, Lp: 0.01, Cp: 10e-12, voicingPeakDb: 0.0, maxLowpassHz: 16000 },  // EMG-style buffered active
 };
 
-const CABLE_CAP_PER_METER = 300e-12; // 300 pF/m typical guitar cable
+const CABLE_CAP_PER_METER = 250e-12; // 250 pF/m low-noise studio guitar cable
 
 export class InputImpedanceNode {
   public readonly inputNode: GainNode;
@@ -53,9 +70,10 @@ export class InputImpedanceNode {
   constructor(ctx: AudioContext, config: Partial<InputImpedanceConfig> = {}) {
     this.ctx = ctx;
 
-    // Defaults: typical Strat into 1M pedal with 3m cable
+    // Default to 'flat' so a real guitar isn't artificially over-brightened (+6.5dB hiss),
+    // while still modeling natural cable & pedal input impedance loading.
     this.config = {
-      pickupType: 'single-coil',
+      pickupType: 'flat',
       cableLengthM: 3,
       loadResistance: 1e6,
       loadCapacitancePf: 80,
@@ -68,64 +86,65 @@ export class InputImpedanceNode {
     this.buildGraph();
   }
 
-  private buildGraph(): void {
+  private computeFilterTargets() {
     const { pickupType, cableLengthM, loadResistance, loadCapacitancePf, volumePosition } = this.config;
-    const preset = PRESETS[pickupType];
+    const preset = PRESETS[pickupType] ?? PRESETS['flat'];
 
-    // Effective load resistance seen by pickup (volume pot as voltage divider)
-    // At volume=0 (full), load = loadResistance
-    // At volume=10 (zero), load ≈ pickup Rp (pot wiper to ground)
     const potFactor = Math.max(0.001, 1 - volumePosition / 10);
     const effectiveRload = loadResistance * potFactor;
 
-    // Total capacitance across pickup: Cp + Ccable + Cload
     const totalC = preset.Cp + cableLengthM * CABLE_CAP_PER_METER + loadCapacitancePf * 1e-12;
-
-    // Resonant frequency: fr = 1 / (2π * sqrt(Lp * Ctotal))
     const fr = 1 / (2 * Math.PI * Math.sqrt(preset.Lp * totalC));
 
-    // Correct electrical RLC Q for pickup coil with series Rp and parallel Rload:
-    // Q = omega0 / (1 / (Rload * Ctotal) + Rp / Lp)
     const omega0 = 2 * Math.PI * fr;
     const damping = (1 / (effectiveRload * totalC)) + (preset.Rp / preset.Lp);
-    const Q = damping > 0 ? omega0 / damping : 2.5;
+    const Q = damping > 0 ? omega0 / damping : 1.5;
 
-    // Clamp to safe audio range
-    const safeFr = Math.max(1200, Math.min(6500, fr));
-    const safeQ = Math.max(1.0, Math.min(6.0, Q));
+    const safeFr = Math.max(950, Math.min(6000, fr));
+    const safeQ = Math.max(0.707, Math.min(3.2, Q * 0.65));
 
-    // Build filter chain: resonant peak + cable lowpass + load highpass
+    // When loaded down by a low-impedance vintage pedal (e.g., Fuzz Face / Rangemaster ~10k-50k),
+    // the resonant peak damps out naturally just like a real passive pickup.
+    const loadDampingFactor = Math.min(1.0, effectiveRload / 250000);
+    const peakGainDb = preset.voicingPeakDb * loadDampingFactor;
+
+    const rParallel = (preset.Rp * effectiveRload) / (preset.Rp + effectiveRload);
+    const rawCableFc = 1 / (2 * Math.PI * rParallel * (cableLengthM * CABLE_CAP_PER_METER));
+    const cableFc = Math.max(1800, Math.min(preset.maxLowpassHz, rawCableFc));
+
+    // Gentle low-cut for mud/DC prevention (especially helpful on series pickups)
+    const baseHighpassHz = pickupType === 'trisonic-series' ? 85 : 35;
+    const loadFc = Math.max(baseHighpassHz, Math.min(120, 1 / (2 * Math.PI * effectiveRload * loadCapacitancePf * 1e-12)));
+
+    // Keep DC gain compensation bounded so low-Z loads don't boost noise floor wildly
+    const rawDcGain = effectiveRload / (preset.Rp + effectiveRload);
+    const compGain = Math.min(1.25, 1 / Math.max(0.5, rawDcGain));
+
+    return { safeFr, safeQ, peakGainDb, cableFc, loadFc, compGain };
+  }
+
+  private buildGraph(): void {
+    const { safeFr, safeQ, peakGainDb, cableFc, loadFc, compGain } = this.computeFilterTargets();
+
     this.resonantFilter = this.ctx.createBiquadFilter();
     this.resonantFilter.type = 'peaking';
     this.resonantFilter.frequency.setValueAtTime(safeFr, this.ctx.currentTime);
     this.resonantFilter.Q.setValueAtTime(safeQ, this.ctx.currentTime);
-    // Real resonance peak boost (typically +2.5dB to +6dB for real guitar pickups)
-    const peakGainDb = Math.min(6.5, Math.max(1.5, 20 * Math.log10(safeQ * 0.75)));
     this.resonantFilter.gain.setValueAtTime(peakGainDb, this.ctx.currentTime);
 
-    // Cable capacitance adds additional low-pass above resonance
-    // fc = 1 / (2π * (Rp||Rload) * Ccable)
-    const rParallel = (preset.Rp * effectiveRload) / (preset.Rp + effectiveRload);
-    const cableFc = 1 / (2 * Math.PI * rParallel * (cableLengthM * CABLE_CAP_PER_METER));
     this.cableLowpass = this.ctx.createBiquadFilter();
     this.cableLowpass.type = 'lowpass';
-    this.cableLowpass.frequency.setValueAtTime(Math.max(2000, Math.min(20000, cableFc)), this.ctx.currentTime);
+    this.cableLowpass.frequency.setValueAtTime(cableFc, this.ctx.currentTime);
     this.cableLowpass.Q.setValueAtTime(0.707, this.ctx.currentTime);
 
-    // Load capacitance forms a high-pass with load resistance (blocks DC offset from asymmetric clipping later)
-    const loadFc = 1 / (2 * Math.PI * effectiveRload * loadCapacitancePf * 1e-12);
     this.loadHighpass = this.ctx.createBiquadFilter();
     this.loadHighpass.type = 'highpass';
-    this.loadHighpass.frequency.setValueAtTime(Math.max(1, Math.min(50, loadFc)), this.ctx.currentTime);
+    this.loadHighpass.frequency.setValueAtTime(loadFc, this.ctx.currentTime);
     this.loadHighpass.Q.setValueAtTime(0.707, this.ctx.currentTime);
 
-    // Compensation gain to maintain unity at DC (below resonance)
-    // At DC: pickup is just Rp, voltage divider with Rload
-    const dcGain = effectiveRload / (preset.Rp + effectiveRload);
     this.gainComp = this.ctx.createGain();
-    this.gainComp.gain.setValueAtTime(1 / dcGain, this.ctx.currentTime);
+    this.gainComp.gain.setValueAtTime(compGain, this.ctx.currentTime);
 
-    // Wire: input -> gainComp -> resonantPeak -> cableLowpass -> loadHighpass -> output
     this.inputNode.connect(this.gainComp);
     this.gainComp.connect(this.resonantFilter);
     this.resonantFilter.connect(this.cableLowpass);
@@ -136,37 +155,18 @@ export class InputImpedanceNode {
   /** Update configuration live with click-free parameter transitions */
   public updateConfig(partial: Partial<InputImpedanceConfig>): void {
     this.config = { ...this.config, ...partial };
+    const { safeFr, safeQ, peakGainDb, cableFc, loadFc, compGain } = this.computeFilterTargets();
 
-    const { pickupType, cableLengthM, loadResistance, loadCapacitancePf, volumePosition } = this.config;
-    const preset = PRESETS[pickupType];
-
-    const potFactor = Math.max(0.001, 1 - volumePosition / 10);
-    const effectiveRload = loadResistance * potFactor;
-    const totalC = preset.Cp + cableLengthM * CABLE_CAP_PER_METER + loadCapacitancePf * 1e-12;
-    const fr = 1 / (2 * Math.PI * Math.sqrt(preset.Lp * totalC));
-    const omega0 = 2 * Math.PI * fr;
-    const damping = (1 / (effectiveRload * totalC)) + (preset.Rp / preset.Lp);
-    const Q = damping > 0 ? omega0 / damping : 2.5;
-
-    const safeFr = Math.max(1200, Math.min(6500, fr));
-    const safeQ = Math.max(1.0, Math.min(6.0, Q));
-    const peakGainDb = Math.min(6.5, Math.max(1.5, 20 * Math.log10(safeQ * 0.75)));
-    const rParallel = (preset.Rp * effectiveRload) / (preset.Rp + effectiveRload);
-    const cableFc = 1 / (2 * Math.PI * rParallel * (cableLengthM * CABLE_CAP_PER_METER));
-    const loadFc = 1 / (2 * Math.PI * effectiveRload * loadCapacitancePf * 1e-12);
-    const dcGain = effectiveRload / (preset.Rp + effectiveRload);
-
-    // If graph already exists, update AudioParams smoothly without audio pops
     if (this.resonantFilter && this.cableLowpass && this.loadHighpass && this.gainComp) {
       const now = this.ctx.currentTime;
-      const tc = 0.02; // Smooth 20ms time constant
+      const tc = 0.02;
       try {
         this.resonantFilter.frequency.setTargetAtTime(safeFr, now, tc);
         this.resonantFilter.Q.setTargetAtTime(safeQ, now, tc);
         this.resonantFilter.gain.setTargetAtTime(peakGainDb, now, tc);
-        this.cableLowpass.frequency.setTargetAtTime(Math.max(2000, Math.min(20000, cableFc)), now, tc);
-        this.loadHighpass.frequency.setTargetAtTime(Math.max(1, Math.min(50, loadFc)), now, tc);
-        this.gainComp.gain.setTargetAtTime(1 / dcGain, now, tc);
+        this.cableLowpass.frequency.setTargetAtTime(cableFc, now, tc);
+        this.loadHighpass.frequency.setTargetAtTime(loadFc, now, tc);
+        this.gainComp.gain.setTargetAtTime(compGain, now, tc);
         return;
       } catch {
         // Fallback to rebuild if scheduling fails
@@ -183,7 +183,7 @@ export class InputImpedanceNode {
   }
 
   /** Preset helpers */
-  public setPickupType(type: InputImpedanceConfig['pickupType']): void {
+  public setPickupType(type: PickupVoicingType): void {
     this.updateConfig({ pickupType: type });
   }
 

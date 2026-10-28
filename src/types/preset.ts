@@ -1,6 +1,7 @@
 import type { PedalInstance } from './pedal';
 import type { CabinetSettings } from './cabinet';
 import type { AmpHeadSettings } from './amp';
+import type { PickupVoicingType } from '../audio/InputImpedanceNode';
 
 export interface PresetPatchConnection {
   id: string;
@@ -20,7 +21,7 @@ export interface PresetSchema {
   connections?: PresetPatchConnection[];
   inputGain?: number;
   masterVolume?: number;
+  pickupVoicing?: PickupVoicingType;
   cabinet?: Partial<CabinetSettings>;
   ampHead?: Partial<AmpHeadSettings>;
 }
-

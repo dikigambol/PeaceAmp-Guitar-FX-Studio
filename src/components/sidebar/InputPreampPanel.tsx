@@ -1,8 +1,9 @@
 import React from 'react';
 import type { AudioDeviceInfo, InputChannelMode, MeterData } from '../../types/audio';
+import type { PickupVoicingType } from '../../audio/InputImpedanceNode';
 import { Knob } from '../common/Knob';
 import { VuMeter } from '../meters/VuMeter';
-import { Mic, RefreshCw, Sliders, ShieldOff } from 'lucide-react';
+import { Mic, RefreshCw, Sliders, ShieldOff, Guitar } from 'lucide-react';
 
 interface InputPreampPanelProps {
   devices: AudioDeviceInfo[];
@@ -14,6 +15,8 @@ interface InputPreampPanelProps {
   onInputGainChange: (gain: number) => void;
   inputChannelMode: InputChannelMode;
   onInputChannelModeChange: (mode: InputChannelMode) => void;
+  pickupVoicing: PickupVoicingType;
+  onPickupVoicingChange: (pickup: PickupVoicingType) => void;
   noiseGateEnabled: boolean;
   noiseGateThreshold: number;
   onNoiseGateChange: (enabled: boolean, thresholdDb: number) => void;
@@ -22,9 +25,18 @@ interface InputPreampPanelProps {
 }
 
 const CHANNEL_OPTIONS: { id: InputChannelMode; label: string; title: string }[] = [
-  { id: 'sum', label: 'L+R', title: 'Mono mix of both channels (mono mic / guitar on both inputs)' },
-  { id: 'left', label: 'IN 1', title: 'Left channel only (guitar plugged into Input 1 of the interface)' },
+  { id: 'left', label: 'IN 1', title: 'Left channel only (standard Guitar Input 1 on audio interfaces — lowest noise)' },
   { id: 'right', label: 'IN 2', title: 'Right channel only (guitar plugged into Input 2 of the interface)' },
+  { id: 'sum', label: 'L+R', title: 'Mono mix of both channels (use only if signal is on both inputs)' },
+];
+
+const PICKUP_VOICING_OPTIONS: { id: PickupVoicingType; label: string; desc: string }[] = [
+  { id: 'flat', label: 'Natural DI (Flat Hi-Z)', desc: 'True pickup character of your guitar without extra EQ coloration' },
+  { id: 'single-coil', label: 'Strat / Tele Single-Coil', desc: 'Glassy 3.3 kHz chime & bell-like attack' },
+  { id: 'humbucker', label: 'PAF Humbucker', desc: 'Warm, woody 2.1 kHz midrange with smooth highs' },
+  { id: 'p90', label: 'Vintage P-90 Soapbar', desc: 'Gritty 2.5 kHz upper-mid bark & punch' },
+  { id: 'trisonic-series', label: 'Burns Tri-Sonic Series (Red Special)', desc: 'Brian May signature in-series pickups: thick 1.35 kHz vocal midrange & smooth treble' },
+  { id: 'active', label: 'Active Humbucker (EMG)', desc: 'Buffered low-Z response with extended tight bandwidth' },
 ];
 
 export const InputPreampPanel: React.FC<InputPreampPanelProps> = ({
@@ -37,6 +49,8 @@ export const InputPreampPanel: React.FC<InputPreampPanelProps> = ({
   onInputGainChange,
   inputChannelMode,
   onInputChannelModeChange,
+  pickupVoicing,
+  onPickupVoicingChange,
   noiseGateEnabled,
   noiseGateThreshold,
   onNoiseGateChange,
@@ -53,7 +67,7 @@ export const InputPreampPanel: React.FC<InputPreampPanelProps> = ({
       <div className="mini-module-header">
         <div className="mini-header-title">
           <Sliders size={13} className="text-brass" />
-          <span>INPUT PREAMP & I/O</span>
+          <span>INPUT PREAMP & PICKUP</span>
         </div>
       </div>
 
@@ -105,6 +119,23 @@ export const InputPreampPanel: React.FC<InputPreampPanelProps> = ({
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Guitar Pickup & Cable Impedance Voicing */}
+        <div className="mini-device-bar" style={{ marginTop: 2 }}>
+          <Guitar size={12} className="text-brass shrink-0" />
+          <select
+            className="mini-device-select"
+            value={pickupVoicing}
+            onChange={(e) => onPickupVoicingChange(e.target.value as PickupVoicingType)}
+            title="Guitar Pickup & Impedance Voicing Simulator"
+          >
+            {PICKUP_VOICING_OPTIONS.map((opt) => (
+              <option key={opt.id} value={opt.id} title={opt.desc}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* INPUT PREAMP STAGE */}

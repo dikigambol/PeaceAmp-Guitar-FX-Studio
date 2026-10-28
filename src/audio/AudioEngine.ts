@@ -1,13 +1,8 @@
 import type { AudioDeviceInfo, AudioEngineMetrics, EngineStatus, InputChannelMode, MeterData } from '../types/audio';
-import { DEFAULT_NOISE_GATE_ENABLED, DEFAULT_NOISE_GATE_THRESHOLD_DB } from '../types/audio';
 import { createDcBlocker } from './pedals/dspUtils';
 import type { PedalInstance } from '../types/pedal';
-import { SignalChain } from './SignalChain';
-import { AmpHeadNode } from './amp/AmpHeadNode';
-import { InputImpedanceNode } from './InputImpedanceNode';
-import type { AmpHeadSettings } from '../types/amp';
-import { CabinetNode } from './cabinet/CabinetNode';
-import type { CabinetSettings } from '../types/cabinet';
+import { SignalChain, type SignalEdge } from './SignalChain';
+import { InputImpedanceNode, type PickupVoicingType } from './InputImpedanceNode';
 import { detectPitch, type TunerResult } from '../dsp/tuner/pitchDetector';
 import { ensureWorkletsRegistered } from './worklets/workletBundle';
 
@@ -34,62 +29,36 @@ export class AudioEngine {
   private inputGainNode: GainNode | null = null;
   private inputAnalyser: AnalyserNode | null = null;
 
-  // Input conditioning: discrete channel splitter -> 30 Hz rumble/DC high-pass -> input gain -> noise gate
+  // Input conditioning: discrete channel splitter -> 72 Hz sub-cut -> 50/60/100 Hz AC hum notch -> 5.4 kHz RF low-pass -> input gain -> studio input gate
   private inputSplitter: ChannelSplitterNode | null = null;
   private inputLeftGain: GainNode | null = null;
   private inputRightGain: GainNode | null = null;
   private inputMonoBus: GainNode | null = null;
   private inputHighpass: BiquadFilterNode | null = null;
-  private inputChannelMode: InputChannelMode = 'sum';
+  private humNotch50Hz: BiquadFilterNode | null = null;
+  private humNotch60Hz: BiquadFilterNode | null = null;
+  private humNotch100Hz: BiquadFilterNode | null = null;
+  private inputRfLowpass: BiquadFilterNode | null = null;
+  private inputStudioGate: AudioWorkletNode | null = null;
+  private inputChannelMode: InputChannelMode = 'left';
   private detectedInputChannels = 2;
 
   // Input Impedance / Pickup Loading Simulator (first in chain, right after source)
   private inputImpedanceNode: InputImpedanceNode | null = null;
+  private pickupVoicing: PickupVoicingType = 'flat';
 
-  // Noise gate (AudioWorklet) with clean crossfade bypass
-  private noiseGateNode: AudioWorkletNode | null = null;
-  private gateOnGain: GainNode | null = null;
-  private gateBypassGain: GainNode | null = null;
-  private gateOutGain: GainNode | null = null;
-  private noiseGateEnabled = DEFAULT_NOISE_GATE_ENABLED;
-  private noiseGateThresholdDb = DEFAULT_NOISE_GATE_THRESHOLD_DB;
-
-  // Safety DC blocker at the end of the pedal chain (before cabinet)
+  // Safety DC blocker at the end of the pedal chain (before master output)
   private chainDcBlocker: BiquadFilterNode | null = null;
-  
-  // Chain hooks: between chainInputNode and chainOutputNode pedals will be connected
+
+  // Chain hooks: between chainInputNode and chainOutputNode pedals/amps/cabs will be connected
   private chainInputNode: GainNode | null = null;
   private chainOutputNode: GainNode | null = null;
   private signalChain: SignalChain | null = null;
   private pedalInstances: PedalInstance[] = [];
-
-  // Dedicated Guitar Amp Head Simulator (positioned between pedals and cabinet)
-  private ampHeadNode: AmpHeadNode | null = null;
-  private ampHeadSettings: AmpHeadSettings = {
-    enabled: true,
-    model: 'pristine-clean',
-    gain: 5.0,
-    bass: 5.0,
-    mid: 5.0,
-    treble: 5.0,
-    presence: 5.0,
-    master: 6.0,
-  };
-
-  // Dedicated Cabinet IR Convolver at the end of the chain
-  private cabinetNode: CabinetNode | null = null;
-  private cabinetSettings: CabinetSettings = {
-    enabled: true,
-    model: '4x12-closed',
-    mic: 'sm57',
-    position: 0.5,
-    distance: 0.15,
-    mix: 1.0,
-    level: 0,
-  };
+  private pedalConnections: SignalEdge[] = [];
 
   private masterGainNode: GainNode | null = null;
-  private safetyLimiter: DynamicsCompressorNode | null = null;
+  private safetyLimiter: WaveShaperNode | null = null;
   private outputAnalyser: AnalyserNode | null = null;
 
   // Pre-allocated arrays for zero-GC metering
@@ -311,16 +280,6 @@ export class AudioEngine {
         this.inputImpedanceNode = null;
       }
 
-      if (this.ampHeadNode) {
-        this.ampHeadNode.dispose();
-        this.ampHeadNode = null;
-      }
-
-      if (this.cabinetNode) {
-        this.cabinetNode.dispose();
-        this.cabinetNode = null;
-      }
-
       this.notifyState('suspended', null);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error stopping audio';
@@ -343,7 +302,7 @@ export class AudioEngine {
    * Graph:
    * InputSource
    *   ├─> inputGainNode ──> inputAnalyser
-   *   └─> chainInputNode (hook for pedals) ──> chainOutputNode
+   *   └─> chainInputNode (hook for modular pedals/amps/cabs) ──> chainOutputNode
    *         ──> masterGainNode ──> safetyLimiter ──> outputAnalyser ──> destination
    */
   private setupNodes(): void {
@@ -379,21 +338,49 @@ export class AudioEngine {
 
     // Input Impedance / Pickup Loading Simulator (mono, before 30 Hz HPF)
     this.inputImpedanceNode = new InputImpedanceNode(this.ctx, {
-      pickupType: 'single-coil',
+      pickupType: this.pickupVoicing,
       cableLengthM: 3,
       loadResistance: 1e6,
       loadCapacitancePf: 80,
       volumePosition: 0,
     });
+    this.updateAutoInputImpedance();
 
-    // 30 Hz Butterworth high-pass: removes interface DC offset, mains rumble and handling thumps
+    // 1. 72 Hz Butterworth high-pass: removes DC offset, 50/60 Hz mains rumble and handling thumps below E2 (82.4 Hz)
     this.inputHighpass = this.ctx.createBiquadFilter();
     this.inputHighpass.type = 'highpass';
-    this.inputHighpass.frequency.setValueAtTime(30, this.ctx.currentTime);
+    this.inputHighpass.frequency.setValueAtTime(72, this.ctx.currentTime);
     this.inputHighpass.Q.setValueAtTime(0.707, this.ctx.currentTime);
+
+    // 2. Surgical AC Power-Line Hum Notch Filters (50 Hz, 60 Hz & 100 Hz 2nd-harmonic rectifier buzz)
+    this.humNotch50Hz = this.ctx.createBiquadFilter();
+    this.humNotch50Hz.type = 'notch';
+    this.humNotch50Hz.frequency.setValueAtTime(50, this.ctx.currentTime);
+    this.humNotch50Hz.Q.setValueAtTime(10, this.ctx.currentTime);
+
+    this.humNotch60Hz = this.ctx.createBiquadFilter();
+    this.humNotch60Hz.type = 'notch';
+    this.humNotch60Hz.frequency.setValueAtTime(60, this.ctx.currentTime);
+    this.humNotch60Hz.Q.setValueAtTime(10, this.ctx.currentTime);
+
+    this.humNotch100Hz = this.ctx.createBiquadFilter();
+    this.humNotch100Hz.type = 'notch';
+    this.humNotch100Hz.frequency.setValueAtTime(100, this.ctx.currentTime);
+    this.humNotch100Hz.Q.setValueAtTime(14, this.ctx.currentTime);
+
+    // 3. 5.4 kHz Butterworth RF / ADC Hiss Low-Pass: strips soundcard white hiss above passive pickup band
+    this.inputRfLowpass = this.ctx.createBiquadFilter();
+    this.inputRfLowpass.type = 'lowpass';
+    this.inputRfLowpass.frequency.setValueAtTime(5400, this.ctx.currentTime);
+    this.inputRfLowpass.Q.setValueAtTime(0.707, this.ctx.currentTime);
+
     this.inputMonoBus.connect(this.inputImpedanceNode.inputNode);
     this.inputImpedanceNode.outputNode.connect(this.inputHighpass);
-    this.inputHighpass.connect(this.inputGainNode);
+    this.inputHighpass.connect(this.humNotch50Hz);
+    this.humNotch50Hz.connect(this.humNotch60Hz);
+    this.humNotch60Hz.connect(this.humNotch100Hz);
+    this.humNotch100Hz.connect(this.inputRfLowpass);
+    this.inputRfLowpass.connect(this.inputGainNode);
 
     // Input Analyser (2048 samples for accurate low E2 guitar pitch detection)
     this.inputAnalyser = this.ctx.createAnalyser();
@@ -401,26 +388,54 @@ export class AudioEngine {
     this.inputAnalyser.smoothingTimeConstant = 0.3;
     this.inputBuffer = new Float32Array(this.inputAnalyser.fftSize);
 
-    // Passthrough chain nodes (entry & exit points for modular pedals)
+    // Passthrough chain nodes (entry & exit points for modular pedals/amps/cabinets)
     this.chainInputNode = this.ctx.createGain();
     this.chainOutputNode = this.ctx.createGain();
 
-    // Setup modular signal chain
+    // 4. Built-in Studio Input Gate & De-Hisser before modular chain (clamps idle cable buzz automatically)
+    try {
+      this.inputStudioGate = new AudioWorkletNode(this.ctx, 'noise-gate-processor', {
+        numberOfInputs: 1,
+        numberOfOutputs: 1,
+        outputChannelCount: [1],
+        channelCount: 1,
+        channelCountMode: 'explicit',
+        parameterData: {
+          threshold: -48,
+          release: 0.055,
+          hold: 0.022,
+        },
+      });
+    } catch {
+      this.inputStudioGate = null;
+    }
+
+    // Setup modular signal chain (pedals, amp heads, and cabinet IRs)
     this.signalChain = new SignalChain(this.ctx, this.chainInputNode, this.chainOutputNode);
-    this.signalChain.rebuild(this.pedalInstances);
+    this.signalChain.rebuild(this.pedalInstances, this.pedalConnections);
 
     // Master Gain
     this.masterGainNode = this.ctx.createGain();
     const effectiveMaster = this.isMuted ? 0 : this.masterVolumeValue;
     this.masterGainNode.gain.setValueAtTime(effectiveMaster, this.ctx.currentTime);
 
-    // Safety Limiter (prevents harsh digital clipping)
-    this.safetyLimiter = this.ctx.createDynamicsCompressor();
-    this.safetyLimiter.threshold.setValueAtTime(-0.5, this.ctx.currentTime);
-    this.safetyLimiter.knee.setValueAtTime(0, this.ctx.currentTime);
-    this.safetyLimiter.ratio.setValueAtTime(20, this.ctx.currentTime);
-    this.safetyLimiter.attack.setValueAtTime(0.001, this.ctx.currentTime);
-    this.safetyLimiter.release.setValueAtTime(0.05, this.ctx.currentTime);
+    // Zero-Makeup-Gain Transparent Brickwall Safety Limiter (prevents digital clipping without boosting noise floor)
+    this.safetyLimiter = this.ctx.createWaveShaper();
+    const limSamples = 2048;
+    const limCurve = new Float32Array(new ArrayBuffer(limSamples * Float32Array.BYTES_PER_ELEMENT));
+    const limThresh = 0.88;
+    const limCeil = 0.98;
+    for (let i = 0; i < limSamples; i++) {
+      const x = (i * 2) / (limSamples - 1) - 1;
+      const ax = Math.abs(x);
+      if (ax <= limThresh) {
+        limCurve[i] = x;
+      } else {
+        const over = (ax - limThresh) / (1 - limThresh);
+        limCurve[i] = Math.sign(x) * (limThresh + (limCeil - limThresh) * Math.tanh(over * 1.5));
+      }
+    }
+    this.safetyLimiter.curve = limCurve;
 
     // Output Analyser
     this.outputAnalyser = this.ctx.createAnalyser();
@@ -428,48 +443,20 @@ export class AudioEngine {
     this.outputAnalyser.smoothingTimeConstant = 0.3;
     this.outputBuffer = new Float32Array(this.outputAnalyser.fftSize);
 
-    // Connect downstream graph
+    // Connect downstream graph: inputGainNode -> inputAnalyser (for tuner) & inputStudioGate -> chainInputNode
     this.inputGainNode.connect(this.inputAnalyser);
-
-    // Noise gate stage (post input gain, pre pedals) with click-free crossfade bypass
-    this.gateOutGain = this.ctx.createGain();
-    this.gateBypassGain = this.ctx.createGain();
-    this.gateOnGain = this.ctx.createGain();
-    this.inputGainNode.connect(this.gateBypassGain);
-    this.gateBypassGain.connect(this.gateOutGain);
-    try {
-      this.noiseGateNode = new AudioWorkletNode(this.ctx, 'noise-gate-processor', {
-        numberOfInputs: 1,
-        numberOfOutputs: 1,
-        outputChannelCount: [1],
-        channelCount: 1,
-        channelCountMode: 'explicit',
-        parameterData: {
-          threshold: this.noiseGateThresholdDb,
-          release: 0.06,
-          hold: 0.02,
-        },
-      });
-      this.inputGainNode.connect(this.noiseGateNode);
-      this.noiseGateNode.connect(this.gateOnGain);
-      this.gateOnGain.connect(this.gateOutGain);
-    } catch (gateErr) {
-      console.warn('Noise gate unavailable, running without it:', gateErr);
-      this.noiseGateNode = null;
+    if (this.inputStudioGate) {
+      this.inputGainNode.connect(this.inputStudioGate);
+      this.inputStudioGate.connect(this.chainInputNode);
+    } else {
+      this.inputGainNode.connect(this.chainInputNode);
     }
-    this.applyNoiseGateState(true);
-    this.gateOutGain.connect(this.chainInputNode);
 
-    // Guitar Amp Head & Cabinet Simulator positioned at the end of the pedal chain
-    // (safety DC blocker first so asymmetric clipping offsets never reach the amp/cabinet models)
+    // Safety DC blocker at the end of the modular rig chain before Master Output
     this.chainDcBlocker = createDcBlocker(this.ctx, 15);
-    this.ampHeadNode = new AmpHeadNode(this.ctx, this.ampHeadSettings);
-    this.cabinetNode = new CabinetNode(this.ctx, this.cabinetSettings);
 
     this.chainOutputNode.connect(this.chainDcBlocker);
-    this.chainDcBlocker.connect(this.ampHeadNode.inputNode);
-    this.ampHeadNode.outputNode.connect(this.cabinetNode.inputNode);
-    this.cabinetNode.outputNode.connect(this.masterGainNode);
+    this.chainDcBlocker.connect(this.masterGainNode);
 
     this.masterGainNode.connect(this.safetyLimiter);
     this.safetyLimiter.connect(this.outputAnalyser);
@@ -478,9 +465,6 @@ export class AudioEngine {
 
   /**
    * Acquire media stream with guitar-optimized constraints and resilient fallback.
-   * Uses { exact: deviceId } when a specific hardware device is selected so the browser
-   * directly binds to the chosen physical/virtual audio input (e.g. VB-Cable, Audio Interface)
-   * without falling back to the browser's default microphone.
    */
   private async connectInputStream(deviceId: string | null): Promise<void> {
     if (!this.ctx) return;
@@ -488,9 +472,7 @@ export class AudioEngine {
     let stream: MediaStream | null = null;
     const targetId = deviceId && deviceId.trim() !== '' ? deviceId.trim() : null;
 
-    // 1. Try with user-selected device
     if (targetId && targetId !== 'default') {
-      // Attempt 1A: Exact hardware device with studio guitar constraints (unprocessed stereo)
       try {
         stream = await navigator.mediaDevices.getUserMedia({
           audio: {
@@ -504,7 +486,6 @@ export class AudioEngine {
         });
       } catch (err1) {
         console.warn(`[AudioEngine] Exact deviceId with stereo constraints failed for "${targetId}", trying without channelCount:`, err1);
-        // Attempt 1B: Exact hardware device with studio constraints (no channelCount restriction)
         try {
           stream = await navigator.mediaDevices.getUserMedia({
             audio: {
@@ -517,7 +498,6 @@ export class AudioEngine {
           });
         } catch (err2) {
           console.warn(`[AudioEngine] Exact deviceId with studio constraints failed, trying exact with raw audio:`, err2);
-          // Attempt 1C: Exact hardware device with minimal constraints
           try {
             stream = await navigator.mediaDevices.getUserMedia({
               audio: {
@@ -527,7 +507,6 @@ export class AudioEngine {
             });
           } catch (err3) {
             console.warn(`[AudioEngine] Exact deviceId failed completely (${err3}), falling back to ideal preference:`, err3);
-            // Attempt 1D: Soft ideal constraint fallback
             try {
               stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
@@ -547,7 +526,6 @@ export class AudioEngine {
       }
     }
 
-    // 2. Fallback to default audio input with studio constraints (when targetId is null or 'default')
     if (!stream) {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -564,7 +542,6 @@ export class AudioEngine {
       }
     }
 
-    // 3. Final fallback to raw basic audio input
     if (!stream) {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
@@ -583,7 +560,6 @@ export class AudioEngine {
       }
     }
 
-    // 4. Safely detach and release previous stream now that new stream is verified
     if (this.sourceNode) {
       try {
         this.sourceNode.disconnect();
@@ -601,20 +577,14 @@ export class AudioEngine {
       this.mediaStream = null;
     }
 
-    // 5. Connect new media stream to input graph
     this.mediaStream = stream;
     this.sourceNode = this.ctx.createMediaStreamSource(this.mediaStream);
-
-    // CRITICAL: Set discrete channel interpretation!
-    // Prevents Web Audio from auto-upmixing mono onto channel 1 (IN 2),
-    // and preserves isolated hardware Input 1 (Left) and Input 2 (Right) channels.
     this.sourceNode.channelInterpretation = 'discrete';
 
     if (this.inputSplitter) {
       this.sourceNode.connect(this.inputSplitter);
     }
 
-    // 6. Record active device info and hardware channel capabilities
     const activeTrack = stream.getAudioTracks()[0];
     const reportedSettings = activeTrack?.getSettings?.();
     this.detectedInputChannels = reportedSettings?.channelCount || 1;
@@ -629,7 +599,6 @@ export class AudioEngine {
       `[AudioEngine] Connected to audio input: "${activeTrack?.label || 'Unnamed device'}" (id: ${this.selectedInputId}) - Detected channels: ${this.detectedInputChannels} (${this.detectedInputChannels >= 2 ? 'Stereo / Dual-Channel' : 'Mono'})`
     );
 
-    // Apply active input channel routing to the newly connected source
     this.applyInputChannelMode();
   }
 
@@ -658,49 +627,18 @@ export class AudioEngine {
 
     switch (mode) {
       case 'left':
-        // Only Hardware Input 1 (Left Channel / Ch 0)
         this.inputLeftGain.gain.setTargetAtTime(1.0, now, 0.01);
         this.inputRightGain.gain.setTargetAtTime(0.0, now, 0.01);
         break;
       case 'right':
-        // Only Hardware Input 2 (Right Channel / Ch 1)
         this.inputLeftGain.gain.setTargetAtTime(0.0, now, 0.01);
         this.inputRightGain.gain.setTargetAtTime(1.0, now, 0.01);
         break;
       case 'sum':
       default:
-        // L+R (Both channels active, summed)
         this.inputLeftGain.gain.setTargetAtTime(1.0, now, 0.01);
         this.inputRightGain.gain.setTargetAtTime(1.0, now, 0.01);
         break;
-    }
-  }
-
-  /**
-   * Noise gate: enable/disable and threshold in dB (-80 .. -30)
-   */
-  public setNoiseGate(enabled: boolean, thresholdDb: number): void {
-    this.noiseGateEnabled = enabled;
-    this.noiseGateThresholdDb = Math.max(-90, Math.min(-10, thresholdDb));
-    this.applyNoiseGateState(false);
-  }
-
-  private applyNoiseGateState(immediate: boolean): void {
-    if (!this.ctx || !this.gateOnGain || !this.gateBypassGain) return;
-    const now = this.ctx.currentTime;
-    const useGate = this.noiseGateEnabled && this.noiseGateNode !== null;
-    const onTarget = useGate ? 1 : 0;
-    const bypassTarget = useGate ? 0 : 1;
-    if (immediate) {
-      this.gateOnGain.gain.setValueAtTime(onTarget, now);
-      this.gateBypassGain.gain.setValueAtTime(bypassTarget, now);
-    } else {
-      this.gateOnGain.gain.setTargetAtTime(onTarget, now, 0.02);
-      this.gateBypassGain.gain.setTargetAtTime(bypassTarget, now, 0.02);
-    }
-    const thresholdParam = this.noiseGateNode?.parameters.get('threshold');
-    if (thresholdParam) {
-      thresholdParam.setTargetAtTime(this.noiseGateThresholdDb, now, 0.02);
     }
   }
 
@@ -708,12 +646,15 @@ export class AudioEngine {
    * Configure Input Impedance / Pickup Loading Simulator
    */
   public setInputImpedance(config: {
-    pickupType?: 'single-coil' | 'humbucker' | 'p90' | 'active';
+    pickupType?: PickupVoicingType;
     cableLengthM?: number;
     loadResistance?: number;
     loadCapacitancePf?: number;
     volumePosition?: number;
   }): void {
+    if (config.pickupType) {
+      this.pickupVoicing = config.pickupType;
+    }
     this.inputImpedanceNode?.updateConfig(config);
   }
 
@@ -753,14 +694,29 @@ export class AudioEngine {
   }
 
   /**
-   * Set or update pedal instances in the signal chain
+   * Set or update pedal/amp/cabinet instances and DAG connections in the signal chain
    */
-  public setPedalInstances(instances: PedalInstance[]): void {
+  public setPedalInstances(instances: PedalInstance[], connections?: SignalEdge[]): void {
     this.pedalInstances = instances;
+    if (connections !== undefined) {
+      this.pedalConnections = connections;
+    }
     if (this.signalChain) {
-      this.signalChain.rebuild(this.pedalInstances);
+      this.signalChain.rebuild(this.pedalInstances, this.pedalConnections);
     }
     this.updateAutoInputImpedance();
+  }
+
+  /**
+   * Load a custom .wav IR file into a specific cabinet-ir instance on the board
+   */
+  public async loadCustomIRForPedal(pedalId: string, file: File): Promise<string> {
+    if (!this.ctx || !this.signalChain) {
+      const AudioCtxClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      this.ctx = new AudioCtxClass({ latencyHint: 'interactive' });
+      this.setupNodes();
+    }
+    return this.signalChain!.loadCustomIRForPedal(pedalId, file);
   }
 
   /**
@@ -791,18 +747,12 @@ export class AudioEngine {
   /**
    * Auto-Z (Dynamic Variable Pickup Input Impedance):
    * Inspects the first active pedal connected directly to the guitar pickups.
-   * If the first active pedal is a vintage Germanium fuzz (Fuzz Face, Tone Bender),
-   * Rangemaster treble booster, or vintage wah, the guitar pickups experience heavy
-   * resistive loading (~10k - 68k), causing natural high-end roll-off and singing compression.
-   * If the first pedal is a modern buffered pedal (or bypass), load resistance returns to 1MΩ.
    */
   private updateAutoInputImpedance(): void {
     if (!this.inputImpedanceNode) return;
 
-    // Find the first enabled pedal instance
     const firstActive = this.pedalInstances.find((p) => p.enabled);
     if (!firstActive) {
-      // Direct into amp / bypass: 1M ohm standard high-Z
       this.inputImpedanceNode.setLoadResistance(1_000_000);
       return;
     }
@@ -811,65 +761,22 @@ export class AudioEngine {
     let loadR: number;
 
     if (type.includes('fuzzface') || type.includes('fuzz-face')) {
-      loadR = 10_000; // 10 kΩ vintage Fuzz Face
+      loadR = 10_000;
     } else if (type.includes('tonebender') || type.includes('tone-bender')) {
-      loadR = 15_000; // 15 kΩ Tone Bender
+      loadR = 15_000;
     } else if (type.includes('fuzzfactory') || type.includes('fuzz-factory')) {
-      loadR = 12_000; // 12 kΩ Fuzz Factory
+      loadR = 12_000;
     } else if (type.includes('rangemaster')) {
-      loadR = 22_000; // 22 kΩ Treble Booster
+      loadR = 22_000;
     } else if (type.includes('wah')) {
-      loadR = 68_000; // 68 kΩ Wah
+      loadR = 68_000;
     } else if (type.includes('bigmuff') || type.includes('big-muff') || type.includes('hoof') || type.includes('flatiron')) {
-      loadR = 100_000; // 100 kΩ Big Muff input loading
+      loadR = 100_000;
     } else {
-      loadR = 1_000_000; // 1 MΩ standard high-Z
+      loadR = 1_000_000;
     }
 
     this.inputImpedanceNode.setLoadResistance(loadR);
-  }
-
-  /**
-   * Guitar Amp Head Simulator Configuration & Real-Time Parameter Updates
-   */
-  public updateAmpHeadSettings(settings: Partial<AmpHeadSettings>): void {
-    this.ampHeadSettings = { ...this.ampHeadSettings, ...settings };
-    this.ampHeadNode?.updateSettings(settings);
-  }
-
-  public getAmpHeadSettings(): AmpHeadSettings {
-    return this.ampHeadNode ? this.ampHeadNode.getSettings() : this.ampHeadSettings;
-  }
-
-  /**
-   * Cabinet Simulator Configuration & Real-Time Parameter Updates
-   */
-  public updateCabinetSettings(settings: Partial<CabinetSettings>): void {
-    this.cabinetSettings = { ...this.cabinetSettings, ...settings };
-    this.cabinetNode?.updateSettings(settings);
-  }
-
-  public setCabinetCustomIR(buffer: AudioBuffer, name: string): void {
-    this.cabinetSettings = {
-      ...this.cabinetSettings,
-      model: 'custom',
-      customIrName: name,
-    };
-    this.cabinetNode?.setCustomIR(buffer, name);
-  }
-
-  public async loadCustomCabinetIRFromFile(file: File): Promise<string> {
-    if (!this.ctx) {
-      throw new Error('AudioEngine context not initialized');
-    }
-    const arrayBuffer = await file.arrayBuffer();
-    const decoded = await this.ctx.decodeAudioData(arrayBuffer);
-    this.setCabinetCustomIR(decoded, file.name);
-    return file.name;
-  }
-
-  public getCabinetSettings(): CabinetSettings {
-    return this.cabinetNode ? this.cabinetNode.getSettings() : this.cabinetSettings;
   }
 
   /**
@@ -894,7 +801,7 @@ export class AudioEngine {
       sampleRate: this.ctx.sampleRate,
       baseLatency: baseLat,
       outputLatency: outLat,
-      totalLatencyMs: totalMs > 0 ? totalMs : (256 / this.ctx.sampleRate) * 1000 * 2, // fallback approximation
+      totalLatencyMs: totalMs > 0 ? totalMs : (256 / this.ctx.sampleRate) * 1000 * 2,
       currentTime: this.ctx.currentTime,
     };
   }
@@ -949,7 +856,6 @@ export class AudioEngine {
       this.lastOutputMeterTime = now;
     }
 
-    // Decay peak hold at 25 dB per second
     let currentPeakHold = isInput ? this.inputPeakHoldDb : this.outputPeakHoldDb;
     currentPeakHold = Math.max(-100, currentPeakHold - 25 * dt);
 

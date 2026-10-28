@@ -338,28 +338,57 @@ function addResonantMode(
 }
 
 /**
- * Adds a short diffuse tail built from seeded noise, low-passed to the speaker
- * band. Real cabinet IRs are broadband decaying noise after the initial
- * transient; this keeps the convolution from sounding like a single click.
+ * Adds deterministic, zero-noise electro-acoustic speaker cone breakup & baffle
+ * early reflections. Unlike random noise tails (which smear distortion into
+ * static/hiss), real guitar speaker cones exhibit deterministic axisymmetric
+ * and bell cone modes plus cabinet baffle diffraction.
  */
-function addDiffuseTail(ir: Float32Array, fs: number, seedBase: number, distNorm: number): void {
-  let seed = (0x9e3779b9 ^ Math.round(seedBase * 1000)) >>> 0;
-  const rnd = (): number => {
-    seed ^= seed << 13;
-    seed ^= seed >>> 17;
-    seed ^= seed << 5;
-    seed >>>= 0;
-    return (seed / 0xffffffff) * 2 - 1;
-  };
+function addSpeakerConeAndBaffleModes(
+  ir: Float32Array,
+  fs: number,
+  cabinet: CabinetModelId,
+  resFreq: number,
+  distNorm: number
+): void {
+  // Fundamental enclosure / spider mechanical suspension ring
+  addResonantMode(ir, fs, resFreq * 1.42, 0.018, 24);
 
-  let lp = 0;
-  const lpCoef = 0.5; // ~4.8 kHz one-pole
-  const tau = 0.028 + distNorm * 0.035;
-  for (let i = 0; i < ir.length; i++) {
-    lp += lpCoef * (rnd() - lp);
-    const t = i / fs;
-    const attack = 1 - Math.exp(-t / 0.0012);
-    ir[i] += lp * attack * Math.exp(-t / tau) * 0.10;
+  // Speaker-specific cone breakup & vocal projection modes (zero random noise)
+  if (cabinet === '2x12-open') {
+    // Celestion Alnico Blue (Vox AC30): famous 1.18 kHz vocal honk & 2.15 kHz bell chime
+    addResonantMode(ir, fs, 1180, 0.028, 16);
+    addResonantMode(ir, fs, 2150, 0.022, 13);
+    addResonantMode(ir, fs, 3150, 0.012, 9);
+  } else if (cabinet === '4x12-greenback') {
+    // Celestion G12M-25 Greenback: woody 1.35 kHz bark & creamy 2.4 kHz crunch
+    addResonantMode(ir, fs, 1350, 0.024, 15);
+    addResonantMode(ir, fs, 2420, 0.018, 11);
+    addResonantMode(ir, fs, 3300, 0.009, 7);
+  } else if (cabinet === '4x12-closed' || cabinet === '4x12-recto-os' || cabinet === '2x12-closed') {
+    // Celestion Vintage 30: authoritative 1.45 kHz mid-push & 2.68 kHz upper-mid slice
+    addResonantMode(ir, fs, 1450, 0.022, 14);
+    addResonantMode(ir, fs, 2680, 0.020, 11);
+    addResonantMode(ir, fs, 3550, 0.009, 7);
+  } else if (cabinet === '1x12-dumble' || cabinet === '1x12-closed') {
+    // Electro-Voice EVM12L / G12-65: ultra-thick 1.1 kHz vocal bloom & smooth 2.3 kHz articulate top
+    addResonantMode(ir, fs, 1120, 0.025, 16);
+    addResonantMode(ir, fs, 2280, 0.016, 11);
+  } else {
+    // Classic American / Jensen Alnico / Ceramic cone modes
+    addResonantMode(ir, fs, 1420, 0.018, 15);
+    addResonantMode(ir, fs, 2480, 0.015, 11);
+    addResonantMode(ir, fs, 3450, 0.009, 8);
+  }
+
+  // Deterministic internal cabinet wall & baffle edge reflections (no white noise!)
+  const tapDelaysMs = [0.68, 1.35, 2.15, 3.40, 4.85];
+  const tapGains = [-0.08, 0.06, -0.045, 0.032, -0.022];
+  const roomScale = 0.75 + distNorm * 0.5;
+  for (let t = 0; t < tapDelaysMs.length; t++) {
+    const idx = Math.floor((tapDelaysMs[t] / 1000) * fs);
+    if (idx > 0 && idx < ir.length) {
+      ir[idx] += ir[0] * tapGains[t] * roomScale;
+    }
   }
 }
 
@@ -485,18 +514,8 @@ export function generateCabinetImpulseResponse(
   // still clearly louder than the decay (as in a real close-mic IR).
   ir[0] = 5.0;
 
-  // 4a. Modal cabinet response. The delta above only carries the direct mic
-  // transient; a real speaker/cabinet keeps ringing at its cone modes for a few
-  // ms. The low-end resonance/thump is already produced by the peaking filter
-  // below, so only the short cone modes are added explicitly here (adding a
-  // second low-frequency resonator made the bass level unpredictable/inverted
-  // depending on phase).
-  addResonantMode(ir, fs, 1450, 0.014, 18);
-  addResonantMode(ir, fs, 2300, 0.010, 12);
-  addResonantMode(ir, fs, 3400, 0.007, 8);
-
-  // 4b. Diffuse cone/air tail (deterministic filtered noise), stronger with mic distance.
-  addDiffuseTail(ir, fs, profile.resonanceFreq, distNorm);
+  // 4a. Deterministic speaker cone breakup & cabinet baffle reflections (zero white noise)
+  addSpeakerConeAndBaffleModes(ir, fs, cabinet, profile.resonanceFreq, distNorm);
 
   // A. Cabinet Acoustic Low-Cut (enclosure air spring limit)
   applyBiquad(ir, biquad('highpass', fs, profile.lowCutFreq, 0.707));
@@ -513,6 +532,22 @@ export function generateCabinetImpulseResponse(
   // D. Cabinet Enclosure Mid-Dip / Multi-cone Phase Cancellation
   if (profile.midScoopDb !== 0 && profile.midScoopFreq > 0) {
     applyBiquad(ir, biquad('peaking', fs, profile.midScoopFreq, 1.2, profile.midScoopDb));
+  }
+
+  // D2. Speaker Magnet & Cone Midrange Character (Alnico Blue vocal honk, Greenback woodiness, V30 projection)
+  if (cabinet === '2x12-open') {
+    // Celestion Alnico Blue: rich vocal 1.18 kHz bloom & 2.25 kHz chime (Brian May / Vox AC30 signature)
+    applyBiquad(ir, biquad('peaking', fs, 1180, 0.95, 3.8));
+    applyBiquad(ir, biquad('peaking', fs, 2250, 1.15, 2.8));
+  } else if (cabinet === '4x12-greenback') {
+    // Celestion G12M-25 Greenback: woody 1.38 kHz midrange authority
+    applyBiquad(ir, biquad('peaking', fs, 1380, 1.0, 3.2));
+  } else if (cabinet === '4x12-closed' || cabinet === '2x12-closed') {
+    // Celestion Vintage 30: famous 2.55 kHz upper-mid presence cut
+    applyBiquad(ir, biquad('peaking', fs, 2550, 1.2, 3.0));
+  } else if (cabinet === '1x12-dumble' || cabinet === '1x12-closed') {
+    // EVM-12L / G12-65: thick 1.05 kHz midrange vocal body
+    applyBiquad(ir, biquad('peaking', fs, 1050, 0.9, 2.8));
   }
 
   // E. Dynamic Mic Placement Tone Shaper (Edge <-> Center)

@@ -69,6 +69,9 @@ import { BossRv6Pedal } from './reverb/BossRv6Pedal';
 import { EhxHolyGrailPedal } from './reverb/EhxHolyGrailPedal';
 import { JhsHallReverbPedal } from './reverb/JhsHallReverbPedal';
 import { TcDripSpringReverbPedal } from './reverb/TcDripSpringReverbPedal';
+import { AmpHeadPedal } from './amp/AmpHeadPedal';
+import { CabinetIrPedal } from './cabinet/CabinetIrPedal';
+import { MxrSmartGatePedal } from './gate/MxrSmartGatePedal';
 
 interface StompboxProps {
   instance: PedalInstance;
@@ -77,6 +80,7 @@ interface StompboxProps {
   onToggleEnabled: (id: string) => void;
   onChangeParam: (id: string, paramId: string, val: number) => void;
   onRemove: (id: string) => void;
+  onLoadCustomIR?: (pedalId: string, file: File) => void;
   onPointerDown?: (e: React.PointerEvent) => void;
   style?: React.CSSProperties;
   isDragging?: boolean;
@@ -102,6 +106,14 @@ export const Stompbox: React.FC<StompboxProps> = (props) => {
 
   // Render authentic pedal hardware components
   switch (instance.type) {
+    // Amplifier, Cabinet IR & Noise Gate Units
+    case 'amp-head':
+      return <AmpHeadPedal {...props} />;
+    case 'cabinet-ir':
+      return <CabinetIrPedal {...props} />;
+    case 'gate-mxr-smartgate':
+      return <MxrSmartGatePedal {...props} />;
+
     // Category 1: Compressors
     case 'comp-dynacomp':
       return <MxrDynaCompPedal {...props} />;

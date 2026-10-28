@@ -5,6 +5,15 @@ export const PEDAL_WIDTH = 204;
 export const JACK_Y_OFFSET = 57;
 
 export function getPedalDimensions(type: string): { w: number; h: number } {
+  if (type === 'amp-head') {
+    return { w: 720, h: 296 };
+  }
+  if (type === 'cabinet-ir') {
+    return { w: 380, h: 420 };
+  }
+  if (type === 'gate-mxr-smartgate') {
+    return { w: 168, h: 276 };
+  }
   const isWide = type === 'od-klon' || type === 'klon-centaur';
   const isMini = type === 'od-tsmini' || type === 'ts-mini' || type === 'boost-spark-mini' || type === 'boost-xotic-ep';
   const isToneBender = type === 'fuzz-tonebender';

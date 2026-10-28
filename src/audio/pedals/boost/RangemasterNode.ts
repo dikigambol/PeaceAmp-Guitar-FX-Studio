@@ -77,20 +77,23 @@ export class RangemasterNode implements AudioPedalNode {
     this.bypassDry = ctx.createGain();
     this.bypassWet = ctx.createGain();
 
-    // 1. Treble Booster Highpass: 5 nF into ~18 kΩ input impedance (~1550 Hz, true one-pole 6 dB/oct)
-    this.trebleBoostHighpass = createOnePoleHighpass(ctx, 1550);
+    // 1. Treble Booster Highpass: 5 nF into OC44 loaded bias network (~560 Hz true one-pole 6 dB/oct)
+    // Tightens low-end mud below 560 Hz so low E/A power chords stay clarinet-tight while preserving thick vocal mids.
+    this.trebleBoostHighpass = createOnePoleHighpass(ctx, 560);
 
-    // 2. Midrange Vocal Chime Peak (~2900 Hz, +3.5 dB, Q=0.9)
+    // 2. Midrange Vocal Singing Peak (~1280 Hz, +5.2 dB, Q=0.92)
+    // Gives the signature Brian May cello/violin vocal sustain when pushing a British tube amp (Vox AC30 / Plexi).
     this.chimePeaking = ctx.createBiquadFilter();
     this.chimePeaking.type = 'peaking';
-    this.chimePeaking.frequency.setValueAtTime(2900, ctx.currentTime);
-    this.chimePeaking.Q.setValueAtTime(0.9, ctx.currentTime);
-    this.chimePeaking.gain.setValueAtTime(3.5, ctx.currentTime);
+    this.chimePeaking.frequency.setValueAtTime(1280, ctx.currentTime);
+    this.chimePeaking.Q.setValueAtTime(0.92, ctx.currentTime);
+    this.chimePeaking.gain.setValueAtTime(5.2, ctx.currentTime);
 
-    // 3. Germanium Transistor HF Roll-Off (Mullard OC44 Miller capacitance, ~8 kHz)
+    // 3. Germanium Transistor HF Roll-Off (Mullard OC44 collector-base Miller capacitance, ~3.95 kHz)
+    // Eliminates harsh upper-treble hiss/fizz (>4 kHz) while keeping high notes singing, creamy, and violin-like.
     this.hfRollOff = ctx.createBiquadFilter();
     this.hfRollOff.type = 'lowpass';
-    this.hfRollOff.frequency.setValueAtTime(8000, ctx.currentTime);
+    this.hfRollOff.frequency.setValueAtTime(3950, ctx.currentTime);
     this.hfRollOff.Q.setValueAtTime(0.707, ctx.currentTime);
 
     // 4. Boost Gain (SET pot)
@@ -106,7 +109,7 @@ export class RangemasterNode implements AudioPedalNode {
 
     // 7. Output Level Calibration
     this.outputLevelTrim = ctx.createGain();
-    this.outputLevelTrim.gain.setValueAtTime(1.15, ctx.currentTime);
+    this.outputLevelTrim.gain.setValueAtTime(1.08, ctx.currentTime);
 
     // Audio Graph Wiring:
     // Dry Path
@@ -141,18 +144,21 @@ export class RangemasterNode implements AudioPedalNode {
     const curve = new Float32Array(samples);
     const kneePos = 0.42; // Positive swing soft threshold
     const kneeNeg = 0.28; // Negative swing soft conduction
+    const noiseKnee = 0.014; // Suppresses low-level interface hiss before boosting into the amp
 
     for (let i = 0; i < samples; i++) {
       const x = (i * 2) / (samples - 1) - 1; // Normalized -1 to +1
+      const ax = Math.abs(x);
+      const expWeight = (ax * ax) / (ax * ax + noiseKnee * noiseKnee);
 
       if (x >= 0) {
         // Upper swing: softer compression with gentle curvature
         const scaled = x / kneePos;
-        curve[i] = (kneePos * scaled) / Math.pow(1 + Math.pow(scaled, 2.4), 1 / 2.4);
+        curve[i] = ((kneePos * scaled) / Math.pow(1 + Math.pow(scaled, 2.4), 1 / 2.4)) * expWeight;
       } else {
         // Lower swing: earlier Germanium knee saturation producing even harmonics
         const scaled = -x / kneeNeg;
-        curve[i] = -(kneeNeg * scaled) / Math.pow(1 + Math.pow(scaled, 1.9), 1 / 1.9);
+        curve[i] = -((kneeNeg * scaled) / Math.pow(1 + Math.pow(scaled, 1.9), 1 / 1.9)) * expWeight;
       }
     }
     return curve;
@@ -166,8 +172,8 @@ export class RangemasterNode implements AudioPedalNode {
     const rawVal = this.params.set ?? 5.0;
     const norm = Math.max(0, Math.min(10, rawVal)) / 10;
 
-    // Authentic log-audio potentiometer taper
-    const gainDb = Math.pow(norm, 1.3) * 28.0;
+    // Authentic log-audio potentiometer taper (+4 dB to +20 dB musical boost without excessive noise floor blowup)
+    const gainDb = 4.0 + Math.pow(norm, 1.25) * 16.0;
     const linearGain = Math.pow(10, gainDb / 20);
 
     if (immediate) {

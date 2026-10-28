@@ -245,3 +245,26 @@ export const MIC_OPTIONS: MicOptionInfo[] = [
     description: 'Full-spectrum hi-fi fidelity, extended 10kHz airy sparkle, studio realism.',
   },
 ];
+
+export function cabinetModelToIndex(model: CabinetModelId): number {
+  if (model === 'custom') return CABINET_OPTIONS.length;
+  const idx = CABINET_OPTIONS.findIndex((c) => c.id === model);
+  return idx >= 0 ? idx : 7; // default 4x12-closed
+}
+
+export function indexToCabinetModel(index: number): CabinetModelId {
+  const rounded = Math.round(index);
+  if (rounded >= CABINET_OPTIONS.length) return 'custom';
+  const clamped = Math.max(0, Math.min(CABINET_OPTIONS.length - 1, rounded));
+  return CABINET_OPTIONS[clamped]?.id || '4x12-closed';
+}
+
+export function micModelToIndex(mic: MicModelId): number {
+  const idx = MIC_OPTIONS.findIndex((m) => m.id === mic);
+  return idx >= 0 ? idx : 0;
+}
+
+export function indexToMicModel(index: number): MicModelId {
+  const clamped = Math.max(0, Math.min(MIC_OPTIONS.length - 1, Math.round(index)));
+  return MIC_OPTIONS[clamped]?.id || 'sm57';
+}

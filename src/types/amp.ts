@@ -47,6 +47,8 @@ export interface AmpHeadSettings {
   treble: number;     // 0 to 10
   presence: number;   // 0 to 10
   master: number;     // 0 to 10
+  powerMode?: number;        // 0 = LOW (5W Studio), 1 = HIGH (20W/100W Full)
+  inputSensitivity?: number; // 0 = LOW Sensitivity (-6dB clean pad), 1 = HIGH Sensitivity (cascaded preamp)
 }
 
 export const AMP_MODELS: AmpModelOption[] = [
@@ -216,3 +218,13 @@ export const AMP_MODELS: AmpModelOption[] = [
     character: 'ENGL® Powerball II E645/2 100W 6L6',
   },
 ];
+
+export function ampModelToIndex(model: AmpModelId): number {
+  const idx = AMP_MODELS.findIndex((m) => m.id === model);
+  return idx >= 0 ? idx : 0;
+}
+
+export function indexToAmpModel(index: number): AmpModelId {
+  const clamped = Math.max(0, Math.min(AMP_MODELS.length - 1, Math.round(index)));
+  return AMP_MODELS[clamped]?.id || 'pristine-clean';
+}

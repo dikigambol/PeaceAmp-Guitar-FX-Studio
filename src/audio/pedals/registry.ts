@@ -80,12 +80,94 @@ import { BossRv6Node } from './reverb/BossRv6Node';
 import { EhxHolyGrailNode } from './reverb/EhxHolyGrailNode';
 import { JhsHallReverbNode } from './reverb/JhsHallReverbNode';
 import { TcDripSpringReverbNode } from './reverb/TcDripSpringReverbNode';
+import { AmpHeadNode } from '../amp/AmpHeadNode';
+import { CabinetNode } from '../cabinet/CabinetNode';
+import { MxrSmartGateNode } from './gate/MxrSmartGateNode';
+import { AMP_MODELS } from '../../types/amp';
+import { CABINET_OPTIONS, MIC_OPTIONS } from '../../types/cabinet';
 
 /**
  * Curated pedal definitions for Category 1 (Compressor), Category 2 (Overdrive), and Category 4 (Fuzz)
  * Exactly modeled according to pedalbox-list.md and reference hardware samples.
  */
 export const PEDAL_DEFINITIONS: Record<string, PedalMetadata> = {
+  // Category 0A: Guitar Amplifier Head
+  'amp-head': {
+    type: 'amp-head',
+    name: 'Guitar Amp Head',
+    subtitle: '18 Classic Tube & Solid-State Preamp + Power Amp Models',
+    category: 'amp',
+    chassisColor: '#1a1815',
+    accentColor: '#c8a665',
+    parameters: [
+      {
+        id: 'model',
+        name: 'MODEL',
+        min: 0,
+        max: AMP_MODELS.length - 1,
+        step: 1,
+        defaultValue: 0,
+        formatValue: (v) => AMP_MODELS[Math.round(v)]?.name || 'JC-120',
+      },
+      { id: 'gain', name: 'GAIN', min: 0, max: 10, step: 0.1, defaultValue: 5.0, formatValue: (v) => `${(1 + v * 1.8).toFixed(1)}x` },
+      { id: 'bass', name: 'BASS', min: 0, max: 10, step: 0.1, defaultValue: 5.0, formatValue: (v) => `${Math.round((v / 10) * 100)}%` },
+      { id: 'mid', name: 'MID', min: 0, max: 10, step: 0.1, defaultValue: 5.0, formatValue: (v) => `${Math.round((v / 10) * 100)}%` },
+      { id: 'treble', name: 'TREBLE', min: 0, max: 10, step: 0.1, defaultValue: 5.0, formatValue: (v) => `${Math.round((v / 10) * 100)}%` },
+      { id: 'presence', name: 'PRESENCE', min: 0, max: 10, step: 0.1, defaultValue: 5.0, formatValue: (v) => `${(-9 + (v / 10) * 18 >= 0 ? '+' : '')}${(-9 + (v / 10) * 18).toFixed(1)} dB` },
+      { id: 'master', name: 'MASTER', min: 0, max: 10, step: 0.1, defaultValue: 6.0, formatValue: (v) => `${Math.round((v / 10) * 100)}%` },
+      { id: 'powerMode', name: 'POWER MODE', min: 0, max: 1, step: 1, defaultValue: 1, formatValue: (v) => (v >= 0.5 ? 'HIGH' : 'LOW') },
+      { id: 'inputSensitivity', name: 'SENSITIVITY', min: 0, max: 1, step: 1, defaultValue: 1, formatValue: (v) => (v >= 0.5 ? 'HIGH' : 'LOW') },
+    ],
+  },
+
+  // Category 0B: Cabinet IR Simulator
+  'cabinet-ir': {
+    type: 'cabinet-ir',
+    name: 'Cabinet IR Simulator',
+    subtitle: '16 Speaker Enclosures, 6 Studio Mics, Stereo Pan & Custom WAV IR',
+    category: 'cabinet',
+    chassisColor: '#17191e',
+    accentColor: '#c8a665',
+    parameters: [
+      {
+        id: 'model',
+        name: 'CABINET',
+        min: 0,
+        max: CABINET_OPTIONS.length,
+        step: 1,
+        defaultValue: 7, // 4x12-closed
+        formatValue: (v) => CABINET_OPTIONS[Math.round(v)]?.name || 'Custom IR',
+      },
+      {
+        id: 'mic',
+        name: 'MIC',
+        min: 0,
+        max: MIC_OPTIONS.length - 1,
+        step: 1,
+        defaultValue: 0, // sm57
+        formatValue: (v) => MIC_OPTIONS[Math.round(v)]?.name || 'SM57',
+      },
+      { id: 'position', name: 'POSITION', min: 0, max: 1, step: 0.02, defaultValue: 0.5, formatValue: (v) => `${Math.round(v * 100)}%` },
+      { id: 'distance', name: 'DISTANCE', min: 0, max: 1, step: 0.02, defaultValue: 0.15, formatValue: (v) => `${(0.5 + v * 5.5).toFixed(1)}"` },
+      { id: 'mix', name: 'MIX', min: 0, max: 1, step: 0.01, defaultValue: 1.0, formatValue: (v) => `${Math.round(v * 100)}%` },
+      { id: 'level', name: 'LEVEL', min: -12, max: 6, step: 0.5, defaultValue: 0, formatValue: (v) => `${v >= 0 ? '+' : ''}${v.toFixed(1)} dB` },
+      { id: 'pan', name: 'PAN', min: -1, max: 1, step: 0.05, defaultValue: 0, formatValue: (v) => (Math.abs(v) < 0.03 ? 'CENTER' : v < 0 ? `L ${Math.round(Math.abs(v) * 100)}%` : `R ${Math.round(v * 100)}%`) },
+    ],
+  },
+  // Category 0C: Noise Gate
+  'gate-mxr-smartgate': {
+    type: 'gate-mxr-smartgate',
+    name: 'MXR M135 Smart Gate',
+    subtitle: 'Intelligent 3-Band Noise Gate (Hiss / Mid / Full & Hi Trigger Range)',
+    category: 'gate',
+    chassisColor: '#b0b5ba',
+    accentColor: '#111317',
+    parameters: [
+      { id: 'trigger', name: 'TRIGGER LEVEL', min: 0, max: 10, step: 0.1, defaultValue: 4.5, formatValue: (v) => v.toFixed(1) },
+      { id: 'range', name: 'HI TRIGGER RANGE', min: 0, max: 1, step: 1, defaultValue: 0, formatValue: (v) => (v >= 1 ? 'HI RANGE' : 'NORMAL') },
+      { id: 'mode', name: 'MODE', min: 0, max: 2, step: 1, defaultValue: 2, formatValue: (v) => (v === 2 ? 'FULL' : v === 1 ? 'MID' : 'HISS') },
+    ],
+  },
   // Category 1: Compressors
   'comp-dynacomp': {
     type: 'comp-dynacomp',
@@ -1550,6 +1632,12 @@ export function createPedalAudioNode(
   enabled = true
 ): AudioPedalNode {
   switch (type) {
+    // Amplifier & Cabinet IR
+    case 'amp-head':
+      return new AmpHeadNode(ctx, id, initialParams, enabled);
+    case 'cabinet-ir':
+      return new CabinetNode(ctx, id, initialParams, enabled);
+
     // Reverb
     case 'reverb-boss-rv6':
       return new BossRv6Node(ctx, id, initialParams, enabled);
@@ -1625,7 +1713,9 @@ export function createPedalAudioNode(
     case 'boost-xotic-ep':
       return new XoticEpBoosterNode(ctx, id, initialParams, enabled);
 
-    // Compressors
+    // Noise Gate & Compressors
+    case 'gate-mxr-smartgate':
+      return new MxrSmartGateNode(ctx, id, initialParams, enabled);
     case 'comp-dynacomp':
       return new MxrDynaCompNode(ctx, id, initialParams, enabled);
     case 'comp-ross':

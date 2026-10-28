@@ -10,7 +10,7 @@ export const WORKLET_CODE = `
 class NoiseGateProcessor extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
-      { name: 'threshold', defaultValue: -50, minValue: -90, maxValue: -10 },
+      { name: 'threshold', defaultValue: -46, minValue: -90, maxValue: -5 },
       { name: 'release', defaultValue: 0.05, minValue: 0.005, maxValue: 0.5 },
       { name: 'hold', defaultValue: 0.02, minValue: 0.0, maxValue: 0.2 },
     ];
@@ -21,7 +21,10 @@ class NoiseGateProcessor extends AudioWorkletProcessor {
     this.envelope = 0;
     this.gain = 0.0;
     this.isOpen = false;
+    this.lastReportedOpen = null;
     this.holdCounter = 0;
+    this.lpL = 0;
+    this.lpR = 0;
   }
 
   process(inputs, outputs, parameters) {
@@ -40,13 +43,13 @@ class NoiseGateProcessor extends AudioWorkletProcessor {
 
     // 'sampleRate' is the AudioWorkletGlobalScope sample rate (44.1k / 48k / 96k ...)
     const openThreshold = Math.pow(10, thresholdDb / 20);
-    const closeThreshold = openThreshold * 0.74; // ~2.6 dB hysteresis to stop chatter
+    const closeThreshold = openThreshold * 0.72; // ~2.8 dB hysteresis to stop chatter
 
     const holdSamples = holdTime * sampleRate;
     const releaseCoeff = Math.exp(-1.0 / Math.max(1, releaseTime * sampleRate));
-    const attackCoeff = 1.0 - Math.exp(-1.0 / (0.001 * sampleRate)); // ~1 ms, click-free
-    // Fast peak envelope with ~18 ms decay: tracks guitar palm-mutes & hand-stops quickly
-    const envDecay = Math.exp(-1.0 / (0.018 * sampleRate));
+    const attackCoeff = 1.0 - Math.exp(-1.0 / (0.0012 * sampleRate)); // ~1.2 ms, click-free
+    // Fast RMS-like envelope with ~16 ms decay: tracks guitar palm-mutes & hand-stops quickly
+    const envDecay = Math.exp(-1.0 / (0.016 * sampleRate));
 
     for (let i = 0; i < inputL.length; i++) {
       const sL = inputL[i];
@@ -69,14 +72,30 @@ class NoiseGateProcessor extends AudioWorkletProcessor {
       }
 
       if (this.isOpen) {
-        this.gain += (1.0 - this.gain) * attackCoeff;
+        // Soft downward expansion knee near closeThreshold so decaying tails fade without hiss
+        const softKnee = Math.min(1.0, this.envelope / Math.max(1e-6, openThreshold * 1.35));
+        const targetGain = 0.35 + 0.65 * softKnee;
+        this.gain += (targetGain - this.gain) * attackCoeff;
       } else {
         this.gain *= releaseCoeff;
         if (this.gain < 0.0001) this.gain = 0;
       }
 
-      outputL[i] = sL * this.gain;
-      if (outputR !== outputL) outputR[i] = sR * this.gain;
+      // Dynamic envelope-tracking de-hisser (sliding 1-pole lowpass):
+      // Strips high-frequency hiss (>1.4 kHz) during quiet sustain tails while opening wide (6 kHz) on notes
+      const brightness = Math.min(1.0, Math.max(0.0, (this.envelope - closeThreshold * 0.5) / Math.max(1e-5, openThreshold * 3.5)));
+      const cutoffHz = 1350 + brightness * 4650;
+      const alpha = Math.min(0.85, (2 * Math.PI * cutoffHz) / sampleRate);
+      this.lpL += alpha * (sL - this.lpL);
+      this.lpR += alpha * (sR - this.lpR);
+
+      outputL[i] = this.lpL * this.gain;
+      if (outputR !== outputL) outputR[i] = this.lpR * this.gain;
+    }
+
+    if (this.isOpen !== this.lastReportedOpen) {
+      this.lastReportedOpen = this.isOpen;
+      this.port.postMessage({ isOpen: this.isOpen });
     }
 
     return true;

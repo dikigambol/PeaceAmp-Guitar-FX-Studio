@@ -1,4 +1,6 @@
 import type { CabinetSettings } from '../../types/cabinet';
+import { indexToCabinetModel, indexToMicModel } from '../../types/cabinet';
+import type { AudioPedalNode } from '../../types/pedal';
 import { generateCabinetImpulseResponse } from '../../dsp/amp/cabinetIRGenerator';
 
 /** Mapping (cabinet, mic) -> filename in public/sample-irs/ */
@@ -19,19 +21,24 @@ const REAL_IR_MAP: Record<string, string> = {
 
   '2x12-open_sm57': 'Vox_AC30_2x12_Alnico_SM57.wav',
   '2x12-open_md421': 'Vox_AC30_2x12_Alnico_SM57.wav',
+  '2x12-open_ribbon': 'Vox_AC30_2x12_Alnico_SM57.wav',
+  '2x12-open_m160': 'Vox_AC30_2x12_Alnico_SM57.wav',
+  '2x12-open_sm7b': 'Vox_AC30_2x12_Alnico_SM57.wav',
 
   '2x12-jc120_sm7b': 'Roland_JC120_2x12_Studio_SM7.wav',
   '2x12-jc120_sm57': 'Roland_JC120_2x12_Studio_SM7.wav',
 
   '4x12-orange_sm57': 'Orange_PPC412_V30_SM57.wav',
   '4x12-orange_md421': 'Orange_PPC412_V30_SM57.wav',
+  '4x12-orange_ribbon': 'Orange_PPC412_V30_SM57.wav',
 };
 
 function irMapKey(cabinet: string, mic: string): string {
   return `${cabinet}_${mic}`;
 }
 
-export class CabinetNode {
+export class CabinetNode implements AudioPedalNode {
+  public id: string;
   public inputNode: GainNode;
   public outputNode: GainNode;
 
@@ -39,10 +46,16 @@ export class CabinetNode {
   private convolver: ConvolverNode;
   private convolverGain: GainNode;
 
-  // Wet / Dry blend & Output Trim Level
+  // Real-time post-convolver mic placement, proximity & speaker cone anti-fizz filters
+  private micProximityShelf: BiquadFilterNode;
+  private micPositionShelf: BiquadFilterNode;
+  private speakerConeLowpass: BiquadFilterNode;
+
+  // Wet / Dry blend, Output Trim Level & Stereo Pan
   private dryGain: GainNode;
   private wetGain: GainNode;
   private levelGain: GainNode;
+  private pannerNode: StereoPannerNode;
 
   // Bypass crossfaders
   private bypassDry: GainNode;
@@ -54,7 +67,7 @@ export class CabinetNode {
   private retireTimers = new Set<ReturnType<typeof setTimeout>>();
   private disposed = false;
 
-  private settings: CabinetSettings = {
+  private settings: CabinetSettings & { pan?: number } = {
     enabled: true,
     model: '4x12-closed',
     mic: 'sm57',
@@ -62,6 +75,7 @@ export class CabinetNode {
     distance: 0.15,
     mix: 1.0, // 100% WET by default (authentic guitar cabinet simulator standard)
     level: 0,
+    pan: 0,
   };
 
   private customBuffer: AudioBuffer | null = null;
@@ -70,11 +84,35 @@ export class CabinetNode {
   // Cache for real IR buffers loaded from files
   private realIrCache = new Map<string, AudioBuffer>();
 
-  constructor(ctx: AudioContext, initialSettings?: Partial<CabinetSettings>) {
+  constructor(
+    ctx: AudioContext,
+    idOrSettings?: string | Partial<CabinetSettings>,
+    initialParams?: Record<string, number>,
+    enabled = true
+  ) {
     this.ctx = ctx;
 
-    if (initialSettings) {
-      this.settings = { ...this.settings, ...initialSettings };
+    if (typeof idOrSettings === 'string') {
+      this.id = idOrSettings;
+      this.settings.enabled = enabled;
+      if (initialParams) {
+        if (initialParams.model !== undefined) {
+          this.settings.model = indexToCabinetModel(initialParams.model);
+        }
+        if (initialParams.mic !== undefined) {
+          this.settings.mic = indexToMicModel(initialParams.mic);
+        }
+        if (initialParams.position !== undefined) this.settings.position = initialParams.position;
+        if (initialParams.distance !== undefined) this.settings.distance = initialParams.distance;
+        if (initialParams.mix !== undefined) this.settings.mix = initialParams.mix;
+        if (initialParams.level !== undefined) this.settings.level = initialParams.level;
+        if (initialParams.pan !== undefined) this.settings.pan = initialParams.pan;
+      }
+    } else {
+      this.id = 'cabinet-ir-default';
+      if (idOrSettings) {
+        this.settings = { ...this.settings, ...idOrSettings };
+      }
     }
 
     this.inputNode = ctx.createGain();
@@ -85,9 +123,25 @@ export class CabinetNode {
     this.convolverGain = ctx.createGain();
     this.convolverGain.gain.setValueAtTime(1, ctx.currentTime);
 
+    // Post-convolver real-time mic placement, proximity & speaker cone anti-fizz filters
+    this.micProximityShelf = ctx.createBiquadFilter();
+    this.micProximityShelf.type = 'lowshelf';
+    this.micProximityShelf.frequency.setValueAtTime(135, ctx.currentTime);
+
+    this.micPositionShelf = ctx.createBiquadFilter();
+    this.micPositionShelf.type = 'highshelf';
+    this.micPositionShelf.frequency.setValueAtTime(2800, ctx.currentTime);
+
+    this.speakerConeLowpass = ctx.createBiquadFilter();
+    this.speakerConeLowpass.type = 'lowpass';
+    this.speakerConeLowpass.frequency.setValueAtTime(5200, ctx.currentTime);
+    this.speakerConeLowpass.Q.setValueAtTime(0.707, ctx.currentTime);
+
     this.dryGain = ctx.createGain();
     this.wetGain = ctx.createGain();
     this.levelGain = ctx.createGain();
+    this.pannerNode = ctx.createStereoPanner();
+    this.pannerNode.pan.setValueAtTime(this.settings.pan ?? 0, ctx.currentTime);
 
     this.bypassDry = ctx.createGain();
     this.bypassWet = ctx.createGain();
@@ -96,23 +150,29 @@ export class CabinetNode {
     // inputNode
     //   ├─> bypassDry ──> outputNode (when bypassed)
     //   └─> bypassWet ──> [active processing]
-    //         ├─> dryGain ────────────────────────┐
-    //         └─> convolver ──> convolverGain ────┴─> levelGain ──> outputNode
+    //         ├─> dryGain ─────────────────────────────────────────────────────────────────────────────┐
+    //         └─> convolver ──> convolverGain ──> micProximity ──> micPosition ──> speakerConeLowpass ──┴─> wetGain ──> levelGain ──> pannerNode ──> outputNode
     this.inputNode.connect(this.bypassDry);
     this.bypassDry.connect(this.outputNode);
 
     this.inputNode.connect(this.bypassWet);
+    this.inputNode.channelCountMode = 'max';
     this.bypassWet.connect(this.dryGain);
     this.bypassWet.connect(this.convolver);
 
     this.dryGain.connect(this.levelGain);
     this.convolver.connect(this.convolverGain);
-    this.convolverGain.connect(this.wetGain);
+    this.convolverGain.connect(this.micProximityShelf);
+    this.micProximityShelf.connect(this.micPositionShelf);
+    this.micPositionShelf.connect(this.speakerConeLowpass);
+    this.speakerConeLowpass.connect(this.wetGain);
     this.wetGain.connect(this.levelGain);
 
-    this.levelGain.connect(this.outputNode);
+    this.levelGain.connect(this.pannerNode);
+    this.pannerNode.connect(this.outputNode);
 
     // Initial setup
+    this.applyMicPlacementFilters(true);
     this.applyMixAndLevel();
     this.applyBypassState();
     // Load IR asynchronously (real file preferred, synthetic fallback)
@@ -189,7 +249,7 @@ export class CabinetNode {
 
     this.bypassWet.connect(newConvolver);
     newConvolver.connect(newGain);
-    newGain.connect(this.wetGain);
+    newGain.connect(this.micProximityShelf);
 
     const oldConvolver = this.convolver;
     const oldGain = this.convolverGain;
@@ -268,6 +328,73 @@ export class CabinetNode {
     }
   }
 
+  /**
+   * Real-time click-free mic placement (Edge <-> Cap Center), proximity effect (Close <-> Room),
+   * and physical speaker cone ceiling filter. Works smoothly on both real WAV captures,
+   * custom IR uploads, and modeled cabinets.
+   */
+  private applyMicPlacementFilters(immediate = false): void {
+    const now = this.ctx.currentTime;
+    const tc = immediate ? 0.001 : 0.018;
+    const posNorm = Math.max(0, Math.min(1, this.settings.position ?? 0.5));
+    const distNorm = Math.max(0, Math.min(1, this.settings.distance ?? 0.15));
+
+    // Mic transducer warmth/brightness offset (allows Ribbon/M160/SM7B to warm up shared WAV captures too)
+    let micTiltDb: number;
+    let micLowDb: number;
+    let micCutoffOffsetHz: number;
+    switch (this.settings.mic) {
+      case 'ribbon':
+        micTiltDb = -2.8;
+        micLowDb = 2.2;
+        micCutoffOffsetHz = -450;
+        break;
+      case 'm160':
+        micTiltDb = -1.6;
+        micLowDb = 1.4;
+        micCutoffOffsetHz = -250;
+        break;
+      case 'sm7b':
+        micTiltDb = -1.2;
+        micLowDb = 0.8;
+        micCutoffOffsetHz = -200;
+        break;
+      case 'md421':
+        micTiltDb = 0.6;
+        micLowDb = 1.6;
+        micCutoffOffsetHz = 100;
+        break;
+      case 'condenser':
+        micTiltDb = 1.5;
+        micLowDb = 0.5;
+        micCutoffOffsetHz = 500;
+        break;
+      default:
+        // sm57
+        micTiltDb = 0.8;
+        micLowDb = -0.6;
+        micCutoffOffsetHz = 0;
+        break;
+    }
+
+    // Proximity effect: +2.4 dB at 0.5" close mic down to -2.4 dB at far room distance
+    const proximityGainDb = (0.3 - distNorm) * 4.5 + micLowDb;
+    // Cap-to-Edge brightness: -4.5 dB at Cone Edge (0.0) up to +3.5 dB at Dust Cap Center (1.0)
+    const positionGainDb = (posNorm - 0.5) * 8.0 + micTiltDb;
+    // Speaker cone acoustic lowpass: rolls off harsh digital fizz above 4.4 kHz (Edge) - 5.7 kHz (Center)
+    const coneCeilingHz = Math.max(3800, Math.min(6200, 4450 + posNorm * 1250 + micCutoffOffsetHz - distNorm * 250));
+
+    if (immediate) {
+      this.micProximityShelf.gain.setValueAtTime(proximityGainDb, now);
+      this.micPositionShelf.gain.setValueAtTime(positionGainDb, now);
+      this.speakerConeLowpass.frequency.setValueAtTime(coneCeilingHz, now);
+    } else {
+      this.micProximityShelf.gain.setTargetAtTime(proximityGainDb, now, tc);
+      this.micPositionShelf.gain.setTargetAtTime(positionGainDb, now, tc);
+      this.speakerConeLowpass.frequency.setTargetAtTime(coneCeilingHz, now, tc);
+    }
+  }
+
   private applyMixAndLevel(): void {
     const now = this.ctx.currentTime;
     const mix = Math.max(0, Math.min(1, this.settings.mix));
@@ -281,6 +408,9 @@ export class CabinetNode {
 
     const linearLevel = Math.pow(10, (this.settings.level || 0) / 20);
     this.levelGain.gain.setTargetAtTime(linearLevel, now, 0.015);
+
+    const panVal = Math.max(-1, Math.min(1, this.settings.pan ?? 0));
+    this.pannerNode.pan.setTargetAtTime(panVal, now, 0.015);
   }
 
   private applyBypassState(): void {
@@ -319,13 +449,54 @@ export class CabinetNode {
     const posChanged = newSettings.position !== undefined && newSettings.position !== prevPos;
     const distChanged = newSettings.distance !== undefined && newSettings.distance !== prevDist;
 
+    if (modelChanged || micChanged || posChanged || distChanged) {
+      this.applyMicPlacementFilters(false);
+    }
+
     if (modelChanged || micChanged) {
       // Model or mic change -> may need different real IR file (async load)
       this.cancelScheduledImpulseUpdate();
       this.loadImpulseResponse();
     } else if (posChanged || distChanged) {
-      // Position/distance only affect synthetic IRs (real IRs are fixed captures)
+      // Position/distance also update synthetic IR modal reflections after debounce
       this.scheduleImpulseResponseUpdate();
+    }
+  }
+
+  public updateParameter(paramId: string, value: number): void {
+    switch (paramId) {
+      case 'model': {
+        const nextModel = indexToCabinetModel(value);
+        if (nextModel !== this.settings.model) {
+          this.updateSettings({ model: nextModel });
+        }
+        break;
+      }
+      case 'mic': {
+        const nextMic = indexToMicModel(value);
+        if (nextMic !== this.settings.mic) {
+          this.updateSettings({ mic: nextMic });
+        }
+        break;
+      }
+      case 'position':
+        this.updateSettings({ position: value });
+        break;
+      case 'distance':
+        this.updateSettings({ distance: value });
+        break;
+      case 'mix':
+        this.updateSettings({ mix: value });
+        break;
+      case 'level':
+        this.updateSettings({ level: value });
+        break;
+      case 'pan':
+        if (this.settings.pan !== value) {
+          this.settings.pan = value;
+          this.applyMixAndLevel();
+        }
+        break;
     }
   }
 
@@ -374,11 +545,15 @@ export class CabinetNode {
       this.outputNode.disconnect();
       this.convolver.disconnect();
       this.convolverGain.disconnect();
+      this.micProximityShelf.disconnect();
+      this.micPositionShelf.disconnect();
+      this.speakerConeLowpass.disconnect();
       this.dryGain.disconnect();
       this.wetGain.disconnect();
       this.bypassDry.disconnect();
       this.bypassWet.disconnect();
       this.levelGain.disconnect();
+      this.pannerNode.disconnect();
     } catch (e) {
       console.warn('CabinetNode dispose error', e);
     }

@@ -1,10 +1,16 @@
 import type { AudioPedalNode, PedalInstance } from '../types/pedal';
 import { createPedalAudioNode } from './pedals/registry';
+import { CabinetNode } from './cabinet/CabinetNode';
 
 interface ActiveNodeEntry {
   node: AudioPedalNode;
   type: string;
   enabled: boolean;
+}
+
+export interface SignalEdge {
+  fromNodeId: string;
+  toNodeId: string;
 }
 
 export class SignalChain {
@@ -14,6 +20,7 @@ export class SignalChain {
 
   private activeNodes: AudioPedalNode[] = [];
   private activeEntries: Map<string, ActiveNodeEntry> = new Map();
+  private customIrCache: Map<string, { buffer: AudioBuffer; name: string }> = new Map();
   private currentTopologyKey = '__UNINITIALIZED__';
 
   constructor(ctx: AudioContext, inputHook: GainNode, outputHook: GainNode) {
@@ -23,21 +30,36 @@ export class SignalChain {
   }
 
   /**
-   * Reconstruct the audio graph with the specified list of pedal instances.
-   * Reuses existing audio nodes where possible to preserve worklet/filter state
+   * Reconstruct the audio graph with the specified list of active pedal/amp/cab instances
+   * and optional DAG patch connections (supporting both serial chains and parallel multi-amp splits).
+   * Reuses existing audio nodes where possible to preserve worklet/filter/IR state
    * and applies a smooth micro-fade to eliminate clicks and pops during rewiring.
    */
-  public rebuild(instances: PedalInstance[]): void {
-    const nextKey = instances.map((i) => `${i.id}:${i.type}`).join('->');
+  public rebuild(instances: PedalInstance[], connections?: SignalEdge[]): void {
+    const edges: SignalEdge[] =
+      connections && connections.length > 0
+        ? connections
+        : instances.length > 0
+          ? [
+            { fromNodeId: 'BOARD_INPUT', toNodeId: instances[0].id },
+            ...instances.slice(0, -1).map((inst, idx) => ({
+              fromNodeId: inst.id,
+              toNodeId: instances[idx + 1].id,
+            })),
+            { fromNodeId: instances[instances.length - 1].id, toNodeId: 'BOARD_OUTPUT' },
+          ]
+          : [];
 
-    // Fast-path: If the sequence of pedal nodes has not changed (e.g. user toggled bypass on/off
-    // or adjusted knob parameters), update node bypass/params directly without rewiring or muting!
+    const nodesKey = instances.map((i) => `${i.id}:${i.type}`).join(',');
+    const edgesKey = edges.map((e) => `${e.fromNodeId}->${e.toNodeId}`).join(',');
+    const nextKey = `${nodesKey}|${edgesKey}`;
+
+    // Fast-path: If the graph topology (nodes + edges) has not changed,
+    // update node bypass/params directly without rewiring or muting!
     if (nextKey === this.currentTopologyKey) {
       for (const inst of instances) {
         const entry = this.activeEntries.get(inst.id);
         if (entry) {
-          // Only touch the bypass crossfade when the state actually changed;
-          // knob moves must not restart the fade on every parameter update.
           if (entry.enabled !== inst.enabled) {
             entry.node.setEnabled(inst.enabled);
             entry.enabled = inst.enabled;
@@ -82,8 +104,8 @@ export class SignalChain {
       }
     }
 
-    // 4. If no pedals, direct passthrough
-    if (instances.length === 0) {
+    // 4. If no active nodes or no active edges, direct passthrough
+    if (instances.length === 0 || edges.length === 0) {
       this.activeNodes = [];
       this.inputHook.connect(this.outputHook);
       if (now > 0) {
@@ -107,10 +129,14 @@ export class SignalChain {
           inst.parameters,
           inst.enabled
         );
+        // Restore cached custom IR if this is a cabinet-ir node
+        const cachedIr = this.customIrCache.get(inst.id);
+        if (cachedIr && audioNode instanceof CabinetNode) {
+          audioNode.setCustomIR(cachedIr.buffer, cachedIr.name);
+        }
         entry = { node: audioNode, type: inst.type, enabled: inst.enabled };
         this.activeEntries.set(inst.id, entry);
       } else {
-        // Reuse node: sync enabled state and parameter values
         if (entry.enabled !== inst.enabled) {
           entry.node.setEnabled(inst.enabled);
           entry.enabled = inst.enabled;
@@ -125,15 +151,27 @@ export class SignalChain {
     }
     this.activeNodes = newActiveNodes;
 
-    // 6. Wire the chain in order:
-    // inputHook -> node[0] -> node[1] -> ... -> outputHook
-    this.inputHook.connect(this.activeNodes[0].inputNode);
+    // 6. Wire the DAG edges (supports serial chains, Y-splits, and parallel multi-amp summing)
+    const connectedPairs = new Set<string>();
+    for (const edge of edges) {
+      const pairKey = `${edge.fromNodeId}->${edge.toNodeId}`;
+      if (connectedPairs.has(pairKey)) continue;
+      connectedPairs.add(pairKey);
 
-    for (let i = 0; i < this.activeNodes.length - 1; i++) {
-      this.activeNodes[i].outputNode.connect(this.activeNodes[i + 1].inputNode);
+      const sourceNode: AudioNode | undefined =
+        edge.fromNodeId === 'BOARD_INPUT'
+          ? this.inputHook
+          : this.activeEntries.get(edge.fromNodeId)?.node.outputNode;
+
+      const targetNode: AudioNode | undefined =
+        edge.toNodeId === 'BOARD_OUTPUT'
+          ? this.outputHook
+          : this.activeEntries.get(edge.toNodeId)?.node.inputNode;
+
+      if (sourceNode && targetNode) {
+        sourceNode.connect(targetNode);
+      }
     }
-
-    this.activeNodes[this.activeNodes.length - 1].outputNode.connect(this.outputHook);
 
     // 7. Micro-ramp input gain back to unity
     if (now > 0) {
@@ -157,6 +195,22 @@ export class SignalChain {
       entry.node.setEnabled(enabled);
       entry.enabled = enabled;
     }
+  }
+
+  public async loadCustomIRForPedal(pedalId: string, file: File): Promise<string> {
+    const arrayBuffer = await file.arrayBuffer();
+    const decoded = await this.ctx.decodeAudioData(arrayBuffer);
+    this.customIrCache.set(pedalId, { buffer: decoded, name: file.name });
+
+    const entry = this.activeEntries.get(pedalId);
+    if (entry && entry.node instanceof CabinetNode) {
+      entry.node.setCustomIR(decoded, file.name);
+    }
+    return file.name;
+  }
+
+  public getActiveNodes(): AudioPedalNode[] {
+    return this.activeNodes;
   }
 
   public dispose(): void {
