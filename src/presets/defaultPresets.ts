@@ -17,8 +17,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
     description:
       'Red Special Burns Tri-Sonic in-series pickup voicing -> MXR Smart Gate -> Dallas Rangemaster OC44 Treble Booster -> Vox AC30 Normal/Top-Boost -> 2x12 Alnico Blue (Royer R-121) + Boss CE-2 Chorus.',
     pickupVoicing: 'trisonic-series',
-    inputGain: 1.0,
-    masterVolume: 0.82,
+    inputGain: 1,
+    masterVolume: 0.3,
     pedals: [
       {
         id: 'bm-gate',
@@ -53,7 +53,7 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           mid: 7.4,
           treble: 5.6,
           presence: 4.4,
-          master: 7.6,
+          master: 2,
           powerMode: 1,
           inputSensitivity: 1,
         },
@@ -85,8 +85,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
     description:
       'True multi-cabinet Wet/Dry/Wet routing: Rangemaster -> Vox AC30 splits into a Dead-Center Dry 2x12 Alnico Blue Cabinet AND a Chorused Stereo 2x12 Alnico Blue Cabinet.',
     pickupVoicing: 'trisonic-series',
-    inputGain: 1.0,
-    masterVolume: 0.8,
+    inputGain: 1,
+    masterVolume: 0.3,
     pedals: [
       {
         id: 'wdw-gate',
@@ -114,8 +114,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           mid: 7.6,
           treble: 5.5,
           presence: 4.2,
-          master: 7.5,
-          powerMode: 1,
+          master: 2,
+          powerMode: 0,
           inputSensitivity: 1,
         },
       },
@@ -179,8 +179,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
     description:
       'PAF Humbucker -> MXR Smart Gate -> Tube Screamer TS-808 (clean mid-boost) -> Marshall JCM 800 2203 -> 4x12 Greenback Stack + Analog Delay.',
     pickupVoicing: 'humbucker',
-    inputGain: 1.0,
-    masterVolume: 0.82,
+    inputGain: 1,
+    masterVolume: 0.3,
     pedals: [
       {
         id: 'slash-gate',
@@ -208,8 +208,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           mid: 7.0,
           treble: 6.2,
           presence: 5.5,
-          master: 6.8,
-          powerMode: 1,
+          master: 2,
+          powerMode: 0,
           inputSensitivity: 1,
         },
       },
@@ -247,8 +247,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
     description:
       'Strat Single-Coil -> MXR Smart Gate -> Tube Screamer TS-808 -> Fender ’65 Twin Reverb -> 2x12 Twin Cab + 6G15 Spring Reverb.',
     pickupVoicing: 'single-coil',
-    inputGain: 1.0,
-    masterVolume: 0.82,
+    inputGain: 1,
+    masterVolume: 0.3,
     pedals: [
       {
         id: 'srv-gate',
@@ -276,7 +276,7 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           mid: 6.5,
           treble: 6.4,
           presence: 5.4,
-          master: 7.2,
+          master: 2,
           powerMode: 1,
           inputSensitivity: 1,
         },
@@ -315,8 +315,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
     description:
       'Strat Single-Coil -> MXR Smart Gate -> Ross Compressor -> EHX Big Muff Pi -> Clean Hi-Headroom Amp -> 4x12 Closed Cab + Analog Delay + Studio Hall.',
     pickupVoicing: 'single-coil',
-    inputGain: 1.0,
-    masterVolume: 0.82,
+    inputGain: 1,
+    masterVolume: 0.3,
     pedals: [
       {
         id: 'dg-gate',
@@ -351,7 +351,7 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           mid: 6.4,
           treble: 5.2,
           presence: 4.8,
-          master: 7.0,
+          master: 3,
           powerMode: 1,
           inputSensitivity: 1,
         },
@@ -397,8 +397,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
     description:
       'PAF Humbucker -> MXR Smart Gate -> MXR Phase 90 (slow sweep) -> Variac-Sag Marshall 1959 Super Lead Plexi -> 4x12 Greenback + Tape Echo.',
     pickupVoicing: 'humbucker',
-    inputGain: 1.0,
-    masterVolume: 0.82,
+    inputGain: 1,
+    masterVolume: 0.3,
     pedals: [
       {
         id: 'evh-gate',
@@ -426,7 +426,7 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           mid: 6.8,
           treble: 6.6,
           presence: 6.0,
-          master: 8.2,
+          master: 2,
           powerMode: 0, // LOW (Variac 90V brown-sound sag!)
           inputSensitivity: 1,
         },
@@ -465,8 +465,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
     description:
       'Strat Single-Coil -> Keeley Compressor -> Klon Centaur (transparent boost) -> Dumble Overdrive Special -> 1x12 Dumble Ported Cab + Spring Reverb.',
     pickupVoicing: 'single-coil',
-    inputGain: 1.0,
-    masterVolume: 0.84,
+    inputGain: 1,
+    masterVolume: 0.3,
     pedals: [
       {
         id: 'jm-comp',
@@ -494,7 +494,7 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           mid: 6.4,
           treble: 5.8,
           presence: 5.0,
-          master: 7.0,
+          master: 5,
           powerMode: 1,
           inputSensitivity: 0,
         },
@@ -533,8 +533,8 @@ export const FACTORY_PRESETS: PresetSchema[] = [
     description:
       'Active Humbucker -> MXR Smart Gate (Hi-Range FULL) -> Ibanez TS9 (0 Drive / Tight Boost) -> EVH 5150 III Lead -> 4x12 Rectifier Oversized V30.',
     pickupVoicing: 'active',
-    inputGain: 1.0,
-    masterVolume: 0.8,
+    inputGain: 1,
+    masterVolume: 0.3,
     pedals: [
       {
         id: 'mm-gate',
@@ -562,7 +562,7 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           mid: 4.8,
           treble: 6.5,
           presence: 6.2,
-          master: 6.5,
+          master: 2,
           powerMode: 1,
           inputSensitivity: 1,
         },
@@ -581,6 +581,156 @@ export const FACTORY_PRESETS: PresetSchema[] = [
           level: 0,
           pan: 0,
         },
+      },
+    ],
+  },
+
+  // 9. JIMI HENDRIX — WOODSTOCK & BAND OF GYPSYS PSYCHEDELIC FUZZ
+  {
+    version: 1,
+    id: 'factory-hendrix-woodstock',
+    name: 'Jimi Hendrix — Woodstock Voodoo Plexi',
+    category: 'factory',
+    description:
+      'Strat Single-Coil -> Boss AW-3 Dynamic Wah -> Dallas Arbiter Fuzz Face -> MXR M68 Uni-Vibe (Chorus/Vibe Modulation) -> Marshall 1959 Super Lead Plexi -> 4x12 Greenback (SM57).',
+    pickupVoicing: 'single-coil',
+    inputGain: 1,
+    masterVolume: 0.3,
+    pedals: [
+      {
+        id: 'jh-wah',
+        type: 'wah-boss-aw3',
+        name: 'Boss AW-3 Dynamic Wah',
+        enabled: false,
+        parameters: { decay: 5.5, manual: 4.0, sens: 6.8, mode: 3 },
+      },
+      {
+        id: 'jh-fuzz',
+        type: 'fuzz-fuzzface',
+        name: 'Dallas Arbiter Fuzz Face',
+        enabled: true,
+        parameters: { volume: 5, fuzz: 5 },
+      },
+      {
+        id: 'jh-univibe',
+        type: 'vibrato-mxr-univibe',
+        name: 'MXR M68 Uni-Vibe',
+        enabled: true,
+        parameters: { level: 6.0, speed: 5.2, depth: 6, vibe: 0 },
+      },
+      {
+        id: 'jh-plexi',
+        type: 'amp-head',
+        name: 'Guitar Amp Head',
+        enabled: true,
+        parameters: {
+          model: ampModelToIndex('crunch-plexi'),
+          gain: 7.2,
+          bass: 5.5,
+          mid: 6.5,
+          treble: 7.2,
+          presence: 6.8,
+          master: 2.2,
+          powerMode: 0,
+          inputSensitivity: 0,
+        },
+      },
+      {
+        id: 'jh-cab',
+        type: 'cabinet-ir',
+        name: 'Cabinet IR Simulator',
+        enabled: true,
+        parameters: {
+          model: cabinetModelToIndex('4x12-greenback'),
+          mic: micModelToIndex('sm57'),
+          position: 0.52,
+          distance: 0.12,
+          mix: 1.0,
+          level: 0,
+          pan: 0,
+        },
+      },
+    ],
+  },
+
+  // 10. JOHN FRUSCIANTE — STADIUM ARCADIUM FUNK & CRUNCH
+  {
+    version: 1,
+    id: 'factory-frusciante-stadium',
+    name: 'John Frusciante — Stadium Arcadium Funk & Lead',
+    category: 'factory',
+    description:
+      'Strat Single-Coil -> MXR Dyna Comp (Percussive Funk Snap) -> MXR Micro Amp (Preamp Clean Boost Push) -> Boss DS-1 Distortion -> Boss CE-2 Chorus -> Marshall Silver Jubilee 2555 -> 4x12 Greenback (MD421) + EHX Holy Grail Reverb.',
+    pickupVoicing: 'single-coil',
+    inputGain: 1,
+    masterVolume: 0.3,
+    pedals: [
+      {
+        id: 'jf-dynacomp',
+        type: 'comp-dynacomp',
+        name: 'MXR M102 Dyna Comp',
+        enabled: true,
+        parameters: { output: 8.700000000000001, sensitivity: 3.8 },
+      },
+      {
+        id: 'jf-microamp',
+        type: 'boost-mxr-microamp',
+        name: 'MXR M133 Micro Amp',
+        enabled: true,
+        parameters: { gain: 6.800000000000001 },
+      },
+      {
+        id: 'jf-ds1',
+        type: 'dist-ds1',
+        name: 'Boss DS-1 Distortion',
+        enabled: false,
+        parameters: { tone: 5.2, level: 3.8000000000000003, dist: 6.7 },
+      },
+      {
+        id: 'jf-ce2',
+        type: 'chorus-boss-ce2',
+        name: 'Boss CE-2 Chorus',
+        enabled: false,
+        parameters: { rate: 3.5, depth: 7.7 },
+      },
+      {
+        id: 'jf-jubilee',
+        type: 'amp-head',
+        name: 'Guitar Amp Head',
+        enabled: true,
+        parameters: {
+          model: ampModelToIndex('marshall-silver-jubilee'),
+          gain: 5.2,
+          bass: 6.0,
+          mid: 7.0,
+          treble: 5.5,
+          presence: 5.2,
+          master: 2.2,
+          powerMode: 0,
+          inputSensitivity: 0,
+        },
+      },
+      {
+        id: 'jf-cab',
+        type: 'cabinet-ir',
+        name: 'Cabinet IR Simulator',
+        enabled: true,
+        parameters: {
+          model: cabinetModelToIndex('4x12-greenback'),
+          mic: micModelToIndex('md421'),
+          position: 0.5,
+          distance: 0.14,
+          mix: 1.0,
+          level: 0,
+          pan: 0,
+        },
+      },
+      {
+        id: 'jf-reverb',
+        type: 'reverb-ehx-holygrail',
+        name: 'EHX Holy Grail',
+        enabled: true,
+        parameters: { reverb: 5.4, mode: 0 },
       },
     ],
   },

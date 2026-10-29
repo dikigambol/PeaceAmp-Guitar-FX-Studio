@@ -90,6 +90,69 @@ export const RossCompressorPedal: React.FC<PedalProps> = ({
       <div className="ross-side-label-right-top">IN</div>
       <div className="ross-side-label-right-bot">PWR</div>
 
+      {/* Small Precision-Centered Indicator LED between two knobs near top */}
+      <div
+        className={`ross-led-mount ${isEnabled ? 'lit' : 'off'}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleEnabled(instance.id);
+        }}
+        title="Status LED (Click to toggle bypass)"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          className="ross-led-svg"
+          aria-hidden="true"
+        >
+          <defs>
+            <radialGradient id={`ross-bezel-${instance.id}`} cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stopColor="#f8fafc" />
+              <stop offset="45%" stopColor="#94a3b8" />
+              <stop offset="85%" stopColor="#475569" />
+              <stop offset="100%" stopColor="#1e293b" />
+            </radialGradient>
+            <radialGradient id={`ross-recess-${instance.id}`} cx="50%" cy="50%" r="50%">
+              <stop offset="65%" stopColor="#0b0f14" />
+              <stop offset="100%" stopColor="#1e2530" />
+            </radialGradient>
+            <radialGradient id={`ross-led-on-${instance.id}`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="30%" stopColor="#ff4d4d" />
+              <stop offset="70%" stopColor="#dc2626" />
+              <stop offset="100%" stopColor="#7f1d1d" />
+            </radialGradient>
+            <radialGradient id={`ross-led-off-${instance.id}`} cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#3b1111" />
+              <stop offset="60%" stopColor="#1f0909" />
+              <stop offset="100%" stopColor="#0d0303" />
+            </radialGradient>
+          </defs>
+
+          {/* Outer Chrome Bezel Ring - concentric at cx=8, cy=8 */}
+          <circle cx="8" cy="8" r="7" fill={`url(#ross-bezel-${instance.id})`} stroke="#0f172a" strokeWidth="0.8" />
+
+          {/* Dark Inner Collar Recess - concentric at cx=8, cy=8 */}
+          <circle cx="8" cy="8" r="5.2" fill={`url(#ross-recess-${instance.id})`} stroke="#090d12" strokeWidth="0.6" />
+
+          {/* LED Lens - concentric at cx=8, cy=8 */}
+          <circle
+            cx="8"
+            cy="8"
+            r="3.6"
+            fill={isEnabled ? `url(#ross-led-on-${instance.id})` : `url(#ross-led-off-${instance.id})`}
+            stroke={isEnabled ? 'rgba(255, 200, 200, 0.85)' : 'rgba(0, 0, 0, 0.8)'}
+            strokeWidth="0.5"
+          />
+
+          {/* Central Hotspot Gleam when illuminated - concentric at cx=8, cy=8 */}
+          {isEnabled && (
+            <circle cx="8" cy="8" r="1.3" fill="#ffffff" opacity="0.9" />
+          )}
+        </svg>
+      </div>
+
       {/* Recessed Circular Wells with Wedge Knobs */}
       <div className="ross-wells-container">
         <div className="ross-well-col">
